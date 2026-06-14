@@ -18,6 +18,8 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: "https://frontend-production-3bca.up.railway.app/"
+    allowedHosts: [
+      'frontend-production-3bca.up.railway.app'
+    ]
   }
 })
