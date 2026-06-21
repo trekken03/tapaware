@@ -76,3 +76,4 @@ Password: Admin@12345
 ```
 
 Change this password after first login. The other sample users still use placeholder password values, so create real users through the app or update the seed with bcrypt hashes if you need seeded staff or resident login accounts.
+    

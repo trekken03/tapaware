@@ -8,7 +8,7 @@ values
 
 insert into users(name,email,role,household_id,password)
 values
--- Temporary seeded admin login: pearson@gmail.com / Admin@12345
+-- Temporary seeded admin login: admin@tapaware.com / Admin@12345
 -- Change this password after first login.
 ('Admin','admin@tapaware.com','admin',null,'$2a$10$suK.AJKQ9ULRPn/pMhdXNuYNfKf10LV7x3ZJiqbwrn28vFZW162Di'),
 ('Harvey Specter','staff1@gmail.com','staff',null,'hashed_password'),
