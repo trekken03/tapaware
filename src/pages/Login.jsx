@@ -43,6 +43,14 @@ const Login = () => {
     return (
 
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+            <div className="pointer-events-none fixed inset-30 flex items-center justify-center opacity-10">
+                <img
+                    src="/assets/logo.jpg"
+                    alt=""
+                    className="w-[1000px] max-w-[50vw] object-contain"
+                />
+            </div>
+
             <Card className="w-full max-w-sm shadow-lg">
                 <div className="flex flex-col items-center mb-6">
                     <div className="flex items-center justify-center gap-2">

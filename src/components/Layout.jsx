@@ -3,7 +3,7 @@ import Sidebar from './Sidebar';
 const Layout = ({ children }) => {
     return (
         <div className="relative flex min-h-screen bg-gray-100 overflow-hidden">
-            <div className="pointer-events-none fixed inset-30 flex items-center justify-center opacity-10">
+            <div className="pointer-events-none fixed inset-30 flex items-center justify-center opacity-10 pl-70">
                 <img
                     src="/assets/logo.jpg"
                     alt=""

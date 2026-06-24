@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Settings, Users, Flag, Plus, Search } from 'lucide-react'
+import { Settings, Users, Flag, Plus, Search, Pencil } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
@@ -111,7 +111,9 @@ const AdminPanel = () => {
                 <div className="flex border-b mb-6">
                     {[
                         { key: 'users', label: 'User Management', icon: Users },
+                        { key: 'role', label: 'Staff Management', icon: Pencil },
                         { key: 'flagged', label: 'Flagged Households', icon: Flag },
+
                     ].map(tab => {
                         const Icon = tab.icon
                         return (
