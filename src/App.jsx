@@ -11,6 +11,7 @@ import Analytics from './pages/Analytics';
 import AdminPanel from './pages/AdminPanel';
 import AddUser from './pages/AddUser';
 import AuditTrail from './pages/AuditTrail';
+import Profile from './pages/Profile';
 import RoleBasedRoute from './components/RoleBasedRoute';
 
 
@@ -44,6 +45,7 @@ const App = () => {
 
             {/* Audit Trail - Admin only */}
             <Route path="/audit-trail" element={<RoleBasedRoute allowedRoles={['admin']}><AuditTrail /></RoleBasedRoute>} />
+            <Route path="/profile" element={<RoleBasedRoute><Profile /></RoleBasedRoute>} />
         </Routes>
     )
 }

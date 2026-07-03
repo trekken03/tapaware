@@ -1,6 +1,5 @@
 const db = require('../models/db');
 const auditLog = require('../utils/auditLogger');
-const AuditLog = require('../utils/auditLogger');
 
 exports.getAllUsers = async (req, res) => {
     try {

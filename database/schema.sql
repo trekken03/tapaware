@@ -1,3 +1,8 @@
+create database tapaware;
+
+use tapaware;
+
+
 create table households(
     id int auto_increment primary key,
     household_number varchar(50) not null,

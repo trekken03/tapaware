@@ -144,9 +144,16 @@ const Sidebar = () => {
 
                 <Separator className="bg-blue-800" />
 
+
                 {/* User section */}
                 <div className="p-4">
-                    <div className="flex items-center gap-3 mb-3">
+                    <div
+                        className="flex items-center gap-3 mb-3 cursor-pointer hover:opacity-50 transition-opacity"
+                        onClick={() => {
+                            navigate('/profile')
+                            setIsOpen(false)
+                        }}
+                    >
                         <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center">
                             <User size={16} className="text-white" />
                         </div>
