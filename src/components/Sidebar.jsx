@@ -1,25 +1,35 @@
 import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
 import {
     LayoutDashboard,
     Home,
     Droplets,
+    ShieldUser,
     FileText,
     BarChart3,
-    Settings,
     ClipboardList,
     LogOut,
     User,
     Menu,
     X,
+    ChevronDown,
 } from 'lucide-react';
 
 const getNavItems = (role) => {
     const baseItems = [
         { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { path: '/reports', label: 'Reports', icon: FileText },
+        {
+            path: '/reports',
+            label: 'Reports',
+            icon: FileText,
+            children: [
+                { path: '/reports?status=pending', label: 'Pending' },
+                { path: '/reports?status=investigating', label: 'Investigating' },
+                { path: '/reports?status=resolved', label: 'Resolved' },
+            ],
+        },
     ];
 
     const adminItems = [
@@ -28,7 +38,7 @@ const getNavItems = (role) => {
         { path: '/tds', label: 'TDS Readings', icon: Droplets },
         { path: '/analytics', label: 'Analytics', icon: BarChart3 },
         { path: '/audit-trail', label: 'Audit Trail', icon: ClipboardList },
-        { path: '/admin', label: 'Admin Panel', icon: Settings },
+        { path: '/admin', label: 'Admin Panel', icon: ShieldUser },
     ];
 
     const staffItems = [
@@ -51,13 +61,27 @@ const getNavItems = (role) => {
             return baseItems;
     }
 };
+const getInitialExpanded = () => {
+    return localStorage.getItem('sidebar_expanded') || null;
+};
 
 const Sidebar = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+    const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
-
+    const [expandedItem, setExpandedItem] = useState(getInitialExpanded);
     const navItems = getNavItems(user?.role);
+
+    const handleExpandToggle = (path) => {
+        const newValue = expandedItem === path ? null : path;
+        setExpandedItem(newValue);
+        if (newValue) {
+            localStorage.setItem('sidebar_expanded', newValue);
+        } else {
+            localStorage.removeItem('sidebar_expanded');
+        }
+    };
 
     const handleLogout = () => {
         logout();
@@ -91,7 +115,7 @@ const Sidebar = () => {
 
             {/* Sidebar */}
             <div
-                className={`w-64 min-h-screen bg-blue-950 flex flex-col fixed left-0 top-0 z-50 transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`w-64 h-screen max-h-screen overflow-y-auto bg-blue-950 flex flex-col fixed left-0 top-0 z-50 transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 {/* Close button (mobile only) */}
@@ -103,7 +127,7 @@ const Sidebar = () => {
                 </button>
 
                 {/* Logo section */}
-                <div className="p-6">
+                <div className="p-6 pb-4">
                     <div className="flex items-center gap-3">
                         <img
                             src="/assets/logo.jpg"
@@ -120,9 +144,64 @@ const Sidebar = () => {
                 <Separator className="bg-blue-800" />
 
                 {/* Navigation */}
-                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                <nav className="flex-1 p-4 space-y-1 overflow-y-auto pb-6 thin-scrollbar">
                     {navItems.map((item) => {
                         const Icon = item.icon;
+                        const hasChildren = item.children && item.children.length > 0;
+                        const isOnThisPage = location.pathname === item.path;
+                        const isExpanded = expandedItem === item.path || isOnThisPage;
+
+                        if (hasChildren) {
+                            return (
+                                <div key={item.path}>
+                                    <div className="flex items-center rounded-lg text-blue-200 hover:bg-blue-900 hover:text-white transition-all duration-200">
+                                        <NavLink
+                                            to={item.path}
+                                            onClick={() => setIsOpen(false)}
+                                            className={({ isActive }) =>
+                                                `flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${isActive && !isOnThisPage === false && location.search === ''
+                                                    ? 'text-white'
+                                                    : ''
+                                                }`
+                                            }
+                                        >
+                                            <Icon size={18} />
+                                            {item.label}
+                                        </NavLink>
+                                        <button
+                                            onClick={() => handleExpandToggle(item.path)}
+                                            className="px-3 py-2.5"
+                                        >
+                                            <ChevronDown
+                                                size={16}
+                                                className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                                            />
+                                        </button>
+                                    </div>
+
+                                    {isExpanded && (
+                                        <div className="ml-8 mt-1 space-y-1">
+                                            {item.children.map((child) => (
+                                                <NavLink
+                                                    key={child.path}
+                                                    to={child.path}
+                                                    onClick={() => setIsOpen(false)}
+                                                    className={({ isActive }) =>
+                                                        `block px-3 py-2 rounded-lg text-sm transition-all duration-200 ${isActive
+                                                            ? 'bg-white/5 text-white hover:bg-white hover:text-black'
+                                                            : 'bg-white/5 text-white hover:bg-white hover:text-black'
+                                                        }`
+                                                    }
+                                                >
+                                                    {child.label}
+                                                </NavLink>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        }
+
                         return (
                             <NavLink
                                 key={item.path}
@@ -146,7 +225,7 @@ const Sidebar = () => {
 
 
                 {/* User section */}
-                <div className="p-4">
+                <div className="p-4 pt-2 pb-6 border-t border-blue-800/50 mt-2">
                     <div
                         className="flex items-center gap-3 mb-3 cursor-pointer hover:opacity-50 transition-opacity"
                         onClick={() => {

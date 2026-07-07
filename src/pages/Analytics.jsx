@@ -188,15 +188,15 @@ const Analytics = () => {
             <div>
 
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Analytics</h1>
                         <p className="text-gray-500 mt-1">Visual breakdown of water quality data</p>
                     </div>
                     <Button
                         onClick={handleDownloadPdf}
                         disabled={isExporting}
-                        className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
+                        className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
 
                     >
                         <Download size={16} />
@@ -333,40 +333,42 @@ const Analytics = () => {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b">
-                                        {['#', 'Purok', 'Total Reports'].map(h => (
-                                            <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                                                {h}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {byPurok.map((p, index) => (
-                                        <tr key={index} className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                            <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
-                                            <td className="py-3 px-4 text-sm font-semibold">Purok {p.purok}</td>
-                                            <td className="py-3 px-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex-1 bg-gray-100 rounded-full h-2 max-w-32">
-                                                        <div
-                                                            className="bg-blue-600 h-2 rounded-full"
-                                                            style={{
-                                                                width: `${Math.min((p.report_count / Math.max(...byPurok.map(x => x.report_count || 1))) * 100, 100)}%`
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-sm font-semibold text-blue-600">
-                                                        {p.report_count}
-                                                    </span>
-                                                </div>
-                                            </td>
+                            <div className="overflow-x-auto">
+                                <table className="w-full min-w-[320px]">
+                                    <thead>
+                                        <tr className="border-b">
+                                            {['#', 'Purok', 'Total Reports'].map(h => (
+                                                <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-black uppercase">
+                                                    {h}
+                                                </th>
+                                            ))}
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {byPurok.map((p, index) => (
+                                            <tr key={index} className=' bg-white'>
+                                                <td className="py-3 px-4 text-sm text-black">{index + 1}</td>
+                                                <td className="py-3 px-4 text-sm font-semibold">Purok {p.purok}</td>
+                                                <td className="py-3 px-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex-1 bg-gray-100 rounded-full h-2 max-w-32">
+                                                            <div
+                                                                className="bg-blue-600 h-2 rounded-full"
+                                                                style={{
+                                                                    width: `${Math.min((p.report_count / Math.max(...byPurok.map(x => x.report_count || 1))) * 100, 100)}%`
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <span className="text-sm font-semibold text-blue-600">
+                                                            {p.report_count}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>

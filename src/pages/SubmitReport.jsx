@@ -68,10 +68,10 @@ const SubmitReport = () => {
 
     return (
         <Layout>
-            <div className="max-w-2xl mx-auto">
+            <div className="w-full max-w-2xl mx-auto">
 
                 {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 mb-6 sm:mb-8">
                     <Button
                         variant="outline"
                         size="sm"
@@ -82,7 +82,7 @@ const SubmitReport = () => {
                         Back
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Submit Report</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Submit Report</h1>
                         <p className="text-gray-500 mt-1">Report a water quality concern</p>
                     </div>
                 </div>
@@ -107,7 +107,7 @@ const SubmitReport = () => {
                                 Reporting for household
                             </p>
                             {householdInfo ? (
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                                     <Home size={20} className="text-blue-600" />
                                     <div>
                                         <p className="font-semibold text-gray-900">
@@ -166,10 +166,10 @@ const SubmitReport = () => {
                                 />
                             </div>
 
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 pt-4">
                                 <Button
                                     type="submit"
-                                    className="bg-blue-900 hover:bg-blue-700 text-white"
+                                    className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white"
                                     disabled={loading || !householdInfo}
                                 >
                                     {loading ? 'Submitting...' : 'Submit Report'}
@@ -177,6 +177,7 @@ const SubmitReport = () => {
                                 <Button
                                     type="button"
                                     variant="outline"
+                                    className="w-full sm:w-auto"
                                     onClick={() => navigate('/reports')}
                                 >
                                     Cancel

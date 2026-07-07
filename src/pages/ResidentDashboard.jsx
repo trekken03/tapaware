@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Droplets, FileText, Clock, AlertCircle, TrendingUp, Info } from 'lucide-react'
+import { Droplets, FileText, ClockFading, AlertCircle, TrendingUp, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
@@ -44,7 +44,7 @@ const ResidentDashboard = () => {
 
     const statCards = [
         { label: 'My Reports', value: summary?.my_reports || 0, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
-        { label: 'Pending Reports', value: summary?.pending_reports || 0, icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+        { label: 'Pending Reports', value: summary?.pending_reports || 0, icon: ClockFading, color: 'text-yellow-600', bg: 'bg-yellow-50' },
     ]
 
     if (loading) {
@@ -64,8 +64,8 @@ const ResidentDashboard = () => {
             <div>
 
                 {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+                <div className="mb-6 sm:mb-8">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
                     <p className="text-gray-500 mt-1">Welcome, {user?.name}</p>
                 </div>
 
@@ -204,17 +204,17 @@ const ResidentDashboard = () => {
                     </Card>
 
                     {/* Submit Report Button */}
-                    <div className="flex gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
                         <Button
                             onClick={() => navigate('/reports')}
-                            className="flex-1"
+                            className="w-full sm:flex-1"
                         >
                             View My Reports
                         </Button>
                         <Button
                             onClick={() => navigate('/reports/add')}
                             variant="default"
-                            className="flex-1"
+                            className="w-full sm:flex-1"
                         >
                             Submit Water Issue Report
                         </Button>

@@ -46,10 +46,10 @@ const AddHousehold = () => {
 
     return (
         <Layout>
-            <div className="max-w-2xl mx-auto">
+            <div className="w-full max-w-2xl mx-auto">
 
                 {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 mb-6 sm:mb-8">
                     <Button
                         variant="outline"
                         size="sm"
@@ -60,7 +60,7 @@ const AddHousehold = () => {
                         Back
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Add Household</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Add Household</h1>
                         <p className="text-gray-500 mt-1">Register a new household record</p>
                     </div>
                 </div>
@@ -79,7 +79,7 @@ const AddHousehold = () => {
                             </div>
                         )}
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="household_number">Household Number</Label>
                                     <Input
@@ -129,10 +129,10 @@ const AddHousehold = () => {
                                     required
                                 />
                             </div>
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 pt-4">
                                 <Button
                                     type="submit"
-                                    className="bg-blue-900 hover:bg-blue-700 text-white"
+                                    className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white"
                                     disabled={loading}
                                 >
                                     {loading ? 'Saving...' : 'Save Household'}
@@ -140,6 +140,7 @@ const AddHousehold = () => {
                                 <Button
                                     type="button"
                                     variant="outline"
+                                    className="w-full sm:w-auto"
                                     onClick={() => navigate('/households')}
                                 >
                                     Cancel

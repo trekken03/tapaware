@@ -52,9 +52,9 @@ const AuditTrail = () => {
             <div>
 
 
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Audit Trail</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Audit Trail</h1>
                         <p className="text-gray-500 mt-1">View system audit logs</p>
                     </div>
                 </div>
@@ -62,12 +62,12 @@ const AuditTrail = () => {
 
                 <Card>
                     <CardHeader>
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <CardTitle className="flex items-center gap-2">
                                 <Home size={20} className="text-blue-600" />
-                                Audit Trail ({filteredAuditTrails.length})
+                                Audit Trail
                             </CardTitle>
-                            <InputGroup className="max-w-xs">
+                            <InputGroup className="w-full sm:max-w-xs">
                                 <InputGroupInput
                                     placeholder="Search..."
                                     value={searchTerm}
@@ -86,33 +86,62 @@ const AuditTrail = () => {
                                 <p className="text-gray-500">No audit trails found.</p>
                             </div>
                         ) : (
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b">
-                                        {['#', 'User', 'Action', 'Table', 'Description', 'Timestamp'].map(h => (
-                                            <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                                                {h}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
+                            <>
+                                <div className="hidden md:block overflow-x-auto">
+                                    <table className="w-full min-w-[760px]">
+                                        <thead>
+                                            <tr className="border-b">
+                                                {['#', 'User', 'Action', 'Table', 'Description', 'Timestamp'].map(h => (
+                                                    <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-black uppercase">
+                                                        {h}
+                                                    </th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredAuditTrails.map((trail, index) => (
+                                                <tr key={trail.id} className={` bg-white`}>
+                                                    <td className="py-3 px-4 text-sm">{index + 1}</td>
+                                                    <td className="py-3 px-4 text-sm">{trail.user_name}</td>
+                                                    <td className="py-3 px-4 text-sm">{trail.action}</td>
+                                                    <td className="py-3 px-4 text-sm ">{trail.table_affected}</td>
+                                                    <td className="py-3 px-4 text-sm">{trail.details}</td>
+                                                    <td className="py-3 px-4 text-sm ">
+                                                        {new Date(trail.created_at).toLocaleString()}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div className="space-y-3 md:hidden">
                                     {filteredAuditTrails.map((trail, index) => (
-                                        <tr key={trail.id} className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                            <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
-                                            <td className="py-3 px-4 text-sm font-semibold">{trail.user_name}</td>
-                                            <td className="py-3 px-4 text-sm">{trail.action}</td>
-                                            <td className="py-3 px-4 text-sm text-gray-500">{trail.table_affected}</td>
-                                            <td className="py-3 px-4 text-sm">{trail.details}</td>
-                                            <td className="py-3 px-4 text-sm text-gray-500">
-                                                {new Date(trail.created_at).toLocaleString()}
-                                            </td>
-                                        </tr>
+                                        <div key={trail.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                                            <div className="flex items-center justify-between gap-2 mb-2">
+                                                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
+                                                <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700">
+                                                    {trail.action}
+                                                </span>
+                                            </div>
+                                            <div className="space-y-2 text-sm text-gray-700">
+                                                <div>
+                                                    <span className="font-semibold text-gray-900">User:</span> {trail.user_name}
+                                                </div>
+                                                <div>
+                                                    <span className="font-semibold text-gray-900">Table:</span> {trail.table_affected}
+                                                </div>
+                                                <div>
+                                                    <span className="font-semibold text-gray-900">Description:</span> {trail.details}
+                                                </div>
+                                                <div>
+                                                    <span className="font-semibold text-gray-900">Timestamp:</span> {new Date(trail.created_at).toLocaleString()}
+                                                </div>
+                                            </div>
+                                        </div>
                                     ))}
-
-
-                                </tbody>
-                            </table>
+                                </div>
+                            </>
                         )}
                     </CardContent>
                 </Card>

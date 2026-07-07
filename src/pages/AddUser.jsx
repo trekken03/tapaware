@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -53,10 +53,10 @@ const AddUser = () => {
 
     return (
         <Layout>
-            <div className="max-w-2xl mx-auto">
+            <div className="w-full max-w-2xl mx-auto">
 
                 {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 mb-6 sm:mb-8">
                     <Button
                         variant="outline"
                         size="sm"
@@ -67,7 +67,7 @@ const AddUser = () => {
                         Back
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Add User</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Add User</h1>
                         <p className="text-gray-500 mt-1">Create a new system user</p>
                     </div>
                 </div>
@@ -152,6 +152,7 @@ const AddUser = () => {
                                         placeholder="e.g. 101"
                                         value={form.household_number}
                                         onChange={handleChange}
+                                        required={form.role === 'resident'}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -163,6 +164,7 @@ const AddUser = () => {
                                         name="purok"
                                         value={form.purok}
                                         onChange={handleChange}
+                                        required={form.role === 'resident'}
                                         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         <option value="">Select purok...</option>
@@ -173,10 +175,10 @@ const AddUser = () => {
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 pt-4">
                                 <Button
                                     type="submit"
-                                    className="bg-blue-900 hover:bg-blue-700 text-white"
+                                    className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white"
                                     disabled={loading}
                                 >
                                     {loading ? 'Saving...' : 'Save User'}
@@ -184,6 +186,7 @@ const AddUser = () => {
                                 <Button
                                     type="button"
                                     variant="outline"
+                                    className="w-full sm:w-auto"
                                     onClick={() => navigate('/admin')}
                                 >
                                     Cancel

@@ -1,0 +1,25 @@
+to add: 
+
+(✓)-user info page(detailing) 
+(✓)-in every table theres a spinner where you can select which is which for example in households theres a spinner where you can just see the households in purok 3
+spinner: reports,households,tds readings
+(✓)-Pdf layout fix
+(✓)-responsiveness
+(✓)-footer
+(✓)-sidebar
+(✓)-email
+
+
+-admin panel: staff management table, actions:add edit
+
+-new table showing which issue is trending per purok example: 3 issue of odor is reported at purok 2 
+
+-households,reports,tds,readings view action
+
+-auth.routes.js - change-pass,prof
+
+-idempotency
+
+-audit-trail limit 100(ask claude)
+
+-add user(phone number), if role==='staff' then household_num = not required,

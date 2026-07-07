@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Droplets, Home, Flag, Clock, AlertTriangle, FileText, TrendingUp } from 'lucide-react'
+import { Droplets, Home, Flag, ClockFading, AlertTriangle, FileText, TrendingUp } from 'lucide-react'
 import API from '@/services/api'
 
 const AdminDashboard = () => {
@@ -35,7 +35,7 @@ const AdminDashboard = () => {
         { label: 'Total Reports', value: summary?.total_reports || 0, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
         { label: 'Total Households', value: summary?.total_households || 0, icon: Home, color: 'text-green-600', bg: 'bg-green-50' },
         { label: 'Flagged Households', value: summary?.flagged_households || 0, icon: Flag, color: 'text-red-600', bg: 'bg-red-50' },
-        { label: 'Pending Reports', value: summary?.pending_reports || 0, icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+        { label: 'Pending Reports', value: summary?.pending_reports || 0, icon: ClockFading, color: 'text-yellow-600', bg: 'bg-yellow-50' },
         { label: 'Average TDS (ppm)', value: summary?.average_tds || 0, icon: Droplets, color: 'text-purple-600', bg: 'bg-purple-50' },
     ]
 
@@ -156,37 +156,39 @@ const AdminDashboard = () => {
                         {flagged.length === 0 ? (
                             <p className="text-gray-500 text-sm">No flagged households at this time.</p>
                         ) : (
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b">
-                                        {['Household No.', 'Owner', 'Purok', 'Issue Type', 'Times Reported', 'Status'].map(h => (
-                                            <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                                                {h}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {flagged.map((flag, index) => (
-                                        <tr key={flag.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                            <td className="py-3 px-4 text-sm font-semibold">{flag.household_number}</td>
-                                            <td className="py-3 px-4 text-sm">{flag.owner_name}</td>
-                                            <td className="py-3 px-4 text-sm">Purok {flag.purok}</td>
-                                            <td className="py-3 px-4 text-sm capitalize">{flag.issue_type}</td>
-                                            <td className="py-3 px-4 text-sm">
-                                                <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
-                                                    {flag.times_reported}x
-                                                </span>
-                                            </td>
-                                            <td className="py-3 px-4 text-sm">
-                                                <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
-                                                    {flag.status}
-                                                </span>
-                                            </td>
+                            <div className="overflow-x-auto">
+                                <table className="w-full min-w-[700px]">
+                                    <thead>
+                                        <tr className="border-b">
+                                            {['Household No.', 'Owner', 'Purok', 'Issue Type', 'Times Reported', 'Status'].map(h => (
+                                                <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
+                                                    {h}
+                                                </th>
+                                            ))}
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {flagged.map((flag, index) => (
+                                            <tr key={flag.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                <td className="py-3 px-4 text-sm font-semibold">{flag.household_number}</td>
+                                                <td className="py-3 px-4 text-sm">{flag.owner_name}</td>
+                                                <td className="py-3 px-4 text-sm">Purok {flag.purok}</td>
+                                                <td className="py-3 px-4 text-sm capitalize">{flag.issue_type}</td>
+                                                <td className="py-3 px-4 text-sm">
+                                                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
+                                                        {flag.times_reported}x
+                                                    </span>
+                                                </td>
+                                                <td className="py-3 px-4 text-sm">
+                                                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
+                                                        {flag.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
                     </CardContent>
                 </Card>

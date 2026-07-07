@@ -7,15 +7,23 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Droplets, Plus, Search } from 'lucide-react';
 import API from '@/services/api';
 
+
 const TdsReadings = () => {
     const [readings, setReadings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
+    const [selectedPurok, setSelectedPurok] = useState('all');
 
     useEffect(() => {
         fetchReadings()
     }, [])
+    const formatDate = (date) =>
+        new Date(date.replace(' ', 'T')).toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+        });
 
     const fetchReadings = async () => {
         try {
@@ -29,12 +37,40 @@ const TdsReadings = () => {
     }
 
     const getTdsStatus = (value) => {
-        if (value <= 300) return { label: 'Safe', color: 'text-green-700', bg: 'bg-green-100' }
-        if (value <= 600) return { label: 'Moderate', color: 'text-yellow-700', bg: 'bg-yellow-100' }
-        return { label: 'High', color: 'text-red-700', bg: 'bg-red-100' }
-    }
+        if (value <= 500) {
+            return {
+                label: 'Safe',
+                color: 'text-green-700',
+                bg: 'bg-green-100',
+                border: 'border-green-400',
+            };
+        }
+
+        if (value <= 1000) {
+            return {
+                label: 'Moderate',
+                color: 'text-yellow-700',
+                bg: 'bg-yellow-100',
+                border: 'border-yellow-400',
+            };
+        }
+
+        return {
+            label: 'High',
+            color: 'text-red-700',
+            bg: 'bg-red-100',
+            border: 'border-red-400',
+        };
+    };
+
+    const purokOptions = [...new Set(readings.map(r => r.purok).filter(Boolean))]
+        .sort((a, b) => a.toString().localeCompare(b.toString(), undefined, { numeric: true }))
 
     const filteredReadings = readings.filter(r => {
+        if (selectedPurok !== 'all' && r.purok?.toString() !== selectedPurok) {
+            return false
+        }
+
         const searchLower = searchTerm.toLowerCase()
         return (
             r.household_number?.toString().includes(searchLower) ||
@@ -59,13 +95,13 @@ const TdsReadings = () => {
             <div>
 
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">TDS Readings</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">TDS Readings</h1>
                         <p className="text-gray-500 mt-1">Total Dissolved Solids monitoring per household</p>
                     </div>
                     <Button
-                        className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
+                        className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
                         onClick={() => navigate('/tds/add')}
                     >
                         <Plus size={16} />
@@ -77,21 +113,38 @@ const TdsReadings = () => {
                 {/* Table */}
                 <Card>
                     <CardHeader>
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <CardTitle className="flex items-center gap-2">
                                 <Droplets size={20} className="text-blue-600" />
                                 All TDS Readings ({filteredReadings.length})
                             </CardTitle>
-                            <InputGroup className="max-w-xs">
-                                <InputGroupInput
-                                    placeholder="Search..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                                <InputGroupAddon>
-                                    <Search size={16} />
-                                </InputGroupAddon>
-                            </InputGroup>
+
+                            <div className="flex items-center gap-3">
+                                {/* Purok spinner */}
+                                <select
+                                    value={selectedPurok}
+                                    onChange={(e) => setSelectedPurok(e.target.value)}
+                                    className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="all">All Puroks</option>
+                                    {purokOptions.map(purok => (
+                                        <option key={purok} value={purok}>
+                                            Purok {purok}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <InputGroup className="max-w-xs">
+                                    <InputGroupInput
+                                        placeholder="Search..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                    <InputGroupAddon>
+                                        <Search size={16} />
+                                    </InputGroupAddon>
+                                </InputGroup>
+                            </div>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -102,41 +155,39 @@ const TdsReadings = () => {
 
                             </div>
                         ) : (
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b">
-                                        {['#', 'Household No.', 'Purok', 'Owner', 'TDS Value', 'Status', 'Notes', 'Recorded By', 'Date'].map(h => (
-                                            <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                                                {h}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredReadings.map((r, index) => {
-                                        const status = getTdsStatus(r.tds_value)
-                                        return (
-                                            <tr key={r.id} className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                                <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
-                                                <td className="py-3 px-4 text-sm font-semibold">#{r.household_number}</td>
-                                                <td className="py-3 px-4 text-sm text-gray-600">Purok {r.purok}</td>
-                                                <td className="py-3 px-4 text-sm">{r.owner_name}</td>
-                                                <td className="py-3 px-4 text-sm font-semibold">{r.tds_value} ppm</td>
-                                                <td className="py-3 px-4">
-                                                    <span className={`${status.bg} ${status.color} px-2 py-1 rounded-full text-xs font-semibold`}>
+                            <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,290px))] gap-4">
+                                {filteredReadings.map((r) => {
+                                    const status = getTdsStatus(r.tds_value)
+                                    return (
+                                        <div
+                                            key={r.id}
+                                            onClick={() => navigate(`/tds/${r.id}`)}
+                                            className={`flex gap-4 rounded-lg border-l-4 ${status.border} p-4 shadow-lg h-full cursor-pointer hover:shadow-md hover:bg-gray-200 transition-all duration-200`}
+                                        >
+                                            <div className={`hidden sm:flex items-center justify-center w-14 h-14 rounded-full ${status.bg} shrink-0`}>
+                                                <Droplets size={24} className={status.color} />
+                                            </div>
+
+                                            <div className="flex-1 flex flex-col h-full">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-2xl">{r.owner_name}</span>
+                                                    <span className={`${status.bg} ${status.color} px-3 py-1 rounded-full text-xs font-semibold`}>
                                                         {status.label}
                                                     </span>
-                                                </td>
-                                                <td className="py-3 px-4 text-sm text-gray-500">{r.notes || '—'}</td>
-                                                <td className="py-3 px-4 text-sm">{r.staff_name}</td>
-                                                <td className="py-3 px-4 text-sm text-gray-500">
-                                                    {new Date(r.recorded_at).toLocaleDateString()}
-                                                </td>
-                                            </tr>
-                                        )
-                                    })}
-                                </tbody>
-                            </table>
+                                                </div>
+
+                                                <div className="flex flex-col gap-1 text-sm text-gray-700">
+                                                    <p className="font-semibold text-gray-900">Household: #{r.household_number} - Purok {r.purok}</p>
+                                                    <p className="font-semibold text-gray-900">TDS: {r.tds_value} ppm</p>
+                                                    <p className="font-semibold text-gray-900">Recorded By: {r.staff_name}</p>
+                                                    <p className="font-semibold text-gray-900">Notes: {r.notes || '—'}</p>
+                                                    <p className="font-semibold text-gray-900">Date: {formatDate(r.recorded_at)}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         )}
                     </CardContent>
                 </Card>
