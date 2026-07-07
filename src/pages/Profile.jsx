@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -49,7 +49,6 @@ const Profile = () => {
 
         try {
             await API.put('/auth/profile', form)
-            // update user in context and localStorage
             const updatedUser = { ...user, ...form }
             login(token, updatedUser)
             setSuccess('Profile updated successfully!')
@@ -99,42 +98,47 @@ const Profile = () => {
         <Layout>
             <div className="max-w-2xl mx-auto">
 
-                {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(-1)}
-                        className="flex items-center gap-2"
-                    >
-                        <ArrowLeft size={16} />
-                        Back
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-                        <p className="text-gray-500 mt-1">View and update your account information</p>
-                    </div>
-                </div>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-2 mb-4"
+                >
+                    <ArrowLeft size={16} />
+                    Back
+                </Button>
 
-                {/* Role badge */}
-                <div className="mb-6">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize
-                        ${user?.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-                            user?.role === 'staff' ? 'bg-blue-100 text-blue-700' :
-                                'bg-green-100 text-green-700'}`}>
-                        {user?.role}
-                    </span>
-                </div>
+                {/* Everything lives inside one card */}
+                <Card>
+                    <CardContent className="pt-6">
 
-                {/* Profile info card */}
-                <Card className="mb-6">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
+                        {/* Header */}
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
+                                <User size={75} className="text-gray-500" />
+                            </div>
+
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
+                                <p className="text-gray-500 mt-1">View and update your account information</p>
+                            </div>
+                        </div>
+
+                        {/* Role badge */}
+                        <div className="mb-6">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize
+                                ${user?.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                                    user?.role === 'staff' ? 'bg-blue-100 text-blue-700' :
+                                        'bg-green-100 text-green-700'}`}>
+                                {user?.role}
+                            </span>
+                        </div>
+
+                        {/* Personal Information */}
+                        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
                             <User size={20} className="text-blue-600" />
                             Personal Information
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                        </h2>
 
                         {success && (
                             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-6">
@@ -174,7 +178,6 @@ const Profile = () => {
                                 </div>
                             </div>
 
-                            {/* Only show household fields for residents */}
                             {user?.role === 'resident' && (
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
@@ -198,7 +201,7 @@ const Profile = () => {
                                 </div>
                             )}
 
-                            <div className="pt-2">
+                            <div className="pt-2 flex justify-end">
                                 <Button
                                     type="submit"
                                     className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
@@ -210,18 +213,15 @@ const Profile = () => {
                             </div>
 
                         </form>
-                    </CardContent>
-                </Card>
 
-                {/* Change password card */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
+                        {/* Divider between the two sections */}
+                        <hr className="my-8 border-gray-200" />
+
+                        {/* Change Password */}
+                        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
                             <KeyRound size={20} className="text-blue-600" />
                             Change Password
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                        </h2>
 
                         {passwordSuccess && (
                             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-6">
@@ -272,7 +272,7 @@ const Profile = () => {
                                     required
                                 />
                             </div>
-                            <div className="pt-2">
+                            <div className="pt-2 flex justify-end">
                                 <Button
                                     type="submit"
                                     className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
@@ -283,6 +283,7 @@ const Profile = () => {
                                 </Button>
                             </div>
                         </form>
+
                     </CardContent>
                 </Card>
 

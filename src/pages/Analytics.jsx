@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,8 +11,29 @@ import {
     Cell, Legend, LineChart, Line
 } from 'recharts'
 import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas-pro'
 
 const COLORS = ['#1e40af', '#dc2626', '#16a34a', '#d97706', '#7c3aed']
+
+// Logo lives in public/assets, so it's referenced by URL path (not imported
+// as a module). Cached after first load so repeated PDF exports don't
+// re-fetch it every time.
+const LOGO_SRC = '/assets/logo.jpg'
+let cachedLogoImage = null
+
+const loadLogoImage = () => {
+    if (cachedLogoImage) return Promise.resolve(cachedLogoImage)
+
+    return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => {
+            cachedLogoImage = img
+            resolve(img)
+        }
+        img.onerror = reject
+        img.src = LOGO_SRC
+    })
+}
 
 const Analytics = () => {
     const [byIssue, setByIssue] = useState([])
@@ -22,9 +43,49 @@ const Analytics = () => {
     const [isExporting, setIsExporting] = useState(false)
     const [exportError, setExportError] = useState('')
 
+    // Refs to the actual rendered chart cards, so the PDF can screenshot
+    // exactly what's on screen instead of redrawing an approximation.
+    const purokChartRef = useRef(null)
+    const issueChartRef = useRef(null)
+    const tdsChartRef = useRef(null)
+
     useEffect(() => {
         fetchData()
     }, [])
+
+    // Captures a DOM node and adds it to the PDF as a titled section —
+    // checks if the TITLE + IMAGE fit together before drawing either one,
+    // so a section never gets split (title stranded on one page with a
+    // gap underneath, image alone on the next).
+    const addChartSection = async (pdf, title, element, { margin, pageWidth, pageHeight, y }) => {
+        const contentWidth = pageWidth - margin * 2
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            backgroundColor: '#ffffff',
+            useCORS: true
+        })
+        const imgData = canvas.toDataURL('image/png')
+        const imgHeight = (canvas.height / canvas.width) * contentWidth
+        const titleHeight = 10
+        const topGap = 6
+        const neededHeight = topGap + titleHeight + imgHeight + 8
+
+        if (y + neededHeight > pageHeight - margin) {
+            pdf.addPage()
+            y = margin
+        }
+
+        y += topGap
+
+        pdf.setFont('helvetica', 'bold')
+        pdf.setFontSize(14)
+        pdf.setTextColor(17, 24, 39)
+        pdf.text(title, margin, y)
+        y += titleHeight
+
+        pdf.addImage(imgData, 'PNG', margin, y, contentWidth, imgHeight)
+        return y + imgHeight + 8
+    }
 
     const handleDownloadPdf = async () => {
         setExportError('')
@@ -36,7 +97,7 @@ const Analytics = () => {
             const pageHeight = pdf.internal.pageSize.getHeight()
             const margin = 10
             const contentWidth = pageWidth - margin * 2
-            let y = 16
+            let y = margin
 
             const addPageIfNeeded = (neededHeight = 12) => {
                 if (y + neededHeight > pageHeight - margin) {
@@ -88,18 +149,48 @@ const Analytics = () => {
             const maxReports = Math.max(...byPurok.map((purok) => Number(purok.report_count || 0)), 1)
             const latestTds = tdsTrend.length > 0 ? tdsTrend[0] : null
 
-            pdf.setTextColor(17, 24, 39)
-            pdf.setFontSize(16)
+            // --- Header: logo + title centered as one block, date top-right ---
+            const logoSize = 16 // mm, square
+            const gap = 4
+            let logoLoaded = false
+            let logoImg = null
+
+            try {
+                logoImg = await loadLogoImage()
+                logoLoaded = true
+            } catch (error) {
+                // If the logo can't load, just fall back to a text-only
+                // header instead of breaking the whole PDF export.
+                console.log('Logo failed to load for PDF, continuing without it:', error)
+            }
+
             pdf.setFont('helvetica', 'bold')
-            pdf.text('TapAware Analytics Report', margin, y)
-            y += 7
+            pdf.setFontSize(16)
+            const titleWidth = pdf.getTextWidth('TapAware Analytics Report')
+            const blockWidth = (logoLoaded ? logoSize + gap : 0) + titleWidth
+            const blockStartX = (pageWidth - blockWidth) / 2
+
+            let titleX = blockStartX
+            if (logoLoaded) {
+                pdf.addImage(logoImg, 'JPEG', blockStartX, y, logoSize, logoSize)
+                titleX = blockStartX + logoSize + gap
+            }
+
+            pdf.setTextColor(17, 24, 39)
+            pdf.text('TapAware Analytics Report', titleX, y + logoSize / 2 - 2)
+
+            y += logoSize + 6
 
             pdf.setFont('helvetica', 'normal')
             pdf.setFontSize(9)
             pdf.setTextColor(107, 114, 128)
-            pdf.text(`Generated ${new Date().toLocaleString()}`, margin, y)
-            y += 12
+            pdf.text(`Generated ${new Date().toLocaleString()}`, pageWidth / 2, y, { align: 'center' })
+            y += 6
+            pdf.setDrawColor(229, 231, 235)
+            pdf.line(margin, y, pageWidth - margin, y)
+            y += 8
 
+            // --- Summary ---
             addSectionTitle('Summary')
             addRow(['Total reports', totalReports], [45, 40])
             addRow(['Puroks tracked', byPurok.length], [45, 40])
@@ -107,12 +198,18 @@ const Analytics = () => {
             addRow(['Latest average TDS', latestTds ? `${Number(latestTds.average || 0).toFixed(2)} ppm` : 'No data'], [45, 40])
             y += 4
 
-            addSectionTitle('Reports per Purok')
-            addTableHeader(['Purok', 'Reports', 'Visual'], [35, 30, 120])
+            // --- Real charts, screenshotted so the PDF matches the on-screen page exactly ---
+            // --- Reports per Purok: chart + detail table together ---
+            if (purokChartRef.current) {
+                y = await addChartSection(pdf, 'Reports per Purok', purokChartRef.current, { margin, pageWidth, pageHeight, y })
+            }
+
+            addTableHeader(['Purok', 'Reports', 'Share'], [35, 30, 120])
             byPurok.forEach((purok) => {
                 addPageIfNeeded(9)
                 const reportCount = Number(purok.report_count || 0)
                 const barWidth = (reportCount / maxReports) * 70
+                const sharePct = totalReports > 0 ? ((reportCount / totalReports) * 100).toFixed(1) : '0.0'
 
                 pdf.setFont('helvetica', 'normal')
                 pdf.setFontSize(10)
@@ -123,18 +220,31 @@ const Analytics = () => {
                 pdf.rect(margin + 65, y - 4, 70, 4, 'F')
                 pdf.setFillColor(37, 99, 235)
                 pdf.rect(margin + 65, y - 4, barWidth, 4, 'F')
+                pdf.setTextColor(107, 114, 128)
+                pdf.setFontSize(8)
+                pdf.text(`${sharePct}%`, margin + 138, y)
                 y += 8
             })
             y += 4
 
-            addSectionTitle('Reports by Issue Type')
-            addTableHeader(['Issue Type', 'Reports'], [120, 60])
+            // --- Reports by Issue Type: chart + detail table together ---
+            if (issueChartRef.current) {
+                y = await addChartSection(pdf, 'Reports by Issue Type', issueChartRef.current, { margin, pageWidth, pageHeight, y })
+            }
+
+            addTableHeader(['Issue Type', 'Reports', 'Share'], [90, 40, 50])
             byIssue.forEach((issue) => {
-                addRow([issue.issue_type || 'Unknown', issue.count || 0], [120, 60])
+                const count = Number(issue.count || 0)
+                const sharePct = totalReports > 0 ? ((count / totalReports) * 100).toFixed(1) : '0.0'
+                addRow([issue.issue_type || 'Unknown', count, `${sharePct}%`], [90, 40, 50])
             })
             y += 4
 
-            addSectionTitle('TDS Trend')
+            // --- TDS Trend: chart + detail table together ---
+            if (tdsTrend.length > 0 && tdsChartRef.current) {
+                y = await addChartSection(pdf, 'TDS Trend (Last 30 Days)', tdsChartRef.current, { margin, pageWidth, pageHeight, y })
+            }
+
             addTableHeader(['Date', 'Average TDS', 'Readings'], [65, 60, 55])
             tdsTrend.forEach((reading) => {
                 const date = new Date(reading.date).toLocaleDateString()
@@ -148,7 +258,7 @@ const Analytics = () => {
             pdf.save('tapaware-analytics.pdf')
         } catch (error) {
             console.error('Error generating PDF:', error)
-            setExportError('PDF download failed. Please try again.')
+            setExportError(`PDF download failed: ${error?.message || 'Unknown error'}`)
         }
         finally {
             setIsExporting(false)
@@ -188,19 +298,19 @@ const Analytics = () => {
             <div>
 
                 {/* Header */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
+                <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Analytics</h1>
+                        <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
                         <p className="text-gray-500 mt-1">Visual breakdown of water quality data</p>
                     </div>
                     <Button
                         onClick={handleDownloadPdf}
                         disabled={isExporting}
-                        className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
+                        className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
 
                     >
                         <Download size={16} />
-                        {isExporting ? 'preparing PDF...' : 'Download PDF'}
+                        {isExporting ? 'Preparing PDF...' : 'Download PDF'}
                     </Button>
                 </div>
                 {exportError && (
@@ -212,10 +322,7 @@ const Analytics = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
                         {/* Reports per purok */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base">Reports per Purok</CardTitle>
-                            </CardHeader>
+                        <Card ref={purokChartRef}>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={280}>
                                     <BarChart data={byPurok}>
@@ -242,10 +349,7 @@ const Analytics = () => {
                         </Card>
 
                         {/* Reports by issue type */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base">Reports by Issue Type</CardTitle>
-                            </CardHeader>
+                        <Card ref={issueChartRef}>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={280}>
                                     <PieChart>
@@ -277,10 +381,7 @@ const Analytics = () => {
                     </div>
 
                     {/* TDS Trend */}
-                    <Card className="mb-6">
-                        <CardHeader>
-                            <CardTitle className="text-base">TDS Trend (Last 30 Days)</CardTitle>
-                        </CardHeader>
+                    <Card className="mb-6" ref={tdsChartRef}>
                         <CardContent>
                             {tdsTrend.length === 0 ? (
                                 <p className="text-gray-500 text-sm text-center py-12">
@@ -333,42 +434,40 @@ const Analytics = () => {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="overflow-x-auto">
-                                <table className="w-full min-w-[320px]">
-                                    <thead>
-                                        <tr className="border-b">
-                                            {['#', 'Purok', 'Total Reports'].map(h => (
-                                                <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-black uppercase">
-                                                    {h}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {byPurok.map((p, index) => (
-                                            <tr key={index} className=' bg-white'>
-                                                <td className="py-3 px-4 text-sm text-black">{index + 1}</td>
-                                                <td className="py-3 px-4 text-sm font-semibold">Purok {p.purok}</td>
-                                                <td className="py-3 px-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex-1 bg-gray-100 rounded-full h-2 max-w-32">
-                                                            <div
-                                                                className="bg-blue-600 h-2 rounded-full"
-                                                                style={{
-                                                                    width: `${Math.min((p.report_count / Math.max(...byPurok.map(x => x.report_count || 1))) * 100, 100)}%`
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <span className="text-sm font-semibold text-blue-600">
-                                                            {p.report_count}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="border-b">
+                                        {['#', 'Purok', 'Total Reports'].map(h => (
+                                            <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
+                                                {h}
+                                            </th>
                                         ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {byPurok.map((p, index) => (
+                                        <tr key={index} className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                            <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
+                                            <td className="py-3 px-4 text-sm font-semibold">Purok {p.purok}</td>
+                                            <td className="py-3 px-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex-1 bg-gray-100 h-2 max-w-32">
+                                                        <div
+                                                            className="bg-blue-600 h-2"
+                                                            style={{
+                                                                width: `${Math.min((p.report_count / Math.max(...byPurok.map(x => x.report_count || 1))) * 100, 100)}%`
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <span className="text-sm font-semibold text-blue-600">
+                                                        {p.report_count}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </CardContent>
                     </Card>
                 </div>
