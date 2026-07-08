@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,8 @@ const TdsReadings = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const statusFilter = searchParams.get('status');
     const [selectedPurok, setSelectedPurok] = useState('all');
 
     useEffect(() => {
@@ -71,6 +73,14 @@ const TdsReadings = () => {
             return false
         }
 
+        if (statusFilter) {
+            const readingStatus = getTdsStatus(r.tds_value).label.toLowerCase()
+            const statusMap = { safe: 'safe', mild: 'moderate', danger: 'high' }
+            if (readingStatus !== statusMap[statusFilter]) {
+                return false
+            }
+        }
+
         const searchLower = searchTerm.toLowerCase()
         return (
             r.household_number?.toString().includes(searchLower) ||
@@ -111,7 +121,7 @@ const TdsReadings = () => {
 
 
                 {/* Table */}
-                <Card>
+                <Card className="bg-white/80">
                     <CardHeader>
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <CardTitle className="flex items-center gap-2">

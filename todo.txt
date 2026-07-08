@@ -8,18 +8,22 @@ spinner: reports,households,tds readings
 (✓)-footer
 (✓)-sidebar
 (✓)-email
-
-
--admin panel: staff management table, actions:add edit
+(✓)-audit-trail limit 100(ask claude)
+(✓)-admin panel: staff management table, actions:add edit
+(✓)-add user(phone number), if role==='staff' then household_num = not required
+(✓)-households,reports,tds,readings, view action
 
 -new table showing which issue is trending per purok example: 3 issue of odor is reported at purok 2 
 
--households,reports,tds,readings view action
+
+-admin panel responsiveness
 
 -auth.routes.js - change-pass,prof
 
+-edit user page details
+
+-forgot pass
+
 -idempotency
 
--audit-trail limit 100(ask claude)
-
--add user(phone number), if role==='staff' then household_num = not required,
+VITE_API_URL=https://backend-production-cfb9.up.railway.app/api

@@ -109,7 +109,7 @@ const Reports = () => {
         return (
             <Layout>
                 <div className="flex items-center justify-center h-64">
-                    <p className="text-gray-500">Loading reports...</p>
+                    <p className="text-gray-500">Loading { }...</p>
                 </div>
             </Layout>
         )

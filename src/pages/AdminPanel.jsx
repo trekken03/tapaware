@@ -44,6 +44,14 @@ const AdminPanel = () => {
             console.log('Error updating role:', error)
         }
     }
+    const handleFlagStatusUpdate = async (flagId, newStatus) => {
+        try {
+            await API.put(`/admin/flags/${flagId}/status`, { status: newStatus })
+            fetchData()
+        } catch (error) {
+            console.log('Error updating flag status:', error)
+        }
+    }
 
     const handleDeleteUser = async (userId, userName) => {
         if (!window.confirm(`Are you sure you want to delete ${userName}?`)) return
@@ -230,8 +238,8 @@ const AdminPanel = () => {
                                                                 <Button
                                                                     variant="outline"
                                                                     size="sm"
-                                                                    className="text-blue-600 border-red-200 hover:bg-red-50"
-                                                                    onClick={() => handleDeleteUser(u.id, u.name)}
+                                                                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                                                                    onClick={() => navigate(`/admin/edit-user/${u.id}`, { state: u })}
                                                                 >
                                                                     <Pencil size={14} className='mr-1' />
                                                                     Edit
@@ -337,7 +345,7 @@ const AdminPanel = () => {
                                                                     variant="outline"
                                                                     size="sm"
                                                                     className="text-blue-600 border-red-200 hover:bg-red-50"
-                                                                    onClick={() => handleDeleteUser(u.id, u.name)}
+                                                                    onClick={() => navigate(`/admin/edit-user/${u.id}`, { state: u })}
                                                                 >
                                                                     <Pencil size={14} className='mr-1' />
                                                                     Edit
@@ -389,7 +397,7 @@ const AdminPanel = () => {
                                                 <thead>
                                                     <tr className="border-b">
                                                         {['#', 'Household No.', 'Owner', 'Purok', 'Issue Type', 'Times Reported', 'Status'].map(h => (
-                                                            <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
+                                                            <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-black uppercase">
                                                                 {h}
                                                             </th>
                                                         ))}
@@ -397,9 +405,9 @@ const AdminPanel = () => {
                                                 </thead>
                                                 <tbody>
                                                     {flagged.map((f, index) => (
-                                                        <tr key={f.id} className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                                            <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
-                                                            <td className="py-3 px-4 text-sm font-semibold">#{f.household_number}</td>
+                                                        <tr key={f.id} className={`bg-white`}>
+                                                            <td className="py-3 px-4 text-sm ">{index + 1}</td>
+                                                            <td className="py-3 px-4 text-sm ">#{f.household_number}</td>
                                                             <td className="py-3 px-4 text-sm">{f.owner_name}</td>
                                                             <td className="py-3 px-4 text-sm">Purok {f.purok}</td>
                                                             <td className="py-3 px-4 text-sm capitalize">{f.issue_type}</td>
@@ -409,9 +417,14 @@ const AdminPanel = () => {
                                                                 </span>
                                                             </td>
                                                             <td className="py-3 px-4">
-                                                                <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
-                                                                    {f.status}
-                                                                </span>
+                                                                <select
+                                                                    value={f.status}
+                                                                    onChange={(e) => handleFlagStatusUpdate(f.id, e.target.value)}
+                                                                    className="bg-red-100 text-red-700 border-0 rounded-full px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
+                                                                >
+                                                                    <option value="active">Active</option>
+                                                                    <option value="resolved">Resolved</option>
+                                                                </select>
                                                             </td>
                                                         </tr>
                                                     ))}
@@ -433,7 +446,17 @@ const AdminPanel = () => {
                                                         <div><span className="font-semibold text-gray-900">Owner:</span> {f.owner_name}</div>
                                                         <div><span className="font-semibold text-gray-900">Purok:</span> {f.purok}</div>
                                                         <div><span className="font-semibold text-gray-900">Issue:</span> {f.issue_type}</div>
-                                                        <div><span className="font-semibold text-gray-900">Status:</span> {f.status}</div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-semibold text-gray-900">Status:</span>
+                                                            <select
+                                                                value={f.status}
+                                                                onChange={(e) => handleFlagStatusUpdate(f.id, e.target.value)}
+                                                                className="bg-red-100 text-red-700 border-0 rounded-full px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
+                                                            >
+                                                                <option value="active">Active</option>
+                                                                <option value="resolved">Resolved</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ))}

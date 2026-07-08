@@ -98,7 +98,7 @@ const AdminDashboard = () => {
                             ) : (
                                 <div className="space-y-3">
                                     {tdsByPurok.map((item) => (
-                                        <div key={item.purok} className="flex items-center justify-between pb-3 border-b last:border-b-0">
+                                        <div key={item.purok} className="flex items-center justify-between pb-3">
                                             <span className="text-sm font-medium text-gray-700">Purok {item.purok}</span>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-lg font-bold text-blue-600">{parseFloat(item.average_tds).toFixed(2)}</span>
@@ -172,6 +172,52 @@ const AdminDashboard = () => {
                                             <tr key={flag.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                                 <td className="py-3 px-4 text-sm font-semibold">{flag.household_number}</td>
                                                 <td className="py-3 px-4 text-sm">{flag.owner_name}</td>
+                                                <td className="py-3 px-4 text-sm">Purok {flag.purok}</td>
+                                                <td className="py-3 px-4 text-sm capitalize">{flag.issue_type}</td>
+                                                <td className="py-3 px-4 text-sm">
+                                                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
+                                                        {flag.times_reported}x
+                                                    </span>
+                                                </td>
+                                                <td className="py-3 px-4 text-sm">
+                                                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
+                                                        {flag.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+                <Card className="mt-10">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <AlertTriangle size={20} className="text-red-500" />
+                            Issue trend per purok
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {flagged.length === 0 ? (
+                            <p className="text-gray-500 text-sm">No flagged households at this time.</p>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full min-w-[700px]">
+                                    <thead>
+                                        <tr className="border-b">
+                                            {['Purok', 'Issue Type', 'Times Reported', 'Status'].map(h => (
+                                                <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
+                                                    {h}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {flagged.map((flag, index) => (
+                                            <tr key={flag.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+
                                                 <td className="py-3 px-4 text-sm">Purok {flag.purok}</td>
                                                 <td className="py-3 px-4 text-sm capitalize">{flag.issue_type}</td>
                                                 <td className="py-3 px-4 text-sm">

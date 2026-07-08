@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,8 @@ const Households = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedPurok, setSelectedPurok] = useState('all');
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
+    const statusFilter = searchParams.get('status')
 
     useEffect(() => {
         fetchHouseholds()
@@ -32,6 +34,31 @@ const Households = () => {
             setLoading(false)
         }
     }
+    const getHouseholdStatusStyle = (status) => {
+        switch (status) {
+            case 'flagged':
+                return {
+                    label: 'Flagged',
+                    color: 'text-red-700',
+                    bg: 'bg-red-100',
+                    border: 'border-red-400',
+                };
+            case 'pending':
+                return {
+                    label: 'Pending Reports',
+                    color: 'text-yellow-700',
+                    bg: 'bg-yellow-100',
+                    border: 'border-yellow-400',
+                };
+            default:
+                return {
+                    label: 'Safe',
+                    color: 'text-green-700',
+                    bg: 'bg-green-100',
+                    border: 'border-green-400',
+                };
+        }
+    };
 
     const purokOptions = [...new Set(households.map(h => h.purok).filter(Boolean))]
         .sort((a, b) => a.toString().localeCompare(b.toString(), undefined, { numeric: true }))
@@ -40,6 +67,9 @@ const Households = () => {
 
     const filteredHouseholds = households.filter(h => {
         if (selectedPurok !== 'all' && h.purok?.toString() !== selectedPurok) {
+            return false
+        }
+        if (statusFilter && h.computed_status !== statusFilter) {
             return false
         }
         const searchLower = searchTerm.toLowerCase()
@@ -128,36 +158,39 @@ const Households = () => {
 
                             </div>
                         ) : (
-                            <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,290px))] gap-4  ">
-                                {filteredHouseholds.map((h) => (
-                                    <div
-                                        key={h.id}
-                                        onClick={() => navigate(`/households/${h.id}`)}
-                                        className="flex gap-4 rounded-lg border-l-4 border-blue-400 p-4 shadow-lg h-full cursor-pointer hover:shadow-md hover:bg-gray-200 transition-all duration-200">
-                                        <div className="hidden sm:flex items-center justify-center w-14 h-14 rounded-full bg-blue-100 shrink-0" >
-                                            <Home size={24} className="text-blue-700" />
-                                        </div>
-
-                                        <div className="flex-1 flex flex-col h-full">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <span className="text-2xl">{h.owner_name}</span>
-                                                <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                                                    #{h.household_number}
-                                                </span>
+                            <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,290px))] gap-4 bg-white ">
+                                {filteredHouseholds.map((h) => {
+                                    const status = getHouseholdStatusStyle(h.computed_status)
+                                    return (
+                                        <div
+                                            key={h.id}
+                                            onClick={() => navigate(`/households/${h.id}`)}
+                                            className={`flex gap-4 rounded-lg border-l-4 ${status.border} p-4 shadow-lg h-full cursor-pointer hover:shadow-md hover:bg-gray-200 transition-all duration-200`}>
+                                            <div className={`hidden sm:flex items-center justify-center w-14 h-14 rounded-full ${status.bg} shrink-0`}>
+                                                <Home size={24} className={status.color} />
                                             </div>
 
-                                            <div className="flex flex-col gap-1 text-sm text-gray-700">
-                                                <p className="font-semibold text-gray-900">Purok: {h.purok}</p>
-                                                <p className="font-semibold text-gray-900">Address: {h.address}</p>
-                                                <p className="font-semibold text-gray-900">Date Added: {new Date(h.created_at).toLocaleDateString('en-US', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric',
-                                                })}</p>
+                                            <div className="flex-1 flex flex-col h-full">
+                                                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                                    <span className="text-2xl break-words">{h.owner_name}</span>
+                                                    <span className={`${status.bg} ${status.color} px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap`}>
+                                                        {status.label}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex flex-col gap-1 text-sm text-gray-700">
+                                                    <p className="font-semibold text-gray-900">Household: #{h.household_number} - Purok {h.purok}</p>
+                                                    <p className="font-semibold text-gray-900">Address: {h.address}</p>
+                                                    <p className="font-semibold text-gray-900">Date Added: {new Date(h.created_at).toLocaleDateString('en-US', {
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric',
+                                                    })}</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
                         )}
                     </CardContent>

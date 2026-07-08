@@ -90,4 +90,41 @@ exports.getLatestReadingByHousehold = async (req, res) => {
     }
 };
 
+exports.getReadingById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const [[reading]] = await db.query(
+            `SELECT tds_readings.*,
+            households.household_number,
+            households.owner_name,
+            households.purok,
+            households.address,
+            users.name as staff_name
+            FROM tds_readings JOIN households ON tds_readings.household_id = households.id
+            JOIN users ON tds_readings.staff_id = users.id
+            WHERE tds_readings.id = ?`,
+            [id]
+        );
+
+        if (!reading) {
+            return res.status(404).json({ message: 'Reading not found' });
+        }
+
+        const [history] = await db.query(
+            `SELECT tds_readings.*, users.name as staff_name
+            FROM tds_readings JOIN users ON tds_readings.staff_id = users.id
+            WHERE tds_readings.household_id = ? AND tds_readings.id != ?
+            ORDER BY tds_readings.recorded_at DESC
+            LIMIT 5`,
+            [reading.household_id, id]
+        );
+
+        res.json({ ...reading, household_history: history });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 

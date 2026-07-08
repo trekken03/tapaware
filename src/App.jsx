@@ -13,6 +13,10 @@ import AddUser from './pages/AddUser';
 import AuditTrail from './pages/AuditTrail';
 import Profile from './pages/Profile';
 import RoleBasedRoute from './components/RoleBasedRoute';
+import HouseholdDetail from './pages/Households/HouseholdDetail';
+import TdsDetail from './pages/TdsReadings/TdsDetail';
+import ReportDetail from './pages/ReportDetail';
+import EditUser from './pages/EditUser';
 
 
 const App = () => {
@@ -46,6 +50,11 @@ const App = () => {
             {/* Audit Trail - Admin only */}
             <Route path="/audit-trail" element={<RoleBasedRoute allowedRoles={['admin']}><AuditTrail /></RoleBasedRoute>} />
             <Route path="/profile" element={<RoleBasedRoute><Profile /></RoleBasedRoute>} />
+
+            <Route path="/households/:id" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><HouseholdDetail /></RoleBasedRoute>} />
+            <Route path="/reports/:id" element={<RoleBasedRoute><ReportDetail /></RoleBasedRoute>} />
+            <Route path="/tds/:id" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><TdsDetail /></RoleBasedRoute>} />
+            <Route path="/admin/edit-user/:id" element={<RoleBasedRoute allowedRoles={['admin']}><EditUser /></RoleBasedRoute>} />
         </Routes>
     )
 }

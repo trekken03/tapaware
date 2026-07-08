@@ -116,3 +116,39 @@ exports.getReportsByHousehold = async (req, res) => {
     }
 };
 
+exports.getReportById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const [[report]] = await db.query(
+            `SELECT reports.*,
+            households.household_number,
+            households.owner_name,
+            households.purok,
+            households.address,
+            users.name as reported_by
+            FROM reports JOIN households ON reports.household_id = households.id
+            JOIN users ON reports.user_id = users.id
+            WHERE reports.id = ?`,
+            [id]
+        );
+
+        if (!report) {
+            return res.status(404).json({ message: 'Report not found' });
+        }
+
+        const [otherReports] = await db.query(
+            `SELECT reports.*, users.name as reported_by
+            FROM reports JOIN users ON reports.user_id = users.id
+            WHERE reports.household_id = ? AND reports.id != ?
+            ORDER BY reports.created_at DESC
+            LIMIT 5`,
+            [report.household_id, id]
+        );
+
+        res.json({ ...report, household_reports: otherReports });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};

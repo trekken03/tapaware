@@ -93,3 +93,63 @@ exports.getAuditTrailByUser = async (req, res) => {
     }
 
 };
+
+exports.updateUserInfo = async (req, res) => {
+    const { id } = req.params;
+    const { name, email, household_id } = req.body;
+    const currentUser = req.user;
+
+    try {
+        const [existing] = await db.query(`Select * from users where id = ?`, [id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        await db.query(
+            `Update users set name = ?, email = ?, household_id = ? where id = ?`,
+            [name, email, household_id || null, id]
+        );
+
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'UPDATE_USER_INFO',
+            table_affected: 'users',
+            record_id: id,
+            details: `Updated info for user ${existing[0].name} -> name: ${name}, email: ${email}`,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'User info updated successfully' });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+exports.updateFlagStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    const currentUser = req.user;
+
+    try {
+        await db.query(`Update recurring_flags set status = ? where id = ?`, [status, id]);
+
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'UPDATE_FLAG_STATUS',
+            table_affected: 'recurring_flags',
+            record_id: id,
+            details: `Flag status updated to ${status}`,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'Flag status updated successfully' });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};

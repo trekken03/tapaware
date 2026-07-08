@@ -32,10 +32,32 @@ const getNavItems = (role) => {
         },
     ];
 
+    const householdsItem = {
+        path: '/households',
+        label: 'Households',
+        icon: Home,
+        children: [
+            { path: '/households?status=safe', label: 'Safe' },
+            { path: '/households?status=pending', label: 'Pending Reports' },
+            { path: '/households?status=flagged', label: 'Flagged' },
+        ],
+    };
+
+    const tdsItem = {
+        path: '/tds',
+        label: 'TDS Readings',
+        icon: Droplets,
+        children: [
+            { path: '/tds?status=safe', label: 'Safe' },
+            { path: '/tds?status=mild', label: 'Mild' },
+            { path: '/tds?status=danger', label: 'Danger' },
+        ],
+    };
+
     const adminItems = [
         ...baseItems,
-        { path: '/households', label: 'Households', icon: Home },
-        { path: '/tds', label: 'TDS Readings', icon: Droplets },
+        householdsItem,
+        tdsItem,
         { path: '/analytics', label: 'Analytics', icon: BarChart3 },
         { path: '/audit-trail', label: 'Audit Trail', icon: ClipboardList },
         { path: '/admin', label: 'Admin Panel', icon: ShieldUser },
@@ -43,8 +65,8 @@ const getNavItems = (role) => {
 
     const staffItems = [
         ...baseItems,
-        { path: '/households', label: 'Households', icon: Home },
-        { path: '/tds', label: 'TDS Readings', icon: Droplets },
+        householdsItem,
+        tdsItem,
         { path: '/analytics', label: 'Analytics', icon: BarChart3 },
     ];
 

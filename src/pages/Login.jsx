@@ -72,9 +72,9 @@ const Login = () => {
 
                     <CardTitle className="text-center">Login to your account</CardTitle>
                 </CardHeader>
+                <form onSubmit={handleSubmit}>
+                    <CardContent>
 
-                <CardContent>
-                    <form onSubmit={handleSubmit}>
                         <div className="flex flex-col gap-6">
 
 
@@ -119,19 +119,19 @@ const Login = () => {
                             </a>
 
                         </div>
-                    </form>
-                </CardContent>
 
-                <CardFooter className="flex-col gap-2">
-                    <Button
-                        type="submit"
-                        className="w-full bg-blue-900 hover:bg-blue-700 text-white"
-                        disabled={loading}
-                        onClick={handleSubmit}
-                    >
-                        {loading ? 'Signing in...' : 'Login'}
-                    </Button>
-                </CardFooter>
+                    </CardContent>
+
+                    <CardFooter className="flex-col gap-2 border-t-0">
+                        <Button
+                            type="submit"
+                            className="w-full bg-blue-900 hover:bg-blue-700 text-white"
+                            disabled={loading}
+                        >
+                            {loading ? 'Signing in...' : 'Login'}
+                        </Button>
+                    </CardFooter>
+                </form>
             </Card>
 
         </div>

@@ -3,15 +3,27 @@ const auditLog = require('../utils/auditLogger');
 
 exports.getAllHouseholds = async (req, res) => {
     try {
-        const [rows] = await db.query(
-            'SELECT * FROM households ORDER BY created_at ASC'
-        );
+        const [rows] = await db.query(`
+            SELECT h.*,
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1 FROM recurring_flags rf
+                        WHERE rf.household_id = h.id AND rf.status = 'active'
+                    ) THEN 'flagged'
+                    WHEN EXISTS (
+                        SELECT 1 FROM reports r
+                        WHERE r.household_id = h.id AND r.status IN ('pending', 'investigating')
+                    ) THEN 'pending'
+                    ELSE 'safe'
+                END AS computed_status
+            FROM households h
+            ORDER BY h.created_at ASC
+        `);
         res.json(rows);
     }
     catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
-
 };
 
 exports.addHousehold = async (req, res) => {
@@ -37,5 +49,59 @@ exports.addHousehold = async (req, res) => {
     }
     catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message })
+    }
+};
+
+exports.getHouseholdById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const [[household]] = await db.query(
+            `SELECT h.*,
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1 FROM recurring_flags rf
+                        WHERE rf.household_id = h.id AND rf.status = 'active'
+                    ) THEN 'flagged'
+                    WHEN EXISTS (
+                        SELECT 1 FROM reports r
+                        WHERE r.household_id = h.id AND r.status IN ('pending', 'investigating')
+                    ) THEN 'pending'
+                    ELSE 'safe'
+                END AS computed_status
+            FROM households h
+            WHERE h.id = ?`,
+            [id]
+        );
+
+        if (!household) {
+            return res.status(404).json({ message: 'Household not found' });
+        }
+
+        const [reports] = await db.query(
+            `SELECT reports.*, users.name as reported_by
+            FROM reports JOIN users ON reports.user_id = users.id
+            WHERE reports.household_id = ?
+            ORDER BY reports.created_at DESC`,
+            [id]
+        );
+
+        const [tdsReadings] = await db.query(
+            `SELECT tds_readings.*, users.name as staff_name
+            FROM tds_readings JOIN users ON tds_readings.staff_id = users.id
+            WHERE tds_readings.household_id = ?
+            ORDER BY tds_readings.recorded_at DESC`,
+            [id]
+        );
+
+        const [flags] = await db.query(
+            `SELECT * FROM recurring_flags WHERE household_id = ? ORDER BY last_reported_at DESC`,
+            [id]
+        );
+
+        res.json({ ...household, reports, tds_readings: tdsReadings, flags });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
