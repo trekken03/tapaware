@@ -5,9 +5,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { User, Save, KeyRound, ArrowLeft } from 'lucide-react'
+import { User, Save, KeyRound, ArrowLeft, Home, MapPin } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
+import { toast } from 'sonner'
 
 const Profile = () => {
     const navigate = useNavigate()
@@ -15,16 +16,10 @@ const Profile = () => {
 
     const [loading, setLoading] = useState(false)
     const [passwordLoading, setPasswordLoading] = useState(false)
-    const [success, setSuccess] = useState('')
-    const [error, setError] = useState('')
-    const [passwordSuccess, setPasswordSuccess] = useState('')
-    const [passwordError, setPasswordError] = useState('')
 
     const [form, setForm] = useState({
         name: user?.name || '',
         email: user?.email || '',
-        household_number: user?.household_number || '',
-        purok: user?.purok || '',
     })
 
     const [passwordForm, setPasswordForm] = useState({
@@ -43,17 +38,15 @@ const Profile = () => {
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault()
-        setError('')
-        setSuccess('')
         setLoading(true)
 
         try {
             await API.put('/auth/profile', form)
             const updatedUser = { ...user, ...form }
             login(token, updatedUser)
-            setSuccess('Profile updated successfully!')
+            toast.success('Profile updated successfully!')
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to update profile')
+            toast.error(err.response?.data?.message || 'Failed to update profile')
         } finally {
             setLoading(false)
         }
@@ -61,16 +54,14 @@ const Profile = () => {
 
     const handleChangePassword = async (e) => {
         e.preventDefault()
-        setPasswordError('')
-        setPasswordSuccess('')
 
         if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            setPasswordError('Passwords do not match')
+            toast.error('Passwords do not match')
             return
         }
 
         if (passwordForm.newPassword.length < 6) {
-            setPasswordError('Password must be at least 6 characters')
+            toast.error('Password must be at least 6 characters')
             return
         }
 
@@ -81,18 +72,20 @@ const Profile = () => {
                 currentPassword: passwordForm.currentPassword,
                 newPassword: passwordForm.newPassword,
             })
-            setPasswordSuccess('Password changed successfully!')
-            setPasswordForm({
-                currentPassword: '',
-                newPassword: '',
-                confirmPassword: '',
-            })
+            toast.success('Password changed successfully!')
+            setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
         } catch (err) {
-            setPasswordError(err.response?.data?.message || 'Failed to change password')
+            toast.error(err.response?.data?.message || 'Failed to change password')
         } finally {
             setPasswordLoading(false)
         }
     }
+
+    const roleBadgeStyle = {
+        admin: 'bg-purple-100 text-purple-700',
+        staff: 'bg-blue-100 text-blue-700',
+        resident: 'bg-green-100 text-green-700',
+    }[user?.role] || 'bg-gray-100 text-gray-700'
 
     return (
         <Layout>
@@ -108,53 +101,51 @@ const Profile = () => {
                     Back
                 </Button>
 
-                {/* Everything lives inside one card */}
-                <Card>
+                {/* Header card */}
+                <Card className="mb-6 overflow-hidden">
+                    <div className="bg-blue-900 h-20" />
+                    <CardContent className="pt-0">
+                        <div className="flex items-end gap-4 -mt-10">
+                            <div className="w-20 h-20 rounded-full bg-white border-4 border-white shadow-sm flex items-center justify-center shrink-0">
+                                <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center">
+                                    <User size={32} className="text-blue-700" />
+                                </div>
+                            </div>
+                            <div className="pb-1">
+                                <h1 className="text-xl font-bold text-gray-900">{user?.name}</h1>
+                                <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${roleBadgeStyle}`}>
+                                    {user?.role}
+                                </span>
+                            </div>
+                        </div>
+
+                        {user?.role === 'resident' && (
+                            <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-gray-100">
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <Home size={15} className="text-gray-400" />
+                                    {user?.household_number ? `Household #${user.household_number}` : 'No household linked'}
+                                </div>
+                                {user?.household_number && (
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <MapPin size={15} className="text-gray-400" />
+                                        Purok {user?.purok}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Personal Information */}
+                <Card className="mb-6">
                     <CardContent className="pt-6">
-
-                        {/* Header */}
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
-                                <User size={75} className="text-gray-500" />
-                            </div>
-
-                            <div>
-                                <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-                                <p className="text-gray-500 mt-1">View and update your account information</p>
-                            </div>
-                        </div>
-
-                        {/* Role badge */}
-                        <div className="mb-6">
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize
-                                ${user?.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-                                    user?.role === 'staff' ? 'bg-blue-100 text-blue-700' :
-                                        'bg-green-100 text-green-700'}`}>
-                                {user?.role}
-                            </span>
-                        </div>
-
-                        {/* Personal Information */}
-                        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
-                            <User size={20} className="text-blue-600" />
+                        <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                            <User size={18} className="text-blue-600" />
                             Personal Information
                         </h2>
 
-                        {success && (
-                            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-6">
-                                {success}
-                            </div>
-                        )}
-
-                        {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-6">
-                                {error}
-                            </div>
-                        )}
-
                         <form onSubmit={handleUpdateProfile} className="space-y-4">
-
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="name">Full Name</Label>
                                     <Input
@@ -179,26 +170,9 @@ const Profile = () => {
                             </div>
 
                             {user?.role === 'resident' && (
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="household_number">Household Number</Label>
-                                        <Input
-                                            id="household_number"
-                                            name="household_number"
-                                            value={form.household_number}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="purok">Purok</Label>
-                                        <Input
-                                            id="purok"
-                                            name="purok"
-                                            value={form.purok}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                </div>
+                                <p className="text-xs text-gray-400">
+                                    Household and purok are managed by barangay staff. Contact an admin to update these.
+                                </p>
                             )}
 
                             <div className="pt-2 flex justify-end">
@@ -211,29 +185,17 @@ const Profile = () => {
                                     {loading ? 'Saving...' : 'Save Changes'}
                                 </Button>
                             </div>
-
                         </form>
+                    </CardContent>
+                </Card>
 
-                        {/* Divider between the two sections */}
-                        <hr className="my-8 border-gray-200" />
-
-                        {/* Change Password */}
-                        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
-                            <KeyRound size={20} className="text-blue-600" />
+                {/* Change Password */}
+                <Card>
+                    <CardContent className="pt-6">
+                        <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                            <KeyRound size={18} className="text-blue-600" />
                             Change Password
                         </h2>
-
-                        {passwordSuccess && (
-                            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-6">
-                                {passwordSuccess}
-                            </div>
-                        )}
-
-                        {passwordError && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-6">
-                                {passwordError}
-                            </div>
-                        )}
 
                         <form onSubmit={handleChangePassword} className="space-y-4">
                             <div className="space-y-2">
@@ -248,29 +210,31 @@ const Profile = () => {
                                     required
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="newPassword">New Password</Label>
-                                <Input
-                                    id="newPassword"
-                                    name="newPassword"
-                                    type="password"
-                                    placeholder="At least 6 characters"
-                                    value={passwordForm.newPassword}
-                                    onChange={handlePasswordChange}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                                <Input
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    type="password"
-                                    placeholder="Re-enter new password"
-                                    value={passwordForm.confirmPassword}
-                                    onChange={handlePasswordChange}
-                                    required
-                                />
+                            <div className="grid sm:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="newPassword">New Password</Label>
+                                    <Input
+                                        id="newPassword"
+                                        name="newPassword"
+                                        type="password"
+                                        placeholder="At least 6 characters"
+                                        value={passwordForm.newPassword}
+                                        onChange={handlePasswordChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                                    <Input
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        type="password"
+                                        placeholder="Re-enter new password"
+                                        value={passwordForm.confirmPassword}
+                                        onChange={handlePasswordChange}
+                                        required
+                                    />
+                                </div>
                             </div>
                             <div className="pt-2 flex justify-end">
                                 <Button
@@ -283,7 +247,6 @@ const Profile = () => {
                                 </Button>
                             </div>
                         </form>
-
                     </CardContent>
                 </Card>
 

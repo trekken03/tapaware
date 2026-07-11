@@ -23,6 +23,7 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --radius: 0.25px;
+  --success: oklch(42.4% 0.199 265.638);
 }
 
 @theme inline {

@@ -1,5 +1,6 @@
 const db = require('../models/db');
 const auditLog = require('../utils/auditLogger');
+const sendEmail = require('../utils/emailSender');
 
 exports.getAllReports = async (req, res) => {
     try {
@@ -62,6 +63,28 @@ exports.submitReport = async (req, res) => {
                     VALUES(?,?,?,NOW())`, [household_id, issue_type, countRows[0].count]
                 );
             }
+        }
+
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (adminEmail) {
+            try {
+                await sendEmail({
+                    to: adminEmail,
+                    subject: `New Water Quality Report — ${issue_type}`,
+                    html: `
+        <h2>New Report Submitted</h2>
+        <p>A new water quality report has been submitted.</p>
+        <p><strong>Issue Type:</strong> ${issue_type}</p>
+        <p><strong>Description:</strong> ${description || 'No description provided'}</p>
+        <p><strong>Household ID:</strong> ${household_id}</p>
+        <p>Log in to TapAware to view full details and update its status.</p>
+    `
+                });
+            } catch (emailError) {
+                console.log('Failed to send report notification email:', emailError.message);
+            }
+        } else {
+            console.log('Report submitted, but no admin email configured for notification.');
         }
 
         res.status(201).json({ message: 'Report submitted successfully' });
@@ -147,6 +170,36 @@ exports.getReportById = async (req, res) => {
         );
 
         res.json({ ...report, household_reports: otherReports });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+exports.deleteReport = async (req, res) => {
+    const { id } = req.params;
+    const currentUser = req.user;
+
+    try {
+        const [existing] = await db.query('SELECT * FROM reports WHERE id = ?', [id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ message: 'Report not found' });
+        }
+
+        await db.query('DELETE FROM reports WHERE id = ?', [id]);
+
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'DELETE_REPORT',
+            table_affected: 'reports',
+            record_id: id,
+            details: `Deleted report #${id} (${existing[0].issue_type}) for household ${existing[0].household_id}`,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'Report deleted successfully' });
     }
     catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });

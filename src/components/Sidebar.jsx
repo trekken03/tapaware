@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import API from '@/services/api';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
@@ -95,6 +96,33 @@ const Sidebar = () => {
     const [expandedItem, setExpandedItem] = useState(getInitialExpanded);
     const navItems = getNavItems(user?.role);
 
+    const [hasNewReports, setHasNewReports] = useState(false);
+
+    useEffect(() => {
+        if (user?.role === 'resident') return; // residents don't need this indicator
+        checkNewReports();
+    }, [user?.role]);
+
+    const checkNewReports = async () => {
+        try {
+            const res = await API.get('/reports');
+            if (res.data.length === 0) return;
+
+            const latestReportTime = new Date(res.data[0].created_at).getTime();
+            const lastSeen = localStorage.getItem('reports_last_seen');
+            const lastSeenTime = lastSeen ? new Date(lastSeen).getTime() : 0;
+
+            setHasNewReports(latestReportTime > lastSeenTime);
+        } catch (error) {
+            console.log('Error checking new reports:', error);
+        }
+    };
+
+    const markReportsSeen = () => {
+        localStorage.setItem('reports_last_seen', new Date().toISOString());
+        setHasNewReports(false);
+    };
+
     const handleExpandToggle = (path) => {
         const newValue = expandedItem === path ? null : path;
         setExpandedItem(newValue);
@@ -106,6 +134,7 @@ const Sidebar = () => {
     };
 
     const handleLogout = () => {
+        localStorage.removeItem('sidebar_expanded');
         logout();
         navigate('/login');
     };
@@ -117,6 +146,7 @@ const Sidebar = () => {
                 <div className="flex items-center gap-2">
                     <img
                         src="/assets/logo.jpg"
+
                         alt="logo"
                         className="w-8 h-8 object-contain"
                     />
@@ -150,9 +180,10 @@ const Sidebar = () => {
 
                 {/* Logo section */}
                 <div className="p-6 pb-4">
-                    <div className="flex items-center gap-3">
+                    <div onClick={() => navigate('/')} className="flex items-center gap-3 hover:cursor-pointer">
                         <img
                             src="/assets/logo.jpg"
+
                             alt="logo"
                             className="w-10 h-10 object-contain"
                         />
@@ -163,7 +194,7 @@ const Sidebar = () => {
                     </div>
                 </div>
 
-                <Separator className="bg-blue-800" />
+                <Separator className="bg-blue-950" />
 
                 {/* Navigation */}
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto pb-6 thin-scrollbar">
@@ -176,10 +207,13 @@ const Sidebar = () => {
                         if (hasChildren) {
                             return (
                                 <div key={item.path}>
-                                    <div className="flex items-center rounded-lg text-blue-200 hover:bg-blue-900 hover:text-white transition-all duration-200">
+                                    <div className="flex items-center rounded-lg text-blue-200 hover:bg-blue-950 hover:text-white transition-all duration-200">
                                         <NavLink
                                             to={item.path}
-                                            onClick={() => setIsOpen(false)}
+                                            onClick={() => {
+                                                setIsOpen(false)
+                                                if (item.path === '/reports') markReportsSeen()
+                                            }}
                                             className={({ isActive }) =>
                                                 `flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${isActive && !isOnThisPage === false && location.search === ''
                                                     ? 'text-white'
@@ -189,6 +223,9 @@ const Sidebar = () => {
                                         >
                                             <Icon size={18} />
                                             {item.label}
+                                            {item.path === '/reports' && hasNewReports && (
+                                                <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+                                            )}
                                         </NavLink>
                                         <button
                                             onClick={() => handleExpandToggle(item.path)}

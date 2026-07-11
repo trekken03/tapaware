@@ -11,5 +11,6 @@ router.get('/flagged', analyticsController.getFlaggedHouseholds);
 router.get('/tds-trend', analyticsController.getTdsTrend);
 router.get('/tds-by-purok', analyticsController.getTdsByPurok);
 router.get('/resident/summary', verifyToken, analyticsController.getResidentSummary);
+router.get('/trending-issues', analyticsController.getTrendingIssuesByPurok);
 
 module.exports = router;

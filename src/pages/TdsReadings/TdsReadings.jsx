@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Droplets, Plus, Search } from 'lucide-react';
 import API from '@/services/api';
+import { toast } from 'sonner';
 
 
 const TdsReadings = () => {
@@ -33,6 +34,7 @@ const TdsReadings = () => {
             setReadings(res.data)
         } catch (error) {
             console.log('Error fetching readings:', error)
+            toast.error('Failed to fetch TDS readings')
         } finally {
             setLoading(false)
         }

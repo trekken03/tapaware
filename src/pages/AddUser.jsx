@@ -7,11 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Users } from 'lucide-react'
 import API from '@/services/api'
+import { toast } from 'sonner'
 
 const AddUser = () => {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState('')
     const [form, setForm] = useState({
         name: '',
         email: '',
@@ -27,7 +27,7 @@ const AddUser = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        setError('')
+
         setLoading(true)
 
         try {
@@ -43,9 +43,11 @@ const AddUser = () => {
 
             console.log('Submitting user data:', submitData)
             await API.post('/auth/register', submitData)
+            toast.success('User added successfullyS')
             navigate('/admin')
         } catch (error) {
-            setError(error.response?.data?.message || 'Failed to add user')
+            const message = error.response?.data?.message || 'Failed to add user'
+            toast.error(message)
         } finally {
             setLoading(false)
         }
@@ -80,38 +82,20 @@ const AddUser = () => {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-6">
-                                {error}
-                            </div>
-                        )}
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">Full Name</Label>
-                                    <Input
-                                        id="name"
-                                        name="name"
-                                        placeholder="e.g. Juan Dela Cruz"
-                                        value={form.name}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        placeholder="e.g. juan@gmail.com"
-                                        value={form.email}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-                            </div>
 
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    placeholder="e.g. juan@gmail.com"
+                                    value={form.email}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="password">Password</Label>
@@ -125,6 +109,23 @@ const AddUser = () => {
                                         required
                                     />
                                 </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="name">Full Name</Label>
+                                        <Input
+                                            id="name"
+                                            name="name"
+                                            placeholder="e.g. Juan Dela Cruz"
+                                            value={form.name}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+
+                                </div>
+
+
+
                                 <div className="space-y-2">
                                     <Label htmlFor="role">Role</Label>
                                     <select
@@ -151,6 +152,19 @@ const AddUser = () => {
                                         name="household_number"
                                         placeholder="e.g. 101"
                                         value={form.household_number}
+                                        onChange={handleChange}
+                                        required={form.role === 'resident'}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="household_number">
+                                        Address (for residents only)
+                                    </Label>
+                                    <Input
+                                        id="address"
+                                        name="address"
+                                        placeholder="Don jose st."
+                                        value={form.address}
                                         onChange={handleChange}
                                         required={form.role === 'resident'}
                                     />

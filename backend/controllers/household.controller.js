@@ -105,3 +105,32 @@ exports.getHouseholdById = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+exports.deleteHousehold = async (req, res) => {
+    const { id } = req.params;
+    const currentUser = req.user;
+
+    try {
+        const [existing] = await db.query('SELECT * FROM households WHERE id = ?', [id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ message: 'Household not found' });
+        }
+
+        await db.query('DELETE FROM households WHERE id = ?', [id]);
+
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'DELETE_HOUSEHOLD',
+            table_affected: 'households',
+            record_id: id,
+            details: `Deleted household #${existing[0].household_number} - ${existing[0].owner_name}, purok ${existing[0].purok}`,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'Household deleted successfully' });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};

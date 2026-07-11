@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, Home, FileText } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
+import { toast } from 'sonner'
+import { Trash2 } from 'lucide-react'
 
 const getStatusStyle = (status) => {
     switch (status) {
@@ -19,6 +21,7 @@ const getStatusStyle = (status) => {
             return { label: status, color: 'text-gray-700', bg: 'bg-gray-100', border: 'border-gray-400' }
     }
 }
+
 
 const ReportDetail = () => {
     const { id } = useParams()
@@ -37,6 +40,7 @@ const ReportDetail = () => {
             setReport(res.data)
         } catch (error) {
             console.log('Error fetching report:', error)
+            toast.error('Failed to fetch report')
         } finally {
             setLoading(false)
         }
@@ -45,9 +49,11 @@ const ReportDetail = () => {
     const handleStatusUpdate = async (newStatus) => {
         try {
             await API.put(`/reports/${id}/status`, { status: newStatus })
+            toast.success('Report status updated successfully')
             fetchReport()
         } catch (error) {
             console.log('Error updating status:', error)
+            toast.error('Failed to update report status')
         }
     }
 
@@ -76,19 +82,42 @@ const ReportDetail = () => {
 
     const status = getStatusStyle(report.status)
     const isResident = user?.role === 'resident'
+    const handleDelete = async () => {
+        if (!window.confirm('Delete this report? This cannot be undone.')) return
 
+        try {
+            await API.delete(`/reports/${id}`)
+            toast.success('Report deleted successfully')
+            navigate('/reports')
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to delete report')
+        }
+    }
     return (
         <Layout>
             <div>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="mb-4 flex items-center gap-1"
-                    onClick={() => navigate('/reports')}
-                >
-                    <ArrowLeft size={14} />
-                    Back to Reports
-                </Button>
+                <div className="flex items-center justify-between mb-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1"
+                        onClick={() => navigate('/reports')}
+                    >
+                        <ArrowLeft size={14} />
+                        Back
+                    </Button>
+                    {user?.role === 'admin' && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={handleDelete}
+                        >
+                            <Trash2 size={14} />
+                            Delete Household
+                        </Button>
+                    )}
+                </div>
 
                 <Card className={`border-l-4 ${status.border} mb-6`}>
                     <CardContent className="pt-6">

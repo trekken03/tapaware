@@ -126,5 +126,33 @@ exports.getReadingById = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+exports.deleteReading = async (req, res) => {
+    const { id } = req.params;
+    const currentUser = req.user;
 
+    try {
+        const [existing] = await db.query('SELECT * FROM tds_readings WHERE id = ?', [id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ message: 'Reading not found' });
+        }
+
+        await db.query('DELETE FROM tds_readings WHERE id = ?', [id]);
+
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'DELETE_TDS_READING',
+            table_affected: 'tds_readings',
+            record_id: id,
+            details: `Deleted TDS reading #${id} (${existing[0].tds_value} ppm) for household ${existing[0].household_id}`,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'TDS reading deleted successfully' });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
 

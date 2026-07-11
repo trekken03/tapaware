@@ -3,14 +3,16 @@ import { useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Settings, Users, Flag, Plus, Search, Pencil } from 'lucide-react'
+import { Settings, Users, Flag, Plus, Search, Pencil, MessageSquare } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { toast } from 'sonner'
 
 const AdminPanel = () => {
     const [users, setUsers] = useState([])
     const [flagged, setFlagged] = useState([])
+    const [concerns, setConcerns] = useState([])
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('users')
     const [searchTerm, setSearchTerm] = useState('')
@@ -23,14 +25,17 @@ const AdminPanel = () => {
 
     const fetchData = async () => {
         try {
-            const [usersRes, flaggedRes] = await Promise.all([
+            const [usersRes, flaggedRes, concernsRes] = await Promise.all([
                 API.get('/admin/users'),
-                API.get('/analytics/flagged')
+                API.get('/analytics/flagged'),
+                API.get('/concerns')
             ])
             setUsers(usersRes.data)
             setFlagged(flaggedRes.data)
+            setConcerns(concernsRes.data)
         } catch (error) {
             console.log('Error fetching admin data:', error)
+            toast.error('Failed to load admin data')
         } finally {
             setLoading(false)
         }
@@ -40,6 +45,7 @@ const AdminPanel = () => {
         try {
             await API.put(`/admin/users/${userId}/role`, { role: newRole })
             fetchData()
+            toast.success(`Successfully changed ID no.${userId} role to:${newRole}`)
         } catch (error) {
             console.log('Error updating role:', error)
         }
@@ -47,9 +53,11 @@ const AdminPanel = () => {
     const handleFlagStatusUpdate = async (flagId, newStatus) => {
         try {
             await API.put(`/admin/flags/${flagId}/status`, { status: newStatus })
+            toast.success('Flag status updated successfully')
             fetchData()
         } catch (error) {
             console.log('Error updating flag status:', error)
+            toast.error('Error updating flag status')
         }
     }
 
@@ -57,9 +65,11 @@ const AdminPanel = () => {
         if (!window.confirm(`Are you sure you want to delete ${userName}?`)) return
         try {
             await API.delete(`/admin/users/${userId}`)
+            toast.success(`User ${userName} deleted successfully`)
             fetchData()
         } catch (error) {
             console.log('Error deleting user:', error)
+            toast.error('Error deleting user', error)
         }
     }
 
@@ -137,6 +147,7 @@ const AdminPanel = () => {
                         { key: 'users', label: 'User Management', icon: Users },
                         { key: 'staff', label: 'Staff Management', icon: Pencil },
                         { key: 'flagged', label: 'Flagged Households', icon: Flag },
+                        { key: 'concerns', label: 'Concerns', icon: MessageSquare },
 
                     ].map(tab => {
                         const Icon = tab.icon
@@ -183,7 +194,7 @@ const AdminPanel = () => {
 
                         </CardHeader>
                         <CardContent>
-                            <div className="overflow-x-auto">
+                            <div className="hidden md:block overflow-x-auto">
                                 <table className="w-full min-w-[760px]">
                                     <thead>
                                         <tr className="border-b">
@@ -219,17 +230,11 @@ const AdminPanel = () => {
                                                             </select>
                                                         )}
                                                     </td>
-                                                    <td className="py-3 px-4 text-sm text-black">
-                                                        {u.household_number}
-                                                    </td>
-                                                    <td className="py-3 px-4 text-sm text-black">
-                                                        {u.purok}
-                                                    </td>
+                                                    <td className="py-3 px-4 text-sm text-black">{u.household_number}</td>
+                                                    <td className="py-3 px-4 text-sm text-black">{u.purok}</td>
                                                     <td className="py-3 px-4 text-sm text-black">
                                                         {new Date(u.created_at).toLocaleDateString('en-US', {
-                                                            year: 'numeric',
-                                                            month: 'long',
-                                                            day: 'numeric',
+                                                            year: 'numeric', month: 'long', day: 'numeric',
                                                         })}
                                                     </td>
                                                     <td className="py-3 px-4">
@@ -252,10 +257,7 @@ const AdminPanel = () => {
                                                                 >
                                                                     Delete
                                                                 </Button>
-
-
                                                             </div>
-
                                                         )}
                                                     </td>
                                                 </tr>
@@ -264,6 +266,62 @@ const AdminPanel = () => {
                                     </tbody>
                                 </table>
                             </div>
+
+                            <div className="space-y-3 md:hidden">
+                                {filteredResidents.map((u, index) => {
+                                    const roleStyle = getRoleStyle(u.role)
+                                    return (
+                                        <div key={u.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                                            <div className="flex items-center justify-between gap-2 mb-2">
+                                                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
+                                                {u.id === currentUser.id ? (
+                                                    <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1 rounded-full text-xs font-semibold capitalize`}>
+                                                        {u.role}
+                                                    </span>
+                                                ) : (
+                                                    <select
+                                                        value={u.role}
+                                                        onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
+                                                        className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none`}
+                                                    >
+                                                        <option value="resident">Resident</option>
+                                                        <option value="staff">Staff</option>
+                                                        <option value="admin">Admin</option>
+                                                    </select>
+                                                )}
+                                            </div>
+                                            <div className="space-y-1.5 text-sm text-gray-700">
+                                                <div><span className="font-semibold text-gray-900">Name:</span> {u.name}</div>
+                                                <div className="break-all"><span className="font-semibold text-gray-900">Email:</span> {u.email}</div>
+                                                <div><span className="font-semibold text-gray-900">Household:</span> {u.household_number || '—'}</div>
+                                                <div><span className="font-semibold text-gray-900">Purok:</span> {u.purok || '—'}</div>
+                                                <div><span className="font-semibold text-gray-900">Joined:</span> {new Date(u.created_at).toLocaleDateString()}</div>
+                                            </div>
+                                            {u.id !== currentUser.id && (
+                                                <div className="flex gap-2 mt-3">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                                                        onClick={() => navigate(`/admin/edit-user/${u.id}`, { state: u })}
+                                                    >
+                                                        <Pencil size={14} className='mr-1' />
+                                                        Edit
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                        onClick={() => handleDeleteUser(u.id, u.name)}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         </CardContent>
                     </Card>
                 )}
@@ -271,6 +329,7 @@ const AdminPanel = () => {
 
                     <Card>
                         <CardHeader>
+
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <CardTitle className="flex items-center gap-2">
                                     <Pencil size={20} className="text-blue-600" />
@@ -293,81 +352,60 @@ const AdminPanel = () => {
 
                         </CardHeader>
                         <CardContent>
-                            <div className="overflow-x-auto">
-                                <table className="w-full min-w-[760px]">
-                                    <thead>
-                                        <tr className="border-b">
-                                            {['#', 'Name', 'Email', 'Role', 'Date Joined', 'Actions'].map(h => (
-                                                <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-black uppercase">
-                                                    {h}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredStaff.map((u, index) => {
-                                            const roleStyle = getRoleStyle(u.role)
-                                            return (
-                                                <tr key={u.id} className={' bg-white'}>
-                                                    < td className="py-3 px-4 text-sm text-gray-500" > {index + 1
-                                                    }</td>
-                                                    <td className="py-3 px-4 text-sm font-semibold">{u.name}</td>
-                                                    <td className="py-3 px-4 text-sm text-black break-all">{u.email}</td>
-                                                    <td className="py-3 px-4">
-                                                        {u.id === currentUser.id ? (
-                                                            <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1 rounded-full text-xs font-semibold capitalize`}>
-                                                                {u.role}
-                                                            </span>
-                                                        ) : (
-                                                            <select
-                                                                value={u.role}
-                                                                onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                                className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
-                                                            >
-                                                                <option value="resident">Resident</option>
-                                                                <option value="staff">Staff</option>
-                                                                <option value="admin">Admin</option>
-                                                            </select>
-                                                        )}
-                                                    </td>
-
-                                                    <td className="py-3 px-4 text-sm text-black">
-                                                        {new Date(u.created_at).toLocaleDateString('en-US', {
-                                                            year: 'numeric',
-                                                            month: 'long',
-                                                            day: 'numeric',
-                                                        })}
-                                                    </td>
-                                                    <td className="py-3 px-4">
-                                                        {u.id !== currentUser.id && (
-                                                            <div className='flex gap-2'>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    className="text-blue-600 border-red-200 hover:bg-red-50"
-                                                                    onClick={() => navigate(`/admin/edit-user/${u.id}`, { state: u })}
-                                                                >
-                                                                    <Pencil size={14} className='mr-1' />
-                                                                    Edit
-                                                                </Button>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    className="text-red-600 border-red-200 hover:bg-red-50"
-                                                                    onClick={() => handleDeleteUser(u.id, u.name)}
-                                                                >
-                                                                    Delete
-                                                                </Button>
-
-
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            )
-                                        })}
-                                    </tbody>
-                                </table>
+                            <div className="hidden md:block overflow-x-auto">
+                                <div className="space-y-3 md:hidden">
+                                    {filteredStaff.map((u, index) => {
+                                        const roleStyle = getRoleStyle(u.role)
+                                        return (
+                                            <div key={u.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                                                <div className="flex items-center justify-between gap-2 mb-2">
+                                                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
+                                                    {u.id === currentUser.id ? (
+                                                        <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1 rounded-full text-xs font-semibold capitalize`}>
+                                                            {u.role}
+                                                        </span>
+                                                    ) : (
+                                                        <select
+                                                            value={u.role}
+                                                            onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
+                                                            className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none`}
+                                                        >
+                                                            <option value="resident">Resident</option>
+                                                            <option value="staff">Staff</option>
+                                                            <option value="admin">Admin</option>
+                                                        </select>
+                                                    )}
+                                                </div>
+                                                <div className="space-y-1.5 text-sm text-gray-700">
+                                                    <div><span className="font-semibold text-gray-900">Name:</span> {u.name}</div>
+                                                    <div className="break-all"><span className="font-semibold text-gray-900">Email:</span> {u.email}</div>
+                                                    <div><span className="font-semibold text-gray-900">Joined:</span> {new Date(u.created_at).toLocaleDateString()}</div>
+                                                </div>
+                                                {u.id !== currentUser.id && (
+                                                    <div className="flex gap-2 mt-3">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                                                            onClick={() => navigate(`/admin/edit-user/${u.id}`, { state: u })}
+                                                        >
+                                                            <Pencil size={14} className='mr-1' />
+                                                            Edit
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                            onClick={() => handleDeleteUser(u.id, u.name)}
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )
+                                    })}
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
@@ -422,7 +460,7 @@ const AdminPanel = () => {
                                                                     onChange={(e) => handleFlagStatusUpdate(f.id, e.target.value)}
                                                                     className="bg-red-100 text-red-700 border-0 rounded-full px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
                                                                 >
-                                                                    <option value="active">Active</option>
+                                                                    <option value="active" >Active</option>
                                                                     <option value="resolved">Resolved</option>
                                                                 </select>
                                                             </td>
@@ -434,7 +472,7 @@ const AdminPanel = () => {
 
                                         <div className="space-y-3 md:hidden">
                                             {flagged.map((f, index) => (
-                                                <div key={f.id} className="rounded-lg border border-red-100 bg-red-50 p-4 shadow-sm">
+                                                <div key={f.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
                                                     <div className="flex items-center justify-between gap-2 mb-2">
                                                         <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
                                                         <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">
@@ -457,6 +495,89 @@ const AdminPanel = () => {
                                                                 <option value="resolved">Resolved</option>
                                                             </select>
                                                         </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )
+                }
+                {/* Concerns tab */}
+                {
+                    activeTab === 'concerns' && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <MessageSquare size={20} className="text-blue-600" />
+                                    Public Concerns ({concerns.length})
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {concerns.length === 0 ? (
+                                    <p className="text-gray-500 text-sm text-center py-12">
+                                        No concerns submitted yet.
+                                    </p>
+                                ) : (
+                                    <>
+                                        <div className="hidden md:block overflow-x-auto">
+                                            <table className="w-full min-w-[720px]">
+                                                <thead>
+                                                    <tr className="border-b">
+                                                        {['#', 'Name', 'Purok', 'Message', 'Status', 'Date'].map(h => (
+                                                            <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-black uppercase">
+                                                                {h}
+                                                            </th>
+                                                        ))}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {concerns.map((c, index) => (
+                                                        <tr
+                                                            key={c.id}
+                                                            onClick={() => navigate(`/admin/concerns/${c.id}`)}
+                                                            className="bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+                                                        >
+                                                            <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
+                                                            <td className="py-3 px-4 text-sm font-semibold">{c.name || 'Anonymous'}</td>
+                                                            <td className="py-3 px-4 text-sm">{c.purok ? `Purok ${c.purok}` : '—'}</td>
+                                                            <td className="py-3 px-4 text-sm text-gray-600 max-w-xs truncate">{c.message}</td>
+                                                            <td className="py-3 px-4">
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold capitalize ${c.status === 'new' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                                                                    }`}>
+                                                                    {c.status}
+                                                                </span>
+                                                            </td>
+                                                            <td className="py-3 px-4 text-sm text-gray-500">
+                                                                {new Date(c.created_at).toLocaleDateString()}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div className="space-y-3 md:hidden">
+                                            {concerns.map((c, index) => (
+                                                <div
+                                                    key={c.id}
+                                                    onClick={() => navigate(`/admin/concerns/${c.id}`)}
+                                                    className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm cursor-pointer hover:bg-gray-100 transition-colors"
+                                                >
+                                                    <div className="flex items-center justify-between gap-2 mb-2">
+                                                        <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
+                                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold capitalize ${c.status === 'new' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                                                            }`}>
+                                                            {c.status}
+                                                        </span>
+                                                    </div>
+                                                    <div className="space-y-1.5 text-sm text-gray-700">
+                                                        <div><span className="font-semibold text-gray-900">Name:</span> {c.name || 'Anonymous'}</div>
+                                                        <div><span className="font-semibold text-gray-900">Purok:</span> {c.purok ? `Purok ${c.purok}` : '—'}</div>
+                                                        <div className="line-clamp-2"><span className="font-semibold text-gray-900">Message:</span> {c.message}</div>
+                                                        <div><span className="font-semibold text-gray-900">Date:</span> {new Date(c.created_at).toLocaleDateString()}</div>
                                                     </div>
                                                 </div>
                                             ))}

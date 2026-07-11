@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Users } from 'lucide-react'
 import API from '@/services/api'
+import { toast } from 'sonner'
 
 const EditUser = () => {
     const navigate = useNavigate()
@@ -33,9 +34,12 @@ const EditUser = () => {
 
         try {
             await API.put(`/admin/users/${id}`, form)
+            toast.success('User updated successfully')
             navigate('/admin')
         } catch (error) {
-            setError(error.response?.data?.message || 'Failed to update user')
+            const message = error.response?.data?.message || 'Failed to update user'
+            setError(message)
+            toast.error(message)
         } finally {
             setLoading(false)
         }

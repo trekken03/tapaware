@@ -7,7 +7,9 @@ const { loginLimiter } = require('../middleware/rateLimit');
 
 router.post('/register', verifyToken, requireRole('admin'), authController.register);
 router.post('/login', loginLimiter, authController.login);
-// router.put('/profile', verifyToken, authController.updateProfile)
-// router.put('/change-password', verifyToken, authController.changePassword)
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', authController.resetPassword);
+router.put('/profile', verifyToken, authController.updateProfile)
+router.put('/change-password', verifyToken, authController.changePassword)
 
 module.exports = router;

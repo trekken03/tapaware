@@ -12,18 +12,22 @@ spinner: reports,households,tds readings
 (✓)-admin panel: staff management table, actions:add edit
 (✓)-add user(phone number), if role==='staff' then household_num = not required
 (✓)-households,reports,tds,readings, view action
+(✓)-forgot pass
 
 -new table showing which issue is trending per purok example: 3 issue of odor is reported at purok 2 
-
 
 -admin panel responsiveness
 
 -auth.routes.js - change-pass,prof
 
--edit user page details
+-edit profile page details(because it looks ugly for now)
+    
+-landing page for water quality publicity and have a concern button
 
--forgot pass
+-on every detail page have a delete button
 
 -idempotency
+
+-
 
 VITE_API_URL=https://backend-production-cfb9.up.railway.app/api

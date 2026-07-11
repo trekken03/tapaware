@@ -5,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Droplets } from 'lucide-react'
 import API from '@/services/api'
+import { toast } from 'sonner'
+import { useAuth } from '@/context/AuthContext'
+import { Trash2 } from 'lucide-react'
+
 
 const getTdsStatus = (value) => {
     if (value <= 500) return { label: 'Safe', color: 'text-green-700', bg: 'bg-green-100', border: 'border-green-400' }
@@ -17,6 +21,19 @@ const TdsDetail = () => {
     const navigate = useNavigate()
     const [reading, setReading] = useState(null)
     const [loading, setLoading] = useState(true)
+    const { user } = useAuth()
+
+    const handleDelete = async () => {
+        if (!window.confirm('Delete this TDS reading? This cannot be undone.')) return
+
+        try {
+            await API.delete(`/tds/${id}`)
+            toast.success('Reading deleted successfully')
+            navigate('/tds')
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to delete reading')
+        }
+    }
 
     useEffect(() => {
         fetchReading()
@@ -28,6 +45,7 @@ const TdsDetail = () => {
             setReading(res.data)
         } catch (error) {
             console.log('Error fetching reading:', error)
+            toast.error('Failed to fetch TDS reading')
         } finally {
             setLoading(false)
         }
@@ -61,15 +79,28 @@ const TdsDetail = () => {
     return (
         <Layout>
             <div>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="mb-4 flex items-center gap-1"
-                    onClick={() => navigate('/tds')}
-                >
-                    <ArrowLeft size={14} />
-                    Back to TDS Readings
-                </Button>
+                <div className="flex items-center justify-between mb-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1"
+                        onClick={() => navigate('/tds')}
+                    >
+                        <ArrowLeft size={14} />
+                        Back
+                    </Button>
+                    {user?.role === 'admin' && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={handleDelete}
+                        >
+                            <Trash2 size={14} />
+                            Delete Household
+                        </Button>
+                    )}
+                </div>
 
                 <Card className={`border-l-4 ${status.border} mb-6`}>
                     <CardContent className="pt-6">

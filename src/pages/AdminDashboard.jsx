@@ -3,6 +3,8 @@ import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Droplets, Home, Flag, ClockFading, AlertTriangle, FileText, TrendingUp } from 'lucide-react'
 import API from '@/services/api'
+import { toast } from 'sonner'
+
 
 const AdminDashboard = () => {
     const [summary, setSummary] = useState(null)
@@ -24,8 +26,10 @@ const AdminDashboard = () => {
             setSummary(summaryRes.data)
             setFlagged(flaggedRes.data)
             setTdsByPurok(tdsPurokRes.data || [])
+
         } catch (error) {
             console.log('Error fetching dashboard data:', error)
+            toast.error('Failed to load dashboard data')
         } finally {
             setLoading(false)
         }
@@ -65,10 +69,10 @@ const AdminDashboard = () => {
                         const Icon = stat.icon
                         return (
                             <Card key={stat.label}>
-                                <CardContent className="pt-6">
+                                <CardContent className="pt-1">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm text-gray-500">{stat.label}</p>
+                                            <p className="text-sm text-black font-semibold">{stat.label}</p>
                                             <p className={`text-3xl font-bold mt-1 ${stat.color}`}>
                                                 {stat.value}
                                             </p>
@@ -192,52 +196,7 @@ const AdminDashboard = () => {
                         )}
                     </CardContent>
                 </Card>
-                <Card className="mt-10">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <AlertTriangle size={20} className="text-red-500" />
-                            Issue trend per purok
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {flagged.length === 0 ? (
-                            <p className="text-gray-500 text-sm">No flagged households at this time.</p>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full min-w-[700px]">
-                                    <thead>
-                                        <tr className="border-b">
-                                            {['Purok', 'Issue Type', 'Times Reported', 'Status'].map(h => (
-                                                <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                                                    {h}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {flagged.map((flag, index) => (
-                                            <tr key={flag.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
 
-                                                <td className="py-3 px-4 text-sm">Purok {flag.purok}</td>
-                                                <td className="py-3 px-4 text-sm capitalize">{flag.issue_type}</td>
-                                                <td className="py-3 px-4 text-sm">
-                                                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
-                                                        {flag.times_reported}x
-                                                    </span>
-                                                </td>
-                                                <td className="py-3 px-4 text-sm">
-                                                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
-                                                        {flag.status}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
 
             </div>
         </Layout>

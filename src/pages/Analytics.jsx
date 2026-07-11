@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { BarChart3 } from 'lucide-react'
 import { Download } from 'lucide-react'
 import API from '@/services/api'
+import { toast } from 'sonner'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer, PieChart, Pie,
@@ -39,6 +40,7 @@ const Analytics = () => {
     const [byIssue, setByIssue] = useState([])
     const [byPurok, setByPurok] = useState([])
     const [tdsTrend, setTdsTrend] = useState([])
+    const [trendingIssues, setTrendingIssues] = useState([])
     const [loading, setLoading] = useState(true)
     const [isExporting, setIsExporting] = useState(false)
     const [exportError, setExportError] = useState('')
@@ -256,9 +258,12 @@ const Analytics = () => {
             })
 
             pdf.save('tapaware-analytics.pdf')
+            toast.success('Analytics report exported successfully!')
         } catch (error) {
             console.error('Error generating PDF:', error)
-            setExportError(`PDF download failed: ${error?.message || 'Unknown error'}`)
+            const errorMsg = `PDF download failed: ${error?.message || 'Unknown error'}`
+            setExportError(errorMsg)
+            toast.error(errorMsg)
         }
         finally {
             setIsExporting(false)
@@ -268,20 +273,29 @@ const Analytics = () => {
 
     const fetchData = async () => {
         try {
-            const [issueRes, purokRes, trendRes] = await Promise.all([
+            const [issueRes, purokRes, trendRes, trendingRes] = await Promise.all([
                 API.get('/analytics/reports-by-issue'),
                 API.get('/analytics/reports-by-purok'),
-                API.get('/analytics/tds-trend')
+                API.get('/analytics/tds-trend'),
+                API.get('/analytics/trending-issues')
             ])
             setByIssue(issueRes.data)
             setByPurok(purokRes.data)
             setTdsTrend(trendRes.data)
+            setTrendingIssues(trendingRes.data)
         } catch (error) {
             console.log('Error fetching analytics:', error)
         } finally {
             setLoading(false)
         }
     }
+
+    const topIssuePerPurok = trendingIssues.reduce((acc, row) => {
+        if (!acc.find(item => item.purok === row.purok)) {
+            acc.push(row)
+        }
+        return acc
+    }, [])
 
     if (loading) {
         return (
@@ -470,9 +484,54 @@ const Analytics = () => {
                             </table>
                         </CardContent>
                     </Card>
+
                 </div>
 
             </div>
+            {/* Trending issue per purok */}
+            <Card className="mt-6">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                        <BarChart3 size={18} className="text-blue-600" />
+                        Trending Issue per Purok
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {topIssuePerPurok.length === 0 ? (
+                        <p className="text-gray-500 text-sm text-center py-12">
+                            No reports recorded yet.
+                        </p>
+                    ) : (
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b">
+                                    {['#', 'Purok', 'Top Issue', 'Times Reported'].map(h => (
+                                        <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
+                                            {h}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {topIssuePerPurok.map((row, index) => (
+                                    <tr key={row.purok} className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                        <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
+                                        <td className="py-3 px-4 text-sm font-semibold">Purok {row.purok}</td>
+                                        <td className="py-3 px-4">
+                                            <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
+                                                {row.issue_type}
+                                            </span>
+                                        </td>
+                                        <td className="py-3 px-4 text-sm font-semibold text-blue-600">
+                                            {row.count}x
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </CardContent>
+            </Card>
         </Layout>
     )
 }

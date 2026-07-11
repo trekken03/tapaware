@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Home, Plus, Eye, Search } from 'lucide-react'
 import API from '@/services/api'
+import { toast } from 'sonner'
 import {
     InputGroup,
     InputGroupAddon,
@@ -30,6 +31,7 @@ const Households = () => {
             setHouseholds(res.data)
         } catch (error) {
             console.log('Error fetching households:', error)
+            toast.error('Failed to fetch households')
         } finally {
             setLoading(false)
         }

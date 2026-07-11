@@ -84,3 +84,28 @@ create table audit_trail(
     index idx_audit_user_created (user_id, created_at),
     index idx_audit_created_at (created_at)
 );
+
+create table password_resets(
+    id int auto_increment primary key,
+    user_id int not null,
+    token varchar(255) not null unique,
+    expires_at timestamp not null,
+    used boolean not null default false,
+    created_at timestamp default current_timestamp,
+    foreign key(user_id) references users(id) on delete cascade,
+    index idx_password_resets_token (token)
+);
+
+create table concerns(
+    id int auto_increment primary key,
+    name varchar(250),
+    contact_info varchar(250),
+    purok varchar(100),
+    message text not null,
+    status enum('new','reviewed') not null default 'new',
+    reply_message text,
+    replied_by varchar(250),
+    replied_at timestamp null,
+    created_at timestamp default current_timestamp,
+    index idx_concerns_status (status)
+);

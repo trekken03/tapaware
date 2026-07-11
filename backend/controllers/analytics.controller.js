@@ -169,3 +169,18 @@ exports.getReportsByPurokCount = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+exports.getTrendingIssuesByPurok = async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            `SELECT households.purok, reports.issue_type, COUNT(*) as count
+            FROM reports JOIN households ON reports.household_id = households.id
+            GROUP BY households.purok, reports.issue_type
+            ORDER BY households.purok ASC, count DESC`
+        );
+        res.json(rows);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};

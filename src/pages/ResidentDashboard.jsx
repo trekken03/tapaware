@@ -139,7 +139,7 @@ const ResidentDashboard = () => {
                             ) : (
                                 <div className="space-y-3">
                                     {tdsByPurok.map((item) => (
-                                        <div key={item.purok} className="flex items-center justify-between pb-3 border-b last:border-b-0">
+                                        <div key={item.purok} className="flex items-center justify-between pb-3  last:border-b-0">
                                             <span className="text-sm font-medium text-gray-700">Purok {item.purok}</span>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-lg font-bold text-blue-600">{parseFloat(item.average_tds).toFixed(2)}</span>

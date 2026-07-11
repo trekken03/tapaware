@@ -7,11 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Droplets } from 'lucide-react'
 import API from '@/services/api'
+import { toast } from 'sonner'
 
 const AddTdsReading = () => {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState('')
     const [households, setHouseholds] = useState([])
     const user = JSON.parse(localStorage.getItem('user') || '{}')
     const [form, setForm] = useState({
@@ -40,14 +40,16 @@ const AddTdsReading = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        setError('')
+
         setLoading(true)
 
         try {
             await API.post('/tds', form)
             navigate('/tds')
+            toast.success('Tds reading added successfully')
         } catch (error) {
-            setError(error.response?.data?.message || 'Failed to add reading')
+            const message = error.response?.data?.message || 'Failed to add reading'
+            toast.error(message)
         } finally {
             setLoading(false)
         }
@@ -82,11 +84,6 @@ const AddTdsReading = () => {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-6">
-                                {error}
-                            </div>
-                        )}
                         <form onSubmit={handleSubmit} className="space-y-4">
 
                             <div className="space-y-2">
@@ -102,7 +99,7 @@ const AddTdsReading = () => {
                                     <option value="">Select a household...</option>
                                     {households.map(h => (
                                         <option key={h.id} value={h.id}>
-                                            #{h.household_number} — {h.owner_name}
+                                            Purok {h.purok} #{h.household_number}  — {h.owner_name}
                                         </option>
                                     ))}
                                 </select>

@@ -8,11 +8,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Home } from 'lucide-react'
 import API from '@/services/api'
+import { toast } from 'sonner'
 
 const AddHousehold = () => {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState('')
+
     const [form, setForm] = useState({
         household_number: '',
         purok: '',
@@ -26,20 +27,23 @@ const AddHousehold = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        setError('')
+
         setLoading(true)
 
         try {
             await API.post('/households', form)
             navigate('/households')
+            toast.success('Household added successfully')
         } catch (error) {
-            setError(error.response?.data?.message || 'Failed to add household')
+            const message = error.response?.data?.message || 'Failed to add household'
+
+            toast.error(message)
         } finally {
             setLoading(false)
         }
         const purokValue = Number(form.purok);
         if (purokValue < 1 || purokValue > 6) {
-            setError('Invalid purok number');
+            toast.error('Invalid purok number');
             return
         }
     }
@@ -73,11 +77,7 @@ const AddHousehold = () => {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-6">
-                                {error}
-                            </div>
-                        )}
+
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">

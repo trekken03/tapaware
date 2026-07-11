@@ -9,6 +9,8 @@ const tdsRoutes = require('./routes/tds.routes');
 const reportRoutes = require('./routes/report.routes');
 const analyticsRoutes = require('./routes/analytics.routes');
 const adminRoutes = require('./routes/admin.routes');
+const concernRoutes = require('./routes/concern.routes');
+
 
 const app = express();
 
@@ -32,6 +34,7 @@ app.use('/api/tds', tdsRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/concerns', concernRoutes);
 
 app.get('/', (req, res) => {
     res.json({ message: 'TapAware API is running!' });

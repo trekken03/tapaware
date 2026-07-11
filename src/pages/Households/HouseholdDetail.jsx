@@ -5,6 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Home, FileText, Droplets, Flag } from 'lucide-react'
 import API from '@/services/api'
+import { toast } from 'sonner'
+import { useAuth } from '@/context/AuthContext'
+import { Trash2 } from 'lucide-react'
 
 const getHouseholdStatusStyle = (status) => {
     switch (status) {
@@ -37,6 +40,7 @@ const HouseholdDetail = () => {
     const navigate = useNavigate()
     const [household, setHousehold] = useState(null)
     const [loading, setLoading] = useState(true)
+    const { user } = useAuth()
 
     useEffect(() => {
         fetchHousehold()
@@ -48,6 +52,7 @@ const HouseholdDetail = () => {
             setHousehold(res.data)
         } catch (error) {
             console.log('Error fetching household:', error)
+            toast.error('Failed to fetch household')
         } finally {
             setLoading(false)
         }
@@ -78,19 +83,42 @@ const HouseholdDetail = () => {
 
     const status = getHouseholdStatusStyle(household.computed_status)
 
+    const handleDelete = async () => {
+        if (!window.confirm(`Delete household #${household.household_number}? This will permanently remove all its reports and TDS history. This cannot be undone.`)) return
+
+        try {
+            await API.delete(`/households/${id}`)
+            toast.success('Household deleted successfully')
+            navigate('/households')
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to delete household')
+        }
+    }
     return (
         <Layout>
             <div>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="mb-4 flex items-center gap-1"
-                    onClick={() => navigate('/households')}
-                >
-                    <ArrowLeft size={14} />
-                    Back to Households
-                </Button>
-
+                <div className="flex items-center justify-between mb-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1"
+                        onClick={() => navigate('/households')}
+                    >
+                        <ArrowLeft size={14} />
+                        Back
+                    </Button>
+                    {user?.role === 'admin' && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={handleDelete}
+                        >
+                            <Trash2 size={14} />
+                            Delete Household
+                        </Button>
+                    )}
+                </div>
                 <Card className={`border-l-4 ${status.border} mb-6`}>
                     <CardContent className="pt-6">
                         <div className="flex flex-wrap items-start justify-between gap-3 mb-4">

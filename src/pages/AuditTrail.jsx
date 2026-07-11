@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Home, Plus, Eye, Search } from 'lucide-react'
 import { InputGroupAddon, InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import API from '@/services/api'
+import { toast } from 'sonner'
 
 const AuditTrail = () => {
     const [auditTrails, setAuditTrails] = useState([])
@@ -22,6 +23,7 @@ const AuditTrail = () => {
             setAuditTrails(res.data)
         } catch (error) {
             console.log('Error fetching audit trails:', error)
+            toast.error('Failed to fetch audit trails')
         } finally {
             setLoading(false)
         }

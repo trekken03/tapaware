@@ -7,6 +7,7 @@ import { Home, Plus, Search, Hourglass, ClockFading, CircleCheck } from 'lucide-
 import { InputGroupAddon, InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
+import { toast } from 'sonner'
 
 const Reports = () => {
     const [reports, setReports] = useState([])
@@ -35,6 +36,7 @@ const Reports = () => {
             setReports(res.data || [])
         } catch (error) {
             console.log('Error fetching reports:', error)
+            toast.error('Failed to fetch reports')
         } finally {
             setLoading(false)
         }
@@ -43,10 +45,12 @@ const Reports = () => {
     const handleStatusUpdate = async (reportId, newStatus) => {
         try {
             await API.put(`/reports/${reportId}/status`, { status: newStatus });
+            toast.success('Report status updated successfully')
             fetchReports();
         }
         catch (error) {
             console.log('Error updating status:', error)
+            toast.error('Failed to update report status')
         }
     }
 
