@@ -60,12 +60,12 @@ INSERT INTO households (household_number, purok, owner_name, address) VALUES
 -- ---------------------------------------------------------
 INSERT INTO users (name, email, role, household_id, password) VALUES
 ('Admin', 'admin@tapaware.com', 'admin', NULL,
- '$2a$10$suK.AJKQ9ULRPn/pMhdXNuYNfKf10LV7x3ZJiqbwrn28vFZW162Di'),
-('Harvey Specter', 'harvey.specter@tapaware.com', 'staff', NULL,
- '$2b$10$WcOldrt1iHTyK.Vh1Oxot.Q4lVVwC0lPDYuAuLY0XlD95UuP/1fe2'),
-('Mike Ross',         'mike.ross@tapaware.com',         'resident', 1,  '$2b$10$WcOldrt1iHTyK.Vh1Oxot.Q4lVVwC0lPDYuAuLY0XlD95UuP/1fe2'),
+ '$2a$12$H0l8x8060GMsBBW3XqnI6eHtA46Mc4cTlOuKcW24PSFVpZZHX7Vz.'),
+('Harvey Specter', 'staff@tapaware.com', 'staff', NULL,
+ '$2a$10$zouKN6GQSkHhRlabIAd6Ie93pWfLARVQAupfzhdCf261zWwEI/sky'),
+('Mike Ross',         'resident@tapaware.com',         'resident', 1,  '$2a$10$KDvVO57AbbgWOdPEW9ejSuxCqqEynrCtPRVgs.tfZlxftfUA3TkkK'),
 ('Rachel Zane',       'rachel.zane@tapaware.com',       'resident', 2,  '$2b$10$WcOldrt1iHTyK.Vh1Oxot.Q4lVVwC0lPDYuAuLY0XlD95UuP/1fe2'),
-('Donna Paulsen',     'donna.paulsen@tapaware.com',     'resident', 3,  '$2b$10$WcOldrt1iHTyK.Vh1Oxot.Q4lVVwC0lPDYuAuLY0XlD95UuP/1fe2'),
+('Donna Paulsen',     'donna.paulsen@tapaware.com',     'admin', 3,  '$2b$10$WcOldrt1iHTyK.Vh1Oxot.Q4lVVwC0lPDYuAuLY0XlD95UuP/1fe2'),
 ('Louis Litt',        'louis.litt@tapaware.com',        'resident', 4,  '$2b$10$WcOldrt1iHTyK.Vh1Oxot.Q4lVVwC0lPDYuAuLY0XlD95UuP/1fe2'),
 ('Jessica Pearson',   'jessica.pearson@tapaware.com',   'resident', 5,  '$2b$10$WcOldrt1iHTyK.Vh1Oxot.Q4lVVwC0lPDYuAuLY0XlD95UuP/1fe2'),
 ('Robert Zane',       'robert.zane@tapaware.com',       'resident', 6,  '$2b$10$WcOldrt1iHTyK.Vh1Oxot.Q4lVVwC0lPDYuAuLY0XlD95UuP/1fe2'),
