@@ -160,39 +160,65 @@ const AdminDashboard = () => {
                         {flagged.length === 0 ? (
                             <p className="text-gray-500 text-sm">No flagged households at this time.</p>
                         ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full min-w-[700px]">
-                                    <thead>
-                                        <tr className="border-b">
-                                            {['Household No.', 'Owner', 'Purok', 'Issue Type', 'Times Reported', 'Status'].map(h => (
-                                                <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                                                    {h}
-                                                </th>
+                            <>
+                                <div className="hidden md:block overflow-x-auto">
+                                    <table className="w-full min-w-[700px]">
+                                        <thead>
+                                            <tr className="border-b">
+                                                {['Household No.', 'Owner', 'Purok', 'Issue Type', 'Times Reported', 'Status'].map(h => (
+                                                    <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
+                                                        {h}
+                                                    </th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {flagged.map((flag, index) => (
+                                                <tr key={flag.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                    <td className="py-3 px-4 text-sm font-semibold">{flag.household_number}</td>
+                                                    <td className="py-3 px-4 text-sm">{flag.owner_name}</td>
+                                                    <td className="py-3 px-4 text-sm">Purok {flag.purok}</td>
+                                                    <td className="py-3 px-4 text-sm capitalize">{flag.issue_type}</td>
+                                                    <td className="py-3 px-4 text-sm">
+                                                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
+                                                            {flag.times_reported}x
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-3 px-4 text-sm">
+                                                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
+                                                            {flag.status}
+                                                        </span>
+                                                    </td>
+                                                </tr>
                                             ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {flagged.map((flag, index) => (
-                                            <tr key={flag.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                                <td className="py-3 px-4 text-sm font-semibold">{flag.household_number}</td>
-                                                <td className="py-3 px-4 text-sm">{flag.owner_name}</td>
-                                                <td className="py-3 px-4 text-sm">Purok {flag.purok}</td>
-                                                <td className="py-3 px-4 text-sm capitalize">{flag.issue_type}</td>
-                                                <td className="py-3 px-4 text-sm">
-                                                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
-                                                        {flag.times_reported}x
-                                                    </span>
-                                                </td>
-                                                <td className="py-3 px-4 text-sm">
-                                                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div className="space-y-3 md:hidden">
+                                    {flagged.map((flag) => (
+                                        <div key={flag.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                                            <div className="flex items-center justify-between gap-2 mb-2">
+                                                <span className="text-sm font-semibold">#{flag.household_number}</span>
+                                                <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
+                                                    {flag.times_reported}x
+                                                </span>
+                                            </div>
+                                            <div className="space-y-1.5 text-sm text-gray-700">
+                                                <div><span className="font-semibold text-gray-900">Owner:</span> {flag.owner_name}</div>
+                                                <div><span className="font-semibold text-gray-900">Purok:</span> {flag.purok}</div>
+                                                <div><span className="font-semibold text-gray-900">Issue:</span> <span className="capitalize">{flag.issue_type}</span></div>
+                                                <div>
+                                                    <span className="font-semibold text-gray-900">Status:</span>{' '}
+                                                    <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-semibold capitalize">
                                                         {flag.status}
                                                     </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
                         )}
                     </CardContent>
                 </Card>

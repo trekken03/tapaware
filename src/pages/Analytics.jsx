@@ -448,40 +448,42 @@ const Analytics = () => {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b">
-                                        {['#', 'Purok', 'Total Reports'].map(h => (
-                                            <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                                                {h}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {byPurok.map((p, index) => (
-                                        <tr key={index} className="bg-white">
-                                            <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
-                                            <td className="py-3 px-4 text-sm font-semibold">Purok {p.purok}</td>
-                                            <td className="py-3 px-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex-1 bg-gray-100 h-2 max-w-32">
-                                                        <div
-                                                            className="bg-blue-600 h-2"
-                                                            style={{
-                                                                width: `${Math.min((p.report_count / Math.max(...byPurok.map(x => x.report_count || 1))) * 100, 100)}%`
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-sm font-semibold text-blue-600">
-                                                        {p.report_count}
-                                                    </span>
-                                                </div>
-                                            </td>
+                            <div className="overflow-x-auto">
+                                <table className="w-full min-w-[500px]">
+                                    <thead>
+                                        <tr className="border-b">
+                                            {['#', 'Purok', 'Total Reports'].map(h => (
+                                                <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
+                                                    {h}
+                                                </th>
+                                            ))}
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {byPurok.map((p, index) => (
+                                            <tr key={index} className="bg-white">
+                                                <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
+                                                <td className="py-3 px-4 text-sm font-semibold">Purok {p.purok}</td>
+                                                <td className="py-3 px-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex-1 bg-gray-100 h-2 max-w-32">
+                                                            <div
+                                                                className="bg-blue-600 h-2"
+                                                                style={{
+                                                                    width: `${Math.min((p.report_count / Math.max(...byPurok.map(x => x.report_count || 1))) * 100, 100)}%`
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <span className="text-sm font-semibold text-blue-600">
+                                                            {p.report_count}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </CardContent>
                     </Card>
 
@@ -502,33 +504,35 @@ const Analytics = () => {
                             No reports recorded yet.
                         </p>
                     ) : (
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b">
-                                    {['#', 'Purok', 'Top Issue', 'Times Reported'].map(h => (
-                                        <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                                            {h}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {topIssuePerPurok.map((row, index) => (
-                                    <tr key={row.purok} className="bg-white">
-                                        <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
-                                        <td className="py-3 px-4 text-sm font-semibold">Purok {row.purok}</td>
-                                        <td className="py-3 px-4">
-                                            <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
-                                                {row.issue_type}
-                                            </span>
-                                        </td>
-                                        <td className="py-3 px-4 text-sm font-semibold text-blue-600">
-                                            {row.count}x
-                                        </td>
+                        <div className="overflow-x-auto">
+                            <table className="w-full min-w-[500px]">
+                                <thead>
+                                    <tr className="border-b">
+                                        {['#', 'Purok', 'Top Issue', 'Times Reported'].map(h => (
+                                            <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
+                                                {h}
+                                            </th>
+                                        ))}
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {topIssuePerPurok.map((row, index) => (
+                                        <tr key={row.purok} className="bg-white">
+                                            <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
+                                            <td className="py-3 px-4 text-sm font-semibold">Purok {row.purok}</td>
+                                            <td className="py-3 px-4">
+                                                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
+                                                    {row.issue_type}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 px-4 text-sm font-semibold text-blue-600">
+                                                {row.count}x
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
                 </CardContent>
             </Card>

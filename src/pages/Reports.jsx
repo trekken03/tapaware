@@ -155,7 +155,11 @@ const Reports = () => {
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <CardTitle className="flex items-center gap-2">
                                 <Home size={20} className="text-blue-600" />
-                                {isResident ? 'My Reports' : `All ${statusLabel}`} ({filteredReports.length})
+                                {isResident
+                                    ? 'My Reports'
+                                    : statusLabel
+                                        ? `All ${statusLabel}`
+                                        : 'All Reports'}
                             </CardTitle>
                             <div className="flex items-center gap-3">
                                 {/* Purok spinner */}
