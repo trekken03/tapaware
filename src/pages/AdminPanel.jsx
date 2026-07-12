@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,7 +14,8 @@ const AdminPanel = () => {
     const [flagged, setFlagged] = useState([])
     const [concerns, setConcerns] = useState([])
     const [loading, setLoading] = useState(true)
-    const [activeTab, setActiveTab] = useState('users')
+    const [searchParams, setSearchParams] = useSearchParams()
+    const activeTab = searchParams.get('tab') || 'users'
     const [searchTerm, setSearchTerm] = useState('')
     const navigate = useNavigate()
     const { user: currentUser } = useAuth()
@@ -68,11 +69,9 @@ const AdminPanel = () => {
             toast.success(`User ${userName} deleted successfully`)
             fetchData()
         } catch (error) {
-            console.log('Error deleting user:', error)
-            toast.error('Error deleting user', error)
+            toast.error(error.response?.data?.message || 'Failed to delete user')
         }
     }
-
     const getRoleStyle = (role) => {
         switch (role) {
             case 'admin': return { color: 'text-purple-700', bg: 'bg-purple-100' }
@@ -154,7 +153,7 @@ const AdminPanel = () => {
                         return (
                             <button
                                 key={tab.key}
-                                onClick={() => setActiveTab(tab.key)}
+                                onClick={() => setSearchParams({ tab: tab.key })}
                                 className={`flex items-center gap-2 px-4 sm:px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.key
                                     ? 'border-blue-600 text-blue-600'
                                     : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -209,7 +208,11 @@ const AdminPanel = () => {
                                         {filteredResidents.map((u, index) => {
                                             const roleStyle = getRoleStyle(u.role)
                                             return (
-                                                <tr key={u.id} className={' bg-white'}>
+                                                <tr
+                                                    key={u.id}
+                                                    onClick={() => navigate(`/admin/users/${u.id}`)}
+                                                    className="bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+                                                >
                                                     <td className="py-3 px-4 text-sm text-black">{index + 1}</td>
                                                     <td className="py-3 px-4 text-sm font-semibold">{u.name}</td>
                                                     <td className="py-3 px-4 text-sm text-black break-all">{u.email}</td>
@@ -219,15 +222,19 @@ const AdminPanel = () => {
                                                                 {u.role}
                                                             </span>
                                                         ) : (
-                                                            <select
-                                                                value={u.role}
-                                                                onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                                className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
-                                                            >
-                                                                <option value="resident">Resident</option>
-                                                                <option value="staff">Staff</option>
-                                                                <option value="admin">Admin</option>
-                                                            </select>
+                                                            <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                                                                {/* role select/badge */}
+
+                                                                <select
+                                                                    value={u.role}
+                                                                    onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
+                                                                    className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
+                                                                >
+                                                                    <option value="resident">Resident</option>
+                                                                    <option value="staff">Staff</option>
+                                                                    <option value="admin">Admin</option>
+                                                                </select>
+                                                            </td>
                                                         )}
                                                     </td>
                                                     <td className="py-3 px-4 text-sm text-black">{u.household_number}</td>
@@ -237,7 +244,7 @@ const AdminPanel = () => {
                                                             year: 'numeric', month: 'long', day: 'numeric',
                                                         })}
                                                     </td>
-                                                    <td className="py-3 px-4">
+                                                    <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                                                         {u.id !== currentUser.id && (
                                                             <div className='flex gap-2'>
                                                                 <Button
@@ -271,7 +278,7 @@ const AdminPanel = () => {
                                 {filteredResidents.map((u, index) => {
                                     const roleStyle = getRoleStyle(u.role)
                                     return (
-                                        <div key={u.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                                        <div key={u.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm  cursor-pointer hover:bg-gray-200" onClick={() => navigate(`/admin/users/${u.id}`)}>
                                             <div className="flex items-center justify-between gap-2 mb-2">
                                                 <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
                                                 {u.id === currentUser.id ? (
@@ -279,15 +286,19 @@ const AdminPanel = () => {
                                                         {u.role}
                                                     </span>
                                                 ) : (
-                                                    <select
-                                                        value={u.role}
-                                                        onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                        className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none`}
-                                                    >
-                                                        <option value="resident">Resident</option>
-                                                        <option value="staff">Staff</option>
-                                                        <option value="admin">Admin</option>
-                                                    </select>
+                                                    <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                                                        {/* role select/badge */}
+
+                                                        <select
+                                                            value={u.role}
+                                                            onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
+                                                            className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none`}
+                                                        >
+                                                            <option value="resident">Resident</option>
+                                                            <option value="staff">Staff</option>
+                                                            <option value="admin">Admin</option>
+                                                        </select>
+                                                    </td>
                                                 )}
                                             </div>
                                             <div className="space-y-1.5 text-sm text-gray-700">
@@ -298,7 +309,8 @@ const AdminPanel = () => {
                                                 <div><span className="font-semibold text-gray-900">Joined:</span> {new Date(u.created_at).toLocaleDateString()}</div>
                                             </div>
                                             {u.id !== currentUser.id && (
-                                                <div className="flex gap-2 mt-3">
+                                                <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
@@ -353,18 +365,101 @@ const AdminPanel = () => {
                         </CardHeader>
                         <CardContent>
                             <div className="hidden md:block overflow-x-auto">
-                                <div className="space-y-3 md:hidden">
-                                    {filteredStaff.map((u, index) => {
-                                        const roleStyle = getRoleStyle(u.role)
-                                        return (
-                                            <div key={u.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
-                                                <div className="flex items-center justify-between gap-2 mb-2">
-                                                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
-                                                    {u.id === currentUser.id ? (
-                                                        <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1 rounded-full text-xs font-semibold capitalize`}>
-                                                            {u.role}
-                                                        </span>
-                                                    ) : (
+                                <table className="w-full min-w-[760px]">
+                                    <thead>
+                                        <tr className="border-b">
+                                            {['#', 'Name', 'Email', 'Role', 'Date Joined', 'Actions'].map(h => (
+                                                <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-black uppercase">
+                                                    {h}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredStaff.map((u, index) => {
+                                            const roleStyle = getRoleStyle(u.role)
+                                            return (
+                                                <tr
+                                                    key={u.id}
+                                                    onClick={() => navigate(`/admin/users/${u.id}`)}
+                                                    className="bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+                                                >
+                                                    <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
+                                                    <td className="py-3 px-4 text-sm font-semibold">{u.name}</td>
+                                                    <td className="py-3 px-4 text-sm text-black break-all">{u.email}</td>
+                                                    <td className="py-3 px-4">
+                                                        {u.id === currentUser.id ? (
+                                                            <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1 rounded-full text-xs font-semibold capitalize`}>
+                                                                {u.role}
+                                                            </span>
+                                                        ) : (
+                                                            <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+
+
+                                                                <select
+                                                                    value={u.role}
+                                                                    onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
+                                                                    className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
+                                                                >
+                                                                    <option value="resident">Resident</option>
+                                                                    <option value="staff">Staff</option>
+                                                                    <option value="admin">Admin</option>
+                                                                </select>
+                                                            </td>
+                                                        )}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-sm text-black">
+                                                        {new Date(u.created_at).toLocaleDateString('en-US', {
+                                                            year: 'numeric', month: 'long', day: 'numeric',
+                                                        })}
+                                                    </td>
+                                                    <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                                                        {u.id !== currentUser.id && (
+                                                            <div className='flex gap-2' onClick={(e) => e.stopPropagation()}>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                                                                    onClick={() => navigate(`/admin/edit-user/${u.id}`, { state: u })}
+                                                                >
+                                                                    <Pencil size={14} className='mr-1' />
+                                                                    Edit
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                                                    onClick={() => handleDeleteUser(u.id, u.name)}
+                                                                >
+                                                                    Delete
+                                                                </Button>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="space-y-3 md:hidden">
+                                {filteredStaff.map((u, index) => {
+                                    const roleStyle = getRoleStyle(u.role)
+                                    return (
+                                        <div key={u.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                                            <div className="flex items-center justify-between gap-2 mb-2">
+                                                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
+                                                {u.id === currentUser.id ? (
+                                                    <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1 rounded-full text-xs font-semibold capitalize`}>
+                                                        {u.role}
+                                                    </span>
+                                                ) : (
+                                                    <tr
+                                                        key={u.id}
+                                                        onClick={() => navigate(`/admin/users/${u.id}`)}
+                                                        className="bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+                                                    >
                                                         <select
                                                             value={u.role}
                                                             onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
@@ -374,38 +469,38 @@ const AdminPanel = () => {
                                                             <option value="staff">Staff</option>
                                                             <option value="admin">Admin</option>
                                                         </select>
-                                                    )}
-                                                </div>
-                                                <div className="space-y-1.5 text-sm text-gray-700">
-                                                    <div><span className="font-semibold text-gray-900">Name:</span> {u.name}</div>
-                                                    <div className="break-all"><span className="font-semibold text-gray-900">Email:</span> {u.email}</div>
-                                                    <div><span className="font-semibold text-gray-900">Joined:</span> {new Date(u.created_at).toLocaleDateString()}</div>
-                                                </div>
-                                                {u.id !== currentUser.id && (
-                                                    <div className="flex gap-2 mt-3">
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
-                                                            onClick={() => navigate(`/admin/edit-user/${u.id}`, { state: u })}
-                                                        >
-                                                            <Pencil size={14} className='mr-1' />
-                                                            Edit
-                                                        </Button>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
-                                                            onClick={() => handleDeleteUser(u.id, u.name)}
-                                                        >
-                                                            Delete
-                                                        </Button>
-                                                    </div>
+                                                    </tr>
                                                 )}
                                             </div>
-                                        )
-                                    })}
-                                </div>
+                                            <div className="space-y-1.5 text-sm text-gray-700">
+                                                <div><span className="font-semibold text-gray-900">Name:</span> {u.name}</div>
+                                                <div className="break-all"><span className="font-semibold text-gray-900">Email:</span> {u.email}</div>
+                                                <div><span className="font-semibold text-gray-900">Joined:</span> {new Date(u.created_at).toLocaleDateString()}</div>
+                                            </div>
+                                            {u.id !== currentUser.id && (
+                                                <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation}>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                                                        onClick={() => navigate(`/admin/edit-user/${u.id}`, { state: u })}
+                                                    >
+                                                        <Pencil size={14} className='mr-1' />
+                                                        Edit
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                        onClick={() => handleDeleteUser(u.id, u.name)}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
                             </div>
                         </CardContent>
                     </Card>

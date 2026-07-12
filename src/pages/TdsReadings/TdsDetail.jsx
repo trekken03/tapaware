@@ -66,8 +66,8 @@ const TdsDetail = () => {
             <Layout>
                 <div className="text-center py-12">
                     <p className="text-gray-500">Reading not found.</p>
-                    <Button variant="outline" className="mt-4" onClick={() => navigate('/tds')}>
-                        Back to TDS Readings
+                    <Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
+                        Back
                     </Button>
                 </div>
             </Layout>
@@ -84,7 +84,7 @@ const TdsDetail = () => {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-1"
-                        onClick={() => navigate('/tds')}
+                        onClick={() => navigate(-1)}
                     >
                         <ArrowLeft size={14} />
                         Back

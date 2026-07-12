@@ -22,6 +22,7 @@ import ResetPassword from './pages/ResetPassword';
 import { Toaster } from '@/components/ui/sonner';
 import Landing from './pages/Landing';
 import ConcernDetail from './pages/ConcernDetail';
+import UserDetail from './pages/UserDetail';
 
 
 const App = () => {
@@ -55,7 +56,10 @@ const App = () => {
 
                 {/* Audit Trail - Admin only */}
                 <Route path="/audit-trail" element={<RoleBasedRoute allowedRoles={['admin']}><AuditTrail /></RoleBasedRoute>} />
+                <Route path="/audit-trail" element={<RoleBasedRoute allowedRoles={['admin']}><AuditTrail /></RoleBasedRoute>} />
+                <Route path="/admin/users/:id" element={<RoleBasedRoute allowedRoles={['admin']}><UserDetail /></RoleBasedRoute>} />
                 <Route path="/profile" element={<RoleBasedRoute><Profile /></RoleBasedRoute>} />
+
 
                 <Route path="/households/:id" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><HouseholdDetail /></RoleBasedRoute>} />
                 <Route path="/reports/:id" element={<RoleBasedRoute><ReportDetail /></RoleBasedRoute>} />

@@ -72,8 +72,8 @@ const ReportDetail = () => {
             <Layout>
                 <div className="text-center py-12">
                     <p className="text-gray-500">Report not found.</p>
-                    <Button variant="outline" className="mt-4" onClick={() => navigate('/reports')}>
-                        Back to Reports
+                    <Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
+                        Back
                     </Button>
                 </div>
             </Layout>
@@ -101,12 +101,12 @@ const ReportDetail = () => {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-1"
-                        onClick={() => navigate('/reports')}
+                        onClick={() => navigate(-1)}
                     >
                         <ArrowLeft size={14} />
                         Back
                     </Button>
-                    {user?.role === 'admin' && (
+                    {(user?.role === 'admin' || (user?.role === 'resident' && report.user_id === user.id && report.status === 'pending')) && (
                         <Button
                             variant="outline"
                             size="sm"

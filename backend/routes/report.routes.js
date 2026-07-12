@@ -9,6 +9,6 @@ router.post('/', verifyToken, reportController.submitReport);
 router.put('/:id/status', verifyToken, reportController.updateReportStatus);
 router.get('/household/:id', verifyToken, reportController.getReportsByHousehold);
 router.get('/:id', verifyToken, reportController.getReportById);
-router.delete('/:id', verifyToken, requireRole('admin'), reportController.deleteReport);
+router.delete('/:id', verifyToken, reportController.deleteReport);
 
 module.exports = router;

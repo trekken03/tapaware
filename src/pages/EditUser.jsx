@@ -20,7 +20,9 @@ const EditUser = () => {
     const [form, setForm] = useState({
         name: existingUser?.name || '',
         email: existingUser?.email || '',
-        household_id: existingUser?.household_id || ''
+        household_id: existingUser?.household_id || '',
+        purok: existingUser?.purok || ''
+
     })
 
     const handleChange = (e) => {
@@ -50,8 +52,8 @@ const EditUser = () => {
             <Layout>
                 <div className="text-center py-12">
                     <p className="text-gray-500">No user data found. Please go back and click Edit again.</p>
-                    <Button variant="outline" className="mt-4" onClick={() => navigate('/admin')}>
-                        Back to Admin Panel
+                    <Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
+                        Back
                     </Button>
                 </div>
             </Layout>
@@ -66,7 +68,7 @@ const EditUser = () => {
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate('/admin')}
+                        onClick={() => navigate(-1)}
                         className="flex items-center gap-2"
                     >
                         <ArrowLeft size={16} />
@@ -103,6 +105,7 @@ const EditUser = () => {
                                         required
                                     />
                                 </div>
+
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email</Label>
                                     <Input
@@ -110,6 +113,33 @@ const EditUser = () => {
                                         name="email"
                                         type="email"
                                         value={form.email}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="household">Household No.</Label>
+                                    <Input
+                                        id="household"
+                                        name="household_id"
+                                        type="number"
+                                        value={form.household_id}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="purok">Purok</Label>
+                                    <Input
+                                        id="purok"
+                                        name="purok"
+                                        type="number"
+                                        min="1"
+                                        max="7"
+                                        step="1"
+                                        value={form.purok}
                                         onChange={handleChange}
                                         required
                                     />

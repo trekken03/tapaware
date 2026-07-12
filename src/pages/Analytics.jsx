@@ -460,7 +460,7 @@ const Analytics = () => {
                                 </thead>
                                 <tbody>
                                     {byPurok.map((p, index) => (
-                                        <tr key={index} className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                        <tr key={index} className="bg-white">
                                             <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
                                             <td className="py-3 px-4 text-sm font-semibold">Purok {p.purok}</td>
                                             <td className="py-3 px-4">
@@ -514,7 +514,7 @@ const Analytics = () => {
                             </thead>
                             <tbody>
                                 {topIssuePerPurok.map((row, index) => (
-                                    <tr key={row.purok} className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                    <tr key={row.purok} className="bg-white">
                                         <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
                                         <td className="py-3 px-4 text-sm font-semibold">Purok {row.purok}</td>
                                         <td className="py-3 px-4">

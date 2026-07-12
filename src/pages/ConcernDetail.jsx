@@ -69,8 +69,8 @@ const ConcernDetail = () => {
             <Layout>
                 <div className="text-center py-12">
                     <p className="text-gray-500">Concern not found.</p>
-                    <Button variant="outline" className="mt-4" onClick={() => navigate('/admin')}>
-                        Back to Admin Panel
+                    <Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
+                        Back
                     </Button>
                 </div>
             </Layout>
@@ -86,7 +86,7 @@ const ConcernDetail = () => {
                     variant="outline"
                     size="sm"
                     className="mb-4 flex items-center gap-1"
-                    onClick={() => navigate('/admin')}
+                    onClick={() => navigate(-1)}
                 >
                     <ArrowLeft size={14} />
                     Back to Admin Panel

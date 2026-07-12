@@ -13,21 +13,22 @@ spinner: reports,households,tds readings
 (✓)-add user(phone number), if role==='staff' then household_num = not required
 (✓)-households,reports,tds,readings, view action
 (✓)-forgot pass
-
--new table showing which issue is trending per purok example: 3 issue of odor is reported at purok 2 
-
--admin panel responsiveness
-
--auth.routes.js - change-pass,prof
-
--edit profile page details(because it looks ugly for now)
-    
--landing page for water quality publicity and have a concern button
-
--on every detail page have a delete button
-
+(✓)-new table showing which issue is trending per purok example: 3 issue of odor is reported at purok 2 
+(✓)-admin panel responsiveness
+(✓)-auth.routes.js - change-pass,prof
+(✓)-edit profile page details(because it looks ugly for now)  
+(✓)-landing page for water quality publicity and have a concern button
+(✓)-on every detail page have a delete button
+(✓)-analytics 2 table remove border-b and bg per index of 2%
 -idempotency
 
--
+
+-contact an admin for info change
+-delete on admin panel is not properly working
+-deploy on railway
+-delete on residents report(if a resident logged in and look in his/her reports he/she can delete it)
+-edit user page fix where admin can also edit household and purok
+-profile page not fetching the email properly
+-can click a user in a table in admin panel then will go to a page where the admin can see the relevant info to this clicked user
 
 VITE_API_URL=https://backend-production-cfb9.up.railway.app/api

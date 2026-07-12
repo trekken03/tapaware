@@ -62,7 +62,7 @@ const AddUser = () => {
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate('/admin')}
+                        onClick={() => navigate(-1)}
                         className="flex items-center gap-2"
                     >
                         <ArrowLeft size={16} />
@@ -201,7 +201,7 @@ const AddUser = () => {
                                     type="button"
                                     variant="outline"
                                     className="w-full sm:w-auto"
-                                    onClick={() => navigate('/admin')}
+                                    onClick={() => navigate(-1)}
                                 >
                                     Cancel
                                 </Button>

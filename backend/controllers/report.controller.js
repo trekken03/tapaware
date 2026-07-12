@@ -185,6 +185,18 @@ exports.deleteReport = async (req, res) => {
         if (existing.length === 0) {
             return res.status(404).json({ message: 'Report not found' });
         }
+        const report = existing[0];
+
+        const isAdmin = currentUser.role === 'admin';
+        const isOwner = currentUser.role === 'resident' && report.user_id === currentUser.id;
+
+        if (!isAdmin && !isOwner) {
+            return res.status(403).json({ message: 'You are not allowed to delete this report' });
+        }
+
+        if (isOwner && report.status !== 'pending') {
+            return res.status(400).json({ message: 'This report is already being processed and can no longer be deleted' });
+        }
 
         await db.query('DELETE FROM reports WHERE id = ?', [id]);
 
@@ -195,7 +207,7 @@ exports.deleteReport = async (req, res) => {
             action: 'DELETE_REPORT',
             table_affected: 'reports',
             record_id: id,
-            details: `Deleted report #${id} (${existing[0].issue_type}) for household ${existing[0].household_id}`,
+            details: `Deleted report #${id} (${report.issue_type})`,
             ip_address: req.ip
         });
 

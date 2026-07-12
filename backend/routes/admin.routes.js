@@ -11,5 +11,6 @@ router.get('/audit-trail', verifyToken, requireRole('admin'), adminController.ge
 router.get('/audit-trail/user/:id', verifyToken, requireRole('admin'), adminController.getAuditTrailByUser);
 router.put('/users/:id', verifyToken, requireRole('admin'), adminController.updateUserInfo);
 router.put('/flags/:id/status', verifyToken, requireRole('admin'), adminController.updateFlagStatus);
+router.get('/users/:id', verifyToken, requireRole('admin'), adminController.getUserById)
 
 module.exports = router;

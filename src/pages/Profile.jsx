@@ -103,8 +103,8 @@ const Profile = () => {
 
                 {/* Header card */}
                 <Card className="mb-6 overflow-hidden">
-                    <div className="bg-blue-900 h-20" />
-                    <CardContent className="pt-0">
+
+                    <CardContent className="pt-10">
                         <div className="flex items-end gap-4 -mt-10">
                             <div className="w-20 h-20 rounded-full bg-white border-4 border-white shadow-sm flex items-center justify-center shrink-0">
                                 <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center">

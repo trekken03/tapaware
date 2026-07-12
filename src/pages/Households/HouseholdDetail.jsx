@@ -73,8 +73,8 @@ const HouseholdDetail = () => {
             <Layout>
                 <div className="text-center py-12">
                     <p className="text-gray-500">Household not found.</p>
-                    <Button variant="outline" className="mt-4" onClick={() => navigate('/households')}>
-                        Back to Households
+                    <Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
+                        Back
                     </Button>
                 </div>
             </Layout>
@@ -102,7 +102,7 @@ const HouseholdDetail = () => {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-1"
-                        onClick={() => navigate('/households')}
+                        onClick={() => navigate(-1)}
                     >
                         <ArrowLeft size={14} />
                         Back

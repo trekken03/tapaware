@@ -218,7 +218,7 @@ const Reports = () => {
                                             <div className="flex-1 flex flex-col h-full">
                                                 <div className="flex items-center justify-between mb-2 font-semibold">
                                                     <span className="text-black-600 text-2xl">{r.owner_name}</span>
-                                                    <p className=" px-3 py-1 rounded-full font-semibold capitalize justify-end">
+                                                    <p className=" px-3 py-1 rounded-full font-semibold capitalize">
                                                         {r.issue_type}
                                                     </p>
 

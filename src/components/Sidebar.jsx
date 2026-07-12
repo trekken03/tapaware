@@ -207,7 +207,7 @@ const Sidebar = () => {
                         if (hasChildren) {
                             return (
                                 <div key={item.path}>
-                                    <div className="flex items-center rounded-lg text-blue-200 hover:bg-blue-950 hover:text-white transition-all duration-200">
+                                    <div className="flex items-center rounded-lg text-blue-200 hover:bg-blue-900 hover:text-white transition-all duration-200">
                                         <NavLink
                                             to={item.path}
                                             onClick={() => {

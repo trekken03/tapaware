@@ -135,9 +135,9 @@ const AddTdsReading = () => {
                             <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm">
                                 <p className="font-semibold text-blue-900 mb-2">TDS Level Guide:</p>
                                 <div className="space-y-1">
-                                    <p className="text-green-700">● 0 - 300 ppm — Safe for drinking</p>
-                                    <p className="text-yellow-700">● 301 - 600 ppm — Moderate, monitor closely</p>
-                                    <p className="text-red-700">● 601+ ppm — High, needs attention</p>
+                                    <p className="text-green-700">● 0 - 500 ppm — Safe for drinking</p>
+                                    <p className="text-yellow-700">● 501 - 1000 ppm — Moderate, monitor closely</p>
+                                    <p className="text-red-700">● 1000+ ppm — High, needs attention</p>
                                 </div>
                             </div>
 
