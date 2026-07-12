@@ -32,7 +32,7 @@ export default defineConfig({
       'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Resource-Policy': 'same-origin',
-      'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://backend-production-cfb9.up.railway.app"
+      'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://tapaware-production.up.railway.app/api"
     }
   }
 })
