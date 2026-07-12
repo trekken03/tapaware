@@ -17,12 +17,12 @@ export default defineConfig({
   },
   server: {
     allowedHosts: [
-      'frontend-production-3bca.up.railway.app'
+      'zooming-vision-production-e7bc.up.railway.app'
     ]
   },
   preview: {
     allowedHosts: [
-      'frontend-production-3bca.up.railway.app'
+      'zooming-vision-production-e7bc.up.railway.app'
     ],
     headers: {
       'X-Frame-Options': 'DENY',
