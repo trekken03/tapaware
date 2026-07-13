@@ -141,7 +141,7 @@ const Landing = () => {
             <section id="about" className="py-20 bg-white">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
                     <div className="max-w-2xl mb-14">
-                        <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600">About the system</span>
+                        <span className="text-1xl font-semibold uppercase tracking-widest text-cyan-600">About the system</span>
                         <h2 className="text-3xl font-black tracking-tight text-[#0a1a33] mt-2 mb-4">
                             What TDS means for your water
                         </h2>
@@ -183,7 +183,7 @@ const Landing = () => {
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
                     <div className="flex items-center gap-2 mb-2">
                         <Droplets className="text-cyan-600" size={18} />
-                        <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600">Live readings</span>
+                        <span className="text-1xl font-semibold uppercase tracking-widest text-cyan-600">Live readings</span>
                     </div>
                     <h2 className="text-3xl font-black tracking-tight text-[#0a1a33] mb-10">
                         Water quality by purok
@@ -253,13 +253,13 @@ const Landing = () => {
                                             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm h-10 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                                         >
                                             <option value="">Select purok...</option>
-                                            {[1, 2, 3, 4, 5, 6, 7].map(p => <option key={p} value={p}>{p}</option>)}
+                                            {[1, 2, 3, 4, 5, 6].map(p => <option key={p} value={p}>{p}</option>)}
                                         </select>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="contact_info">Contact number or email (optional)</Label>
-                                    <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} placeholder="09xx xxx xxxx" />
+                                    <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} maxlength="11" placeholder="09xx xxx xxxx" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="message">Your concern</Label>

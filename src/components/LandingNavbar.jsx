@@ -87,26 +87,20 @@ const LandingNavbar = () => {
                         user ? (
                             <Button
                                 onClick={() => navigate('/dashboard')}
-                                className="bg-slate-950 hover:bg-gray-700 text-white hover:cursor-pointer"
+                                className="bg-blue-500 hover:bg-blue-300 text-slate-950 hover:cursor-pointer"
                             >
                                 Dashboard
                             </Button>
                         ) : (
                             <Button
                                 onClick={() => navigate('/login')}
-                                className="bg-slate-950 hover:bg-gray-700 text-white hover:cursor-pointer"
+                                className="bg-blue-400 hover:bg-blue-300 text-slate-950 hover:cursor-pointer"
                             >
                                 Login
                             </Button>
                         )
                     )}
-                    <Button
-                        onClick={() => scrollTo('contact')}
-                        className="bg-slate-950 hover:bg-gray-700 text-white font-semibold gap-2 hover:cursor-pointer"
-                    >
-                        <Droplets size={16} />
-                        Report a Concern
-                    </Button>
+
                 </div>
 
                 {/* Mobile toggle */}
@@ -137,27 +131,21 @@ const LandingNavbar = () => {
                             user ? (
                                 <Button
                                     onClick={() => navigate('/dashboard')}
-                                    className="bg-slate-950 hover:bg-gray-700 text-white"
+                                    className="bg-blue-400 hover:bg-blue-300 text-slate-950"
                                 >
                                     Dashboard
                                 </Button>
                             ) : (
                                 <Button
                                     onClick={() => navigate('/login')}
-                                    className="bg-slate-950 hover:bg-gray-700 text-white"
+                                    className="bg-blue-400 hover:bg-blue-300 text-slate-950"
                                 >
                                     Login
                                 </Button>
                             )
                         )}
 
-                        <Button
-                            onClick={() => scrollTo('contact')}
-                            className="mt-2 bg-slate-950 hover:bg-gray-700 text-white font-semibold gap-2"
-                        >
-                            <Droplets size={16} />
-                            Report a Concern
-                        </Button>
+
                     </div>
                 </div>
             )}

@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { User, Save, KeyRound, ArrowLeft, Home, MapPin } from 'lucide-react'
+import { User, Save, KeyRound, ArrowLeft, Home, MapPin, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { toast } from 'sonner'
@@ -13,6 +13,9 @@ import { toast } from 'sonner'
 const Profile = () => {
     const navigate = useNavigate()
     const { user, login, token } = useAuth()
+    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword1, setShowPassword1] = useState(false);
+    const [showPassword2, setShowPassword2] = useState(false);
 
     const [loading, setLoading] = useState(false)
     const [passwordLoading, setPasswordLoading] = useState(false)
@@ -200,40 +203,73 @@ const Profile = () => {
                         <form onSubmit={handleChangePassword} className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="currentPassword">Current Password</Label>
-                                <Input
-                                    id="currentPassword"
-                                    name="currentPassword"
-                                    type="password"
-                                    placeholder="Enter current password"
-                                    value={passwordForm.currentPassword}
-                                    onChange={handlePasswordChange}
-                                    required
-                                />
-                            </div>
-                            <div className="grid sm:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="newPassword">New Password</Label>
+                                <div className="relative">
                                     <Input
-                                        id="newPassword"
-                                        name="newPassword"
+                                        id="currentPassword"
+                                        name="currentPassword"
                                         type="password"
-                                        placeholder="At least 6 characters"
-                                        value={passwordForm.newPassword}
+                                        placeholder="Enter current password"
+                                        value={passwordForm.currentPassword}
+                                        maxlength="20"
                                         onChange={handlePasswordChange}
                                         required
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="grid sm:grid-cols-1 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="newPassword">New Password</Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="newPassword"
+                                            name="newPassword"
+                                            type="password"
+                                            placeholder="At least 6 characters"
+                                            value={passwordForm.newPassword}
+                                            minlength="6"
+                                            maxlength="20"
+                                            onChange={handlePasswordChange}
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword1(!showPassword1)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            {showPassword1 ? <Eye size={18} /> : <EyeOff size={18} />}
+                                        </button>
+                                    </div>
+
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                                    <Input
-                                        id="confirmPassword"
-                                        name="confirmPassword"
-                                        type="password"
-                                        placeholder="Re-enter new password"
-                                        value={passwordForm.confirmPassword}
-                                        onChange={handlePasswordChange}
-                                        required
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            id="confirmPassword"
+                                            name="confirmPassword"
+                                            type="password"
+                                            placeholder="Re-enter new password"
+                                            minlength="6"
+                                            maxlength="20"
+                                            value={passwordForm.confirmPassword}
+                                            onChange={handlePasswordChange}
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword2(!showPassword2)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            {showPassword2 ? <Eye size={18} /> : <EyeOff size={18} />}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div className="pt-2 flex justify-end">

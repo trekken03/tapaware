@@ -5,13 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ArrowLeft, Users } from 'lucide-react'
+import { ArrowLeft, Users, Eye, EyeOff } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
 
 const AddUser = () => {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false);
     const [form, setForm] = useState({
         name: '',
         email: '',
@@ -99,28 +100,39 @@ const AddUser = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="password">Password</Label>
-                                    <Input
-                                        id="password"
-                                        name="password"
-                                        type="password"
-                                        placeholder="Enter password"
-                                        value={form.password}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name">Full Name</Label>
+                                    <div className="relative">
                                         <Input
-                                            id="name"
-                                            name="name"
-                                            placeholder="e.g. Juan Dela Cruz"
-                                            value={form.name}
+                                            id="password"
+                                            name="password"
+                                            type="password"
+                                            placeholder="Enter password"
+                                            value={form.password}
+                                            minlength="6"
+                                            maxlength="20"
+                                            className="pr-10"
                                             onChange={handleChange}
                                             required
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                                        </button>
                                     </div>
+
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">Full Name</Label>
+                                    <Input
+                                        id="name"
+                                        name="name"
+                                        placeholder="e.g. Juan Dela Cruz"
+                                        value={form.name}
+                                        onChange={handleChange}
+                                        required
+                                    />
 
                                 </div>
 

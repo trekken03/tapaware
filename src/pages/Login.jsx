@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Droplets } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import API from "@/services/api";
 import { Link } from "react-router-dom";
 import { toast } from 'sonner'
@@ -24,6 +24,7 @@ const Login = () => {
     const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -110,14 +111,24 @@ const Login = () => {
                                     <Label htmlFor="password">Password</Label>
 
                                 </div>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    placeholder="Enter your password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
+                                <div className="relative">
+                                    <Input
+                                        id="password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        placeholder="Enter your password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        className="pr-10"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                                    </button>
+                                </div>
                             </div>
                             <Link
                                 to="/forgot-password"

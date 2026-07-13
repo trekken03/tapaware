@@ -17,6 +17,7 @@ import {
     X,
     ChevronDown,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const getNavItems = (role) => {
     const baseItems = [
@@ -134,10 +135,20 @@ const Sidebar = () => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('sidebar_expanded');
-        logout();
-        navigate('/login');
-    };
+        if (!window.confirm('Are you sure you want to logout?')) return
+        try {
+            localStorage.removeItem('sidebar_expanded');
+            logout();
+            navigate('/login');
+            toast.success('Successfuly logged out')
+        }
+
+
+        catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to logout')
+        }
+    }
+
 
     return (
         <>
@@ -148,7 +159,7 @@ const Sidebar = () => {
                         src="/assets/logo.jpg"
 
                         alt="logo"
-                        className="w-8 h-8 object-contain"
+                        className="w-8 h-8 object-contain rounded-full"
                     />
                     <h1 className="text-white font-bold text-lg leading-none">TapAware</h1>
                 </div>
@@ -185,7 +196,7 @@ const Sidebar = () => {
                             src="/assets/logo.jpg"
 
                             alt="logo"
-                            className="w-10 h-10 object-contain"
+                            className="w-10 h-10 object-contain rounded-full"
                         />
                         <div>
                             <h1 className="text-white font-bold text-lg leading-none">TapAware</h1>
