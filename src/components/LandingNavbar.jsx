@@ -152,7 +152,7 @@ const LandingNavbar = () => {
                         )}
 
                         <Button
-                            onClick={() => scrollTo('contact')}
+                                                        onClick={() => goToSection(link.id)}
                             className="mt-2 bg-slate-950 hover:bg-gray-700 text-white font-semibold gap-2"
                         >
                             <Droplets size={16} />
