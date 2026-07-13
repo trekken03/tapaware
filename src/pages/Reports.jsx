@@ -163,18 +163,21 @@ const Reports = () => {
                             </CardTitle>
                             <div className="flex items-center gap-3">
                                 {/* Purok spinner */}
-                                <select
-                                    value={selectedPurok}
-                                    onChange={(e) => setSelectedPurok(e.target.value)}
-                                    className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="all">All Puroks</option>
-                                    {purokOptions.map(purok => (
-                                        <option key={purok} value={purok}>
-                                            Purok {purok}
-                                        </option>
-                                    ))}
-                                </select>
+                                {!isResident && (
+
+                                    < select
+                                        value={selectedPurok}
+                                        onChange={(e) => setSelectedPurok(e.target.value)}
+                                        className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="all">All Puroks</option>
+                                        {purokOptions.map(purok => (
+                                            <option key={purok} value={purok}>
+                                                Purok {purok}
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
 
                                 <InputGroup className="max-w-xs">
                                     <InputGroupInput
@@ -266,7 +269,7 @@ const Reports = () => {
                 </Card>
 
             </div>
-        </Layout>
+        </Layout >
     )
 }
 

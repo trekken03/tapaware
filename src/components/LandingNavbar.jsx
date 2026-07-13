@@ -144,8 +144,6 @@ const LandingNavbar = () => {
                                 </Button>
                             )
                         )}
-
-
                     </div>
                 </div>
             )}
