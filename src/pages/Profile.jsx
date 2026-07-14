@@ -207,7 +207,7 @@ const Profile = () => {
                                     <Input
                                         id="currentPassword"
                                         name="currentPassword"
-                                        type="password"
+                                        type={showPassword ? 'text' : 'password'}
                                         placeholder="Enter current password"
                                         value={passwordForm.currentPassword}
                                         maxlength="20"
@@ -230,7 +230,7 @@ const Profile = () => {
                                         <Input
                                             id="newPassword"
                                             name="newPassword"
-                                            type="password"
+                                            type={showPassword1 ? 'text' : 'password'}
                                             placeholder="At least 6 characters"
                                             value={passwordForm.newPassword}
                                             minlength="6"
@@ -254,7 +254,7 @@ const Profile = () => {
                                         <Input
                                             id="confirmPassword"
                                             name="confirmPassword"
-                                            type="password"
+                                            type={showPassword2 ? 'text' : 'password'}
                                             placeholder="Re-enter new password"
                                             minlength="6"
                                             maxlength="20"

@@ -20,15 +20,16 @@ spinner: reports,households,tds readings
 (✓)-landing page for water quality publicity and have a concern button
 (✓)-on every detail page have a delete button
 (✓)-analytics 2 table remove border-b and bg per index of 2%
+(✓)-delete on admin panel is not properly working
+(✓)-deploy on railway
+(✓)-delete on residents report(if a resident logged in and look in his/her reports he/she can delete it)
+(✓)-edit user page fix where admin can also edit household and purok
+(✓)-profile page not fetching the email properly
+(✓)-can click a user in a table in admin panel then will go to a page where the admin can see the relevant info to this clicked user
+
 -idempotency
-
-
 -contact an admin for info change
--delete on admin panel is not properly working
--deploy on railway
--delete on residents report(if a resident logged in and look in his/her reports he/she can delete it)
--edit user page fix where admin can also edit household and purok
--profile page not fetching the email properly
--can click a user in a table in admin panel then will go to a page where the admin can see the relevant info to this clicked user
-
+-in the submit report - i wanna add a algorithm where it will store the time that the report happen then it will have a new table where that data will go 
+through so that the system also knows when are these issues keep happening
+-pagination
 VITE_API_URL=https://backend-production-cfb9.up.railway.app/api
