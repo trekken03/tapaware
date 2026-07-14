@@ -104,7 +104,7 @@ const AddUser = () => {
                                         <Input
                                             id="password"
                                             name="password"
-                                            type="password"
+                                            type={showPassword ? 'text' : 'password'}
                                             placeholder="Enter password"
                                             value={form.password}
                                             minlength="6"

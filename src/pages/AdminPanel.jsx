@@ -640,7 +640,7 @@ const AdminPanel = () => {
                                                             <td className="py-3 px-4 text-sm">{c.purok ? `Purok ${c.purok}` : '—'}</td>
                                                             <td className="py-3 px-4 text-sm text-gray-600 max-w-xs truncate">{c.message}</td>
                                                             <td className="py-3 px-4">
-                                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold capitalize ${c.status === 'new' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                                                                <span className={`px-2 py-1 text-xs font-semibold capitalize ${c.status === 'new' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
                                                                     }`}>
                                                                     {c.status}
                                                                 </span>
@@ -663,7 +663,7 @@ const AdminPanel = () => {
                                                 >
                                                     <div className="flex items-center justify-between gap-2 mb-2">
                                                         <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
-                                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold capitalize ${c.status === 'new' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                                                        <span className={`px-2 py-1 text-xs font-semibold capitalize ${c.status === 'new' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
                                                             }`}>
                                                             {c.status}
                                                         </span>

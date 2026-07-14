@@ -48,6 +48,7 @@ create table reports(
     description text,
     status enum('pending','investigating','resolved') not null default 'pending',
     created_at timestamp default current_timestamp,
+    occurred_at TIME NOT NULL DEFAULT (CURRENT_TIME);
     foreign key(household_id) references households(id) on delete cascade,
     foreign key(user_id) references users(id),
     index idx_reports_household_created (household_id, created_at),
@@ -108,4 +109,16 @@ create table concerns(
     replied_at timestamp null,
     created_at timestamp default current_timestamp,
     index idx_concerns_status (status)
+);
+
+
+CREATE TABLE time_patterns(
+    id int auto_increment primary key,
+    purok varchar(100) not null,
+    issue_type enum('odor','discoloration','low pressure','cleanliness','broken hardware') not null,
+    time_bucket enum('morning','afternoon','evening','night') not null,
+    times_reported int not null default 0,
+    last_reported_at timestamp not null default current_timestamp,
+    unique key unique_time_pattern (purok, issue_type, time_bucket),
+    index idx_time_patterns_purok (purok)
 );

@@ -26,10 +26,13 @@ spinner: reports,households,tds readings
 (✓)-edit user page fix where admin can also edit household and purok
 (✓)-profile page not fetching the email properly
 (✓)-can click a user in a table in admin panel then will go to a page where the admin can see the relevant info to this clicked user
+(✓)-contact an admin for info change(i wanna add here when you click that paragraph it will go to  the contact page on the landing)
+(✓)-in the submit report - i wanna add a algorithm where it will store the time that the report happen then it will have a new table where that data will go 
+through so that the system also knows when are these issues keep happening
+(✓)-putting limit 100 just like the audit trail on the concern tab
 
 -idempotency
--contact an admin for info change
--in the submit report - i wanna add a algorithm where it will store the time that the report happen then it will have a new table where that data will go 
-through so that the system also knows when are these issues keep happening
--pagination
+-waiting for the table for trending issue per time
+-domain
+
 VITE_API_URL=https://backend-production-cfb9.up.railway.app/api

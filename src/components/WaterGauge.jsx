@@ -47,7 +47,7 @@ const WaterGauge = ({ value, label, sublabel, size = 140, maxScale = 1500 }) => 
                 <p className="font-bold text-gray-900 text-sm">{label}</p>
                 {sublabel && <p className="text-xs text-gray-500">{sublabel}</p>}
                 <span
-                    className="inline-block mt-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                    className="inline-block mt-1 px-2 py-0.5 text-[11px] font-semibold"
                     style={{ color: status.color, backgroundColor: status.bg }}
                 >
                     {status.label}

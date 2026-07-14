@@ -21,13 +21,25 @@ exports.getAllReports = async (req, res) => {
     }
 };
 
+const getTimeBucket = (timeString) => {
+    const hour = parseInt(timeString.split(':')[0], 10);
+    if (hour >= 5 && hour < 11) return 'morning';
+    if (hour >= 11 && hour < 17) return 'afternoon';
+    if (hour >= 17 && hour < 21) return 'evening';
+    return 'night';
+};
+
 exports.submitReport = async (req, res) => {
-    const { household_id, user_id, issue_type, description } = req.body;
+    const { household_id, user_id, issue_type, description, occurred_time } = req.body;
+
+    const now = new Date();
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const finalOccurredTime = occurred_time || currentTime;
 
     try {
         const [result] = await db.query(
-            'INSERT INTO reports(household_id,user_id,issue_type,description)VALUES(?,?,?,?)',
-            [household_id, user_id, issue_type, description || null]
+            'INSERT INTO reports(household_id,user_id,issue_type,description,occurred_at)VALUES(?,?,?,?,?)',
+            [household_id, user_id, issue_type, description || null, finalOccurredTime]
         );
         await auditLog({
             user_id: req.user ? req.user.id : null,
@@ -65,6 +77,28 @@ exports.submitReport = async (req, res) => {
             }
         }
 
+        const [[household]] = await db.query('SELECT purok FROM households WHERE id = ?', [household_id]);
+        const timeBucket = getTimeBucket(finalOccurredTime);
+
+        const [existingPattern] = await db.query(
+            'SELECT * FROM time_patterns WHERE purok = ? AND issue_type = ? AND time_bucket = ?',
+            [household.purok, issue_type, timeBucket]
+        );
+
+        if (existingPattern.length > 0) {
+            await db.query(
+                'UPDATE time_patterns SET times_reported = times_reported + 1, last_reported_at = NOW() WHERE id = ?',
+                [existingPattern[0].id]
+            );
+        } else {
+            await db.query(
+                'INSERT INTO time_patterns(purok, issue_type, time_bucket, times_reported, last_reported_at) VALUES (?,?,?,1,NOW())',
+                [household.purok, issue_type, timeBucket]
+            );
+        }
+
+        res.status(201).json({ message: 'Report submitted successfully' });
+
         const adminEmail = process.env.ADMIN_EMAIL;
         if (adminEmail) {
             try {
@@ -87,7 +121,7 @@ exports.submitReport = async (req, res) => {
             console.log('Report submitted, but no admin email configured for notification.');
         }
 
-        res.status(201).json({ message: 'Report submitted successfully' });
+
     }
     catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });

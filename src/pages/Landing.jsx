@@ -196,7 +196,7 @@ const Landing = () => {
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
                             {purokData.map((p) => (
-                                <div key={p.purok} className="bg-white rounded-xl p-5 shadow-sm flex justify-center">
+                                <div key={p.purok} className="bg-white p-5 shadow-sm flex justify-center">
                                     <WaterGauge
                                         value={p.average_tds}
                                         label={`Purok ${p.purok}`}

@@ -140,7 +140,7 @@ const Sidebar = () => {
             localStorage.removeItem('sidebar_expanded');
             logout();
             navigate('/login');
-            toast.success('Successfuly logged out')
+            toast.success('Logged out successfully')
         }
 
 

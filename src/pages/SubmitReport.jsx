@@ -4,6 +4,7 @@ import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { ArrowLeft, FileText, Home } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
@@ -19,7 +20,8 @@ const SubmitReport = () => {
         household_id: user?.household_id || '',
         user_id: user?.id || '',
         issue_type: '',
-        description: ''
+        description: '',
+        occurred_time: ''
     })
 
     useEffect(() => {
@@ -149,9 +151,16 @@ const SubmitReport = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label htmlFor="enter_time">Enter Time</label>
-                                    <input type="time" id="custom-time" class="no-picker" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></input>
-
+                                    <Label htmlFor="occurred_time">When did this happen?</Label>
+                                    <Input
+                                        id="occurred_time"
+                                        name="occurred_time"
+                                        type="time"
+                                        value={form.occurred_time}
+                                        onChange={handleChange}
+                                        className="w-full"
+                                    />
+                                    <p className="text-xs text-gray-400">Leave blank to use the current time</p>
                                 </div>
 
                                 <div className="space-y-2">

@@ -26,7 +26,7 @@ exports.submitConcern = async (req, res) => {
 
 exports.getAllConcerns = async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM concerns ORDER BY created_at DESC');
+        const [rows] = await db.query('SELECT * FROM concerns ORDER BY created_at DESC limit 100');
         res.json(rows);
     }
     catch (error) {

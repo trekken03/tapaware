@@ -173,8 +173,16 @@ const Profile = () => {
                             </div>
 
                             {user?.role === 'resident' && (
-                                <p className="text-xs text-gray-400">
-                                    Household and purok are managed by barangay staff. Contact an admin to update these.
+                                <p className="text-xs text-black">
+                                    Household and purok are managed by barangay staff.{' '}
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate('/', { state: { scrollTo: 'contact' } })}
+                                        className="underline hover:text-gray-600 hover:cursor-pointer"
+                                    >
+                                        Contact an admin
+                                    </button>{' '}
+                                    to update these.
                                 </p>
                             )}
 
