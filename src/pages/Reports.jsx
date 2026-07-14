@@ -145,7 +145,7 @@ const Reports = () => {
                             onClick={() => navigate('/reports/add')}
                         >
                             <Plus size={16} />
-                            Submit Reports
+                            Submit Report
                         </Button>
                     )}
                 </div>

@@ -123,7 +123,7 @@ const ReportDetail = () => {
                     <CardContent className="pt-6">
                         <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
                             <div>
-                                <h1 className="text-2xl font-bold text-gray-900">{report.owner_name}</h1>
+                                <h1 className="text-2xl font-bold text-gray-900">{report.reported_by}</h1>
                                 <p className="text-gray-500">
                                     Household #{report.household_number} - Purok {report.purok}
                                 </p>
