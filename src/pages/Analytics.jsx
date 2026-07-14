@@ -36,6 +36,14 @@ const loadLogoImage = () => {
     })
 }
 
+const getDefaultDates = () => {
+    const to = new Date().toISOString().split('T')[0]
+    const fromDate = new Date()
+    fromDate.setDate(fromDate.getDate() - 30)
+    const from = fromDate.toISOString().split('T')[0]
+    return { from, to }
+}
+
 const Analytics = () => {
     const [byIssue, setByIssue] = useState([])
     const [byPurok, setByPurok] = useState([])
@@ -44,16 +52,14 @@ const Analytics = () => {
     const [loading, setLoading] = useState(true)
     const [isExporting, setIsExporting] = useState(false)
     const [exportError, setExportError] = useState('')
-
+    const [dateRange, setDateRange] = useState(getDefaultDates())
     // Refs to the actual rendered chart cards, so the PDF can screenshot
     // exactly what's on screen instead of redrawing an approximation.
     const purokChartRef = useRef(null)
     const issueChartRef = useRef(null)
     const tdsChartRef = useRef(null)
 
-    useEffect(() => {
-        fetchData()
-    }, [])
+
 
     // Captures a DOM node and adds it to the PDF as a titled section —
     // checks if the TITLE + IMAGE fit together before drawing either one,
@@ -186,6 +192,9 @@ const Analytics = () => {
             pdf.setFont('helvetica', 'normal')
             pdf.setFontSize(9)
             pdf.setTextColor(107, 114, 128)
+            const periodLabel = `Reporting Period: ${new Date(dateRange.from).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} — ${new Date(dateRange.to).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+            pdf.text(periodLabel, pageWidth / 2, y, { align: 'center' })
+            y += 5
             pdf.text(`Generated ${new Date().toLocaleString()}`, pageWidth / 2, y, { align: 'center' })
             y += 6
             pdf.setDrawColor(229, 231, 235)
@@ -244,7 +253,7 @@ const Analytics = () => {
 
             // --- TDS Trend: chart + detail table together ---
             if (tdsTrend.length > 0 && tdsChartRef.current) {
-                y = await addChartSection(pdf, 'TDS Trend (Last 30 Days)', tdsChartRef.current, { margin, pageWidth, pageHeight, y })
+                y = await addChartSection(pdf, 'TDS Trend', tdsChartRef.current, { margin, pageWidth, pageHeight, y })
             }
 
             addTableHeader(['Date', 'Average TDS', 'Readings'], [65, 60, 55])
@@ -272,12 +281,14 @@ const Analytics = () => {
     }
 
     const fetchData = async () => {
+        setLoading(true)
         try {
+            const params = { from: dateRange.from, to: dateRange.to }
             const [issueRes, purokRes, trendRes, trendingRes] = await Promise.all([
-                API.get('/analytics/reports-by-issue'),
-                API.get('/analytics/reports-by-purok'),
-                API.get('/analytics/tds-trend'),
-                API.get('/analytics/trending-issues')
+                API.get('/analytics/reports-by-issue', { params }),
+                API.get('/analytics/reports-by-purok', { params }),
+                API.get('/analytics/tds-trend', { params }),
+                API.get('/analytics/trending-issues', { params })
             ])
             setByIssue(issueRes.data)
             setByPurok(purokRes.data)
@@ -285,10 +296,16 @@ const Analytics = () => {
             setTrendingIssues(trendingRes.data)
         } catch (error) {
             console.log('Error fetching analytics:', error)
+            toast.error('Failed to load analytics data')
         } finally {
             setLoading(false)
         }
     }
+    useEffect(() => {
+        fetchData()
+    }, [dateRange])
+
+
 
     const topIssuePerPurok = trendingIssues.reduce((acc, row) => {
         if (!acc.find(item => item.purok === row.purok)) {
@@ -312,20 +329,42 @@ const Analytics = () => {
             <div>
 
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
                         <p className="text-gray-500 mt-1">Visual breakdown of water quality data</p>
                     </div>
-                    <Button
-                        onClick={handleDownloadPdf}
-                        disabled={isExporting}
-                        className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
-
-                    >
-                        <Download size={16} />
-                        {isExporting ? 'Preparing PDF...' : 'Download PDF'}
-                    </Button>
+                    <div className="flex flex-wrap items-end gap-3">
+                        <div>
+                            <label className="text-xs font-semibold text-black uppercase block mb-1">From</label>
+                            <input
+                                type="date"
+                                value={dateRange.from}
+                                max={dateRange.to}
+                                onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+                                className="border border-black bg-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-8"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-xs font-semibold text-black uppercase block mb-1">To</label>
+                            <input
+                                type="date"
+                                value={dateRange.to}
+                                min={dateRange.from}
+                                max={new Date().toISOString().split('T')[0]}
+                                onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+                                className="border border-black bg-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-8"
+                            />
+                        </div>
+                        <Button
+                            onClick={handleDownloadPdf}
+                            disabled={isExporting}
+                            className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
+                        >
+                            <Download size={16} />
+                            {isExporting ? 'Preparing PDF...' : 'Download PDF'}
+                        </Button>
+                    </div>
                 </div>
                 {exportError && (
                     <p className="text-sm text-red-600 mb-4">{exportError}</p>

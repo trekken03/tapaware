@@ -34,11 +34,18 @@ exports.getSummary = async (req, res) => {
 };
 
 exports.getReportByIssueType = async (req, res) => {
+    const { from, to } = req.query;
     try {
-        const [rows] = await db.query(
-            `SELECT issue_type, COUNT(*) as count
-            FROM reports GROUP BY issue_type ORDER BY count DESC`
-        );
+        let query = `SELECT issue_type, COUNT(*) as count FROM reports`;
+        const params = [];
+
+        if (from && to) {
+            query += ` WHERE created_at BETWEEN ? AND ?`;
+            params.push(from, `${to} 23:59:59`);
+        }
+
+        query += ` GROUP BY issue_type ORDER BY count DESC`;
+        const [rows] = await db.query(query, params);
         res.json(rows);
     }
     catch (error) {
@@ -79,15 +86,23 @@ exports.getFlaggedHouseholds = async (req, res) => {
     }
 };
 
+
 exports.getTdsTrend = async (req, res) => {
+    const { from, to } = req.query;
     try {
-        const [rows] = await db.query(
-            `SELECT DATE(recorded_at) as date,
-            AVG(tds_value) as average,
-            COUNT(*) as reading_count
-            FROM tds_readings GROUP BY DATE(recorded_at)
-            ORDER BY date DESC LIMIT 30`
-        );
+        let query = `SELECT DATE(recorded_at) as date, AVG(tds_value) as average, COUNT(*) as reading_count
+            FROM tds_readings`;
+        const params = [];
+
+        if (from && to) {
+            query += ` WHERE recorded_at BETWEEN ? AND ?`;
+            params.push(from, `${to} 23:59:59`);
+            query += ` GROUP BY DATE(recorded_at) ORDER BY date ASC`;
+        } else {
+            query += ` GROUP BY DATE(recorded_at) ORDER BY date DESC LIMIT 30`;
+        }
+
+        const [rows] = await db.query(query, params);
         res.json(rows);
     }
     catch (error) {
@@ -154,30 +169,40 @@ exports.getResidentSummary = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
 exports.getReportsByPurokCount = async (req, res) => {
+    const { from, to } = req.query;
     try {
-        const [rows] = await db.query(
-            `SELECT households.purok,
-            COUNT(reports.id) as report_count
-            FROM households LEFT JOIN reports ON households.id = reports.household_id
-            GROUP BY households.purok ORDER BY report_count DESC`
-        );
+        let query = `SELECT households.purok, COUNT(reports.id) as report_count
+            FROM households LEFT JOIN reports ON households.id = reports.household_id`;
+        const params = [];
+
+        if (from && to) {
+            query += ` AND reports.created_at BETWEEN ? AND ?`;
+            params.push(from, `${to} 23:59:59`);
+        }
+
+        query += ` GROUP BY households.purok ORDER BY report_count DESC`;
+        const [rows] = await db.query(query, params);
         res.json(rows);
     }
     catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
 exports.getTrendingIssuesByPurok = async (req, res) => {
+    const { from, to } = req.query;
     try {
-        const [rows] = await db.query(
-            `SELECT households.purok, reports.issue_type, COUNT(*) as count
-            FROM reports JOIN households ON reports.household_id = households.id
-            GROUP BY households.purok, reports.issue_type
-            ORDER BY households.purok ASC, count DESC`
-        );
+        let query = `SELECT households.purok, reports.issue_type, COUNT(*) as count
+            FROM reports JOIN households ON reports.household_id = households.id`;
+        const params = [];
+
+        if (from && to) {
+            query += ` WHERE reports.created_at BETWEEN ? AND ?`;
+            params.push(from, `${to} 23:59:59`);
+        }
+
+        query += ` GROUP BY households.purok, reports.issue_type ORDER BY households.purok ASC, count DESC`;
+        const [rows] = await db.query(query, params);
         res.json(rows);
     }
     catch (error) {
