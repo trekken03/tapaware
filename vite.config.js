@@ -17,12 +17,12 @@ export default defineConfig({
   },
   server: {
     allowedHosts: [
-      'zooming-vision-production-e7bc.up.railway.app'
+      'tapaware.online'
     ]
   },
   preview: {
     allowedHosts: [
-      'zooming-vision-production-e7bc.up.railway.app'
+      'tapaware.online'
     ],
     headers: {
       'X-Frame-Options': 'DENY',
