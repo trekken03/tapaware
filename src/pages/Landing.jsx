@@ -116,7 +116,7 @@ const Landing = () => {
                         {loading ? (
                             <div className="w-[180px] h-[180px] rounded-full border-4 border-white/10 animate-pulse" />
                         ) : summary && overallStatus ? (
-                            <div className="bg-white rounded-2xl p-6 shadow-2xl">
+                            <div className="bg-white rounded-sm p-6 shadow-2xl">
                                 <p className="text-center text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
                                     Barangay-wide average
                                 </p>
@@ -259,7 +259,7 @@ const Landing = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="contact_info">Contact number or email (optional)</Label>
-                                    <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} maxLength="11" placeholder="09xx xxx xxxx" />
+                                    <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} minLength="11" placeholder="09xx xxx xxxx" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="message">Your concern</Label>

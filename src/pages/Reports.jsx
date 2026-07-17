@@ -209,7 +209,7 @@ const Reports = () => {
                                 )}
                             </div>
                         ) : (
-                            <div className={`grid grid-cols-${isResident ? '[repeat(auto-fit,minmax(550px,290px))]' : '[repeat(auto-fit,minmax(220px,290px))]'} justify-center gap-4`}>
+                            <div className={`grid grid-cols-${isResident ? '[repeat(auto-fit,minmax(220px,290px))]' : '[repeat(auto-fit,minmax(220px,290px))] '} justify-center gap-4`}>
                                 {filteredReports.map((r) => {
                                     const statusStyle = getStatusStyle(r.status)
                                     const Icon = statusStyle.icon
@@ -248,7 +248,7 @@ const Reports = () => {
                                                         <select
                                                             value={r.status}
                                                             onChange={(e) => handleStatusUpdate(r.id, e.target.value)}
-                                                            className={`${statusStyle.bg} ${statusStyle.color} border-0 rounded-full px-3 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
+                                                            className={`${statusStyle.bg} ${statusStyle.color} border-0  px-3 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
                                                         >
                                                             <option value="pending">Pending</option>
                                                             <option value="investigating">Investigating</option>

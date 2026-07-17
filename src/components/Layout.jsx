@@ -8,10 +8,12 @@ const Layout = ({ children }) => {
 
     return (
         <div className="relative flex min-h-screen bg-gray-100 overflow-hidden">
-            <div className="pointer-events-none fixed inset-30 flex items-center justify-center opacity-10 pl-70">
+            <div className={`pointer-events-none fixed inset-30 flex items-center justify-center opacity-10 ${isResident ? 'pl-15' : 'pl-70'}`}>
                 <img
                     src="/assets/logo.webp"
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     className="w-[1000px] max-w-[50vw] object-contain"
                 />
             </div>

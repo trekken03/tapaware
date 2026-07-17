@@ -183,7 +183,7 @@ const TdsReadings = () => {
                                             <div className="flex-1 flex flex-col h-full">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="text-2xl">{r.owner_name}</span>
-                                                    <span className={`${status.bg} ${status.color} px-3 py-1 rounded-full text-xs font-semibold`}>
+                                                    <span className={`${status.bg} ${status.color} px-3 py-1 text-xs font-semibold`}>
                                                         {status.label}
                                                     </span>
                                                 </div>

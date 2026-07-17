@@ -557,7 +557,7 @@ const Analytics = () => {
                                         <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
                                         <td className="py-3 px-4 text-sm font-semibold">Purok {row.purok}</td>
                                         <td className="py-3 px-4">
-                                            <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
+                                            <span className="bg-blue-100 text-blue-700 px-2 py-1  text-xs font-semibold capitalize">
                                                 {row.issue_type}
                                             </span>
                                         </td>

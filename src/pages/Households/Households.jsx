@@ -175,7 +175,7 @@ const Households = () => {
                                             <div className="flex-1 flex flex-col h-full">
                                                 <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                                                     <span className="text-2xl break-words">{h.owner_name}</span>
-                                                    <span className={`${status.bg} ${status.color} px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap`}>
+                                                    <span className={`${status.bg} ${status.color} px-3 py-1 text-xs font-semibold whitespace-nowrap`}>
                                                         {status.label}
                                                     </span>
                                                 </div>

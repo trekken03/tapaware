@@ -218,14 +218,14 @@ const AdminPanel = () => {
                                                     <td className="py-3 px-4 text-sm text-black break-all">{u.email}</td>
                                                     <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                                                         {u.id === currentUser.id ? (
-                                                            <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1 rounded-full text-xs font-semibold capitalize`}>
+                                                            <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1  text-xs font-semibold capitalize`}>
                                                                 {u.role}
                                                             </span>
                                                         ) : (
                                                             <select
                                                                 value={u.role}
                                                                 onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                                className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
+                                                                className={`${roleStyle.bg} ${roleStyle.color} border-0  px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
                                                             >
                                                                 <option value="resident">Resident</option>
                                                                 <option value="staff">Staff</option>
@@ -274,11 +274,11 @@ const AdminPanel = () => {
                                 {filteredResidents.map((u, index) => {
                                     const roleStyle = getRoleStyle(u.role)
                                     return (
-                                        <div key={u.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm  cursor-pointer hover:bg-gray-200" onClick={() => navigate(`/admin/users/${u.id}`)}>
+                                        <div key={u.id} className=" border border-gray-200 bg-gray-50 p-4 shadow-sm  cursor-pointer hover:bg-gray-200" onClick={() => navigate(`/admin/users/${u.id}`)}>
                                             <div className="flex items-center justify-between gap-2 mb-2">
                                                 <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
                                                 {u.id === currentUser.id ? (
-                                                    <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1 rounded-full text-xs font-semibold capitalize`}>
+                                                    <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1  text-xs font-semibold capitalize`}>
                                                         {u.role}
                                                     </span>
                                                 ) : (
@@ -286,7 +286,7 @@ const AdminPanel = () => {
                                                         <select
                                                             value={u.role}
                                                             onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                            className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none`}
+                                                            className={`${roleStyle.bg} ${roleStyle.color} border-0  px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none`}
                                                         >
                                                             <option value="resident">Resident</option>
                                                             <option value="staff">Staff</option>
@@ -383,7 +383,7 @@ const AdminPanel = () => {
                                                     <td className="py-3 px-4 text-sm text-black break-all">{u.email}</td>
                                                     <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                                                         {u.id === currentUser.id ? (
-                                                            <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1 rounded-full text-xs font-semibold capitalize`}>
+                                                            <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1  text-xs font-semibold capitalize`}>
                                                                 {u.role}
                                                             </span>
                                                         ) : (
@@ -393,7 +393,7 @@ const AdminPanel = () => {
                                                             <select
                                                                 value={u.role}
                                                                 onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                                className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
+                                                                className={`${roleStyle.bg} ${roleStyle.color} border-0  px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
                                                             >
                                                                 <option value="resident">Resident</option>
                                                                 <option value="staff">Staff</option>
@@ -444,12 +444,12 @@ const AdminPanel = () => {
                                         <div
                                             key={u.id}
                                             onClick={() => navigate(`/admin/users/${u.id}`)}
-                                            className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm cursor-pointer hover:bg-gray-100 transition-colors"
+                                            className=" border border-gray-200 bg-gray-50 p-4 shadow-sm cursor-pointer hover:bg-gray-100 transition-colors"
                                         >
                                             <div className="flex items-center justify-between gap-2 mb-2">
                                                 <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
                                                 {u.id === currentUser.id ? (
-                                                    <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1 rounded-full text-xs font-semibold capitalize`}>
+                                                    <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1  text-xs font-semibold capitalize`}>
                                                         {u.role}
                                                     </span>
                                                 ) : (
@@ -457,7 +457,7 @@ const AdminPanel = () => {
                                                         <select
                                                             value={u.role}
                                                             onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                            className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none`}
+                                                            className={`${roleStyle.bg} ${roleStyle.color} border-0  px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none`}
                                                         >
                                                             <option value="resident">Resident</option>
                                                             <option value="staff">Staff</option>
@@ -539,7 +539,7 @@ const AdminPanel = () => {
                                                             <td className="py-3 px-4 text-sm">Purok {f.purok}</td>
                                                             <td className="py-3 px-4 text-sm capitalize">{f.issue_type}</td>
                                                             <td className="py-3 px-4">
-                                                                <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
+                                                                <span className="bg-red-100 text-red-700 px-2 py-1 text-xs font-semibold">
                                                                     {f.times_reported}x
                                                                 </span>
                                                             </td>
@@ -547,7 +547,7 @@ const AdminPanel = () => {
                                                                 <select
                                                                     value={f.status}
                                                                     onChange={(e) => handleFlagStatusUpdate(f.id, e.target.value)}
-                                                                    className="bg-red-100 text-red-700 border-0 rounded-full px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
+                                                                    className="bg-red-100 text-red-700 border-0  px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
                                                                 >
                                                                     <option value="active" >Active</option>
                                                                     <option value="resolved">Resolved</option>
@@ -561,10 +561,10 @@ const AdminPanel = () => {
 
                                         <div className="space-y-3 md:hidden">
                                             {flagged.map((f, index) => (
-                                                <div key={f.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                                                <div key={f.id} className=" border border-gray-200 bg-gray-50 p-4 shadow-sm">
                                                     <div className="flex items-center justify-between gap-2 mb-2">
                                                         <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
-                                                        <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">
+                                                        <span className=" bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">
                                                             {f.times_reported}x
                                                         </span>
                                                     </div>
@@ -578,7 +578,7 @@ const AdminPanel = () => {
                                                             <select
                                                                 value={f.status}
                                                                 onChange={(e) => handleFlagStatusUpdate(f.id, e.target.value)}
-                                                                className="bg-red-100 text-red-700 border-0 rounded-full px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
+                                                                className="bg-red-100 text-red-700 border-0  px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
                                                             >
                                                                 <option value="active">Active</option>
                                                                 <option value="resolved">Resolved</option>
@@ -653,7 +653,7 @@ const AdminPanel = () => {
                                                 <div
                                                     key={c.id}
                                                     onClick={() => navigate(`/admin/concerns/${c.id}`)}
-                                                    className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm cursor-pointer hover:bg-gray-100 transition-colors"
+                                                    className=" border border-gray-200 bg-gray-50 p-4 shadow-sm cursor-pointer hover:bg-gray-100 transition-colors"
                                                 >
                                                     <div className="flex items-center justify-between gap-2 mb-2">
                                                         <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>

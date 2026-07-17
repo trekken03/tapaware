@@ -180,12 +180,12 @@ const AdminDashboard = () => {
                                                     <td className="py-3 px-4 text-sm">Purok {flag.purok}</td>
                                                     <td className="py-3 px-4 text-sm capitalize">{flag.issue_type}</td>
                                                     <td className="py-3 px-4 text-sm">
-                                                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
+                                                        <span className="bg-red-100 text-red-700 px-2 py-1  text-xs font-semibold">
                                                             {flag.times_reported}x
                                                         </span>
                                                     </td>
                                                     <td className="py-3 px-4 text-sm">
-                                                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
+                                                        <span className="bg-red-100 text-red-700 px-2 py-1 text-xs font-semibold capitalize">
                                                             {flag.status}
                                                         </span>
                                                     </td>
@@ -197,10 +197,10 @@ const AdminDashboard = () => {
 
                                 <div className="space-y-3 md:hidden">
                                     {flagged.map((flag) => (
-                                        <div key={flag.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                                        <div key={flag.id} className="border border-gray-200 bg-gray-50 p-4 shadow-sm">
                                             <div className="flex items-center justify-between gap-2 mb-2">
                                                 <span className="text-sm font-semibold">#{flag.household_number}</span>
-                                                <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
+                                                <span className="bg-red-100 text-red-700 px-2 py-1 text-xs font-semibold">
                                                     {flag.times_reported}x
                                                 </span>
                                             </div>
@@ -210,7 +210,7 @@ const AdminDashboard = () => {
                                                 <div><span className="font-semibold text-gray-900">Issue:</span> <span className="capitalize">{flag.issue_type}</span></div>
                                                 <div>
                                                     <span className="font-semibold text-gray-900">Status:</span>{' '}
-                                                    <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-semibold capitalize">
+                                                    <span className="bg-red-100 text-red-700 px-2 py-0.5  text-xs font-semibold capitalize">
                                                         {flag.status}
                                                     </span>
                                                 </div>
