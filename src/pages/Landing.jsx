@@ -259,7 +259,7 @@ const Landing = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="contact_info">Contact number or email (optional)</Label>
-                                    <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} maxlength="11" placeholder="09xx xxx xxxx" />
+                                    <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} maxLength="11" placeholder="09xx xxx xxxx" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="message">Your concern</Label>

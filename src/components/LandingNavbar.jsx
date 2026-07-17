@@ -65,7 +65,7 @@ const LandingNavbar = () => {
                     className="flex items-center gap-2 text-white"
                 >
                     <img
-                        src="/assets/logo.jpg"
+                        src="/assets/logo.webp"
                         alt="TapAware logo"
                         className="w-9 h-9 object-contain rounded-full"
                     />

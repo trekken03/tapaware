@@ -1,20 +1,28 @@
-import Sidebar from './Sidebar';
+import { useAuth } from '@/context/AuthContext'
+import Sidebar from './Sidebar'
+import ResidentNavbar from './ResidentNavbar'
 
 const Layout = ({ children }) => {
+    const { user } = useAuth()
+    const isResident = user?.role === 'resident'
+
     return (
         <div className="relative flex min-h-screen bg-gray-100 overflow-hidden">
             <div className="pointer-events-none fixed inset-30 flex items-center justify-center opacity-10 pl-70">
                 <img
-                    src="/assets/logo.jpg"
+                    src="/assets/logo.webp"
                     alt=""
                     className="w-[1000px] max-w-[50vw] object-contain"
                 />
             </div>
 
-            <Sidebar />
+            {isResident ? <ResidentNavbar /> : <Sidebar />}
 
-            <div className="relative z-10 flex-1 lg:ml-64 flex flex-col min-h-screen">
-                <main className="flex-1 p-4 pt-24 sm:p-6 lg:p-8 lg:pt-8">
+            <div
+                className={`relative z-10 flex-1 flex flex-col min-h-screen ${isResident ? 'pt-16' : 'lg:ml-64'
+                    }`}
+            >
+                <main className={`flex-1 p-4 sm:p-6 lg:p-8 ${isResident ? '' : 'pt-24 lg:pt-8'}`}>
                     {children}
                 </main>
 

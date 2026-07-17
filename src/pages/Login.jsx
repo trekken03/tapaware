@@ -52,7 +52,7 @@ const Login = () => {
             <LandingNavbar />
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
                 <img
-                    src="/assets/logo.jpg"
+                    src="/assets/logo.webp"
                     alt=""
                     className="w-[700px] opacity-10 object-contain"
                 />
@@ -62,7 +62,7 @@ const Login = () => {
                 <div className="flex flex-col items-center mb-6">
                     <div className="flex items-center justify-center gap-2">
                         <img
-                            src="/assets/logo.jpg"
+                            src="/assets/logo.webp"
                             onClick={() => navigate('/')}
                             alt="logo"
                             className="w-10 h-10 object-contain hover:cursor-pointer "

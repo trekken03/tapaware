@@ -209,7 +209,7 @@ const Reports = () => {
                                 )}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,290px))] gap-4">
+                            <div className={`grid grid-cols-${isResident ? '[repeat(auto-fit,minmax(550px,290px))]' : '[repeat(auto-fit,minmax(220px,290px))]'} justify-center gap-4`}>
                                 {filteredReports.map((r) => {
                                     const statusStyle = getStatusStyle(r.status)
                                     const Icon = statusStyle.icon
@@ -224,10 +224,7 @@ const Reports = () => {
 
                                             <div className="flex-1 flex flex-col h-full">
                                                 <div className="flex items-center justify-between mb-2 font-semibold">
-                                                    <span className="text-black-600 text-2xl">{r.owner_name}</span>
-                                                    <p className=" px-3 py-1 rounded-full font-semibold capitalize">
-                                                        {r.issue_type}
-                                                    </p>
+                                                    <span className={`text-black-600 ${isResident ? 'text-1xl' : 'text-2xl'} capitalize`}>{r.issue_type}</span>
 
                                                 </div>
 

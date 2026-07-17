@@ -156,7 +156,7 @@ const Sidebar = () => {
             <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-blue-950 flex items-center justify-between px-4 z-40">
                 <div className="flex items-center gap-2">
                     <img
-                        src="/assets/logo.jpg"
+                        src="/assets/logo.webp"
 
                         alt="logo"
                         className="w-8 h-8 object-contain rounded-full"
@@ -193,7 +193,7 @@ const Sidebar = () => {
                 <div className="p-6 pb-4">
                     <div onClick={() => navigate('/')} className="flex items-center gap-3 hover:cursor-pointer">
                         <img
-                            src="/assets/logo.jpg"
+                            src="/assets/logo.webp"
 
                             alt="logo"
                             className="w-10 h-10 object-contain rounded-full"

@@ -19,7 +19,7 @@ const COLORS = ['#1e40af', '#dc2626', '#16a34a', '#d97706', '#7c3aed']
 // Logo lives in public/assets, so it's referenced by URL path (not imported
 // as a module). Cached after first load so repeated PDF exports don't
 // re-fetch it every time.
-const LOGO_SRC = '/assets/logo.jpg'
+const LOGO_SRC = '/assets/logo.webp'
 let cachedLogoImage = null
 
 const loadLogoImage = () => {

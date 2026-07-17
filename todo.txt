@@ -36,3 +36,4 @@ through so that the system also knows when are these issues keep happening
 -domain
 
 VITE_API_URL=https://backend-production-cfb9.up.railway.app/api
+

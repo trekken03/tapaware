@@ -216,25 +216,21 @@ const AdminPanel = () => {
                                                     <td className="py-3 px-4 text-sm text-black">{index + 1}</td>
                                                     <td className="py-3 px-4 text-sm font-semibold">{u.name}</td>
                                                     <td className="py-3 px-4 text-sm text-black break-all">{u.email}</td>
-                                                    <td className="py-3 px-4">
+                                                    <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                                                         {u.id === currentUser.id ? (
                                                             <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1 rounded-full text-xs font-semibold capitalize`}>
                                                                 {u.role}
                                                             </span>
                                                         ) : (
-                                                            <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
-                                                                {/* role select/badge */}
-
-                                                                <select
-                                                                    value={u.role}
-                                                                    onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                                    className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
-                                                                >
-                                                                    <option value="resident">Resident</option>
-                                                                    <option value="staff">Staff</option>
-                                                                    <option value="admin">Admin</option>
-                                                                </select>
-                                                            </td>
+                                                            <select
+                                                                value={u.role}
+                                                                onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
+                                                                className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
+                                                            >
+                                                                <option value="resident">Resident</option>
+                                                                <option value="staff">Staff</option>
+                                                                <option value="admin">Admin</option>
+                                                            </select>
                                                         )}
                                                     </td>
                                                     <td className="py-3 px-4 text-sm text-black">{u.household_number}</td>
@@ -286,9 +282,7 @@ const AdminPanel = () => {
                                                         {u.role}
                                                     </span>
                                                 ) : (
-                                                    <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
-                                                        {/* role select/badge */}
-
+                                                    <div onClick={(e) => e.stopPropagation()}>
                                                         <select
                                                             value={u.role}
                                                             onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
@@ -298,7 +292,7 @@ const AdminPanel = () => {
                                                             <option value="staff">Staff</option>
                                                             <option value="admin">Admin</option>
                                                         </select>
-                                                    </td>
+                                                    </div>
                                                 )}
                                             </div>
                                             <div className="space-y-1.5 text-sm text-gray-700">
@@ -387,25 +381,25 @@ const AdminPanel = () => {
                                                     <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
                                                     <td className="py-3 px-4 text-sm font-semibold">{u.name}</td>
                                                     <td className="py-3 px-4 text-sm text-black break-all">{u.email}</td>
-                                                    <td className="py-3 px-4">
+                                                    <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                                                         {u.id === currentUser.id ? (
                                                             <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1 rounded-full text-xs font-semibold capitalize`}>
                                                                 {u.role}
                                                             </span>
                                                         ) : (
-                                                            <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
 
 
-                                                                <select
-                                                                    value={u.role}
-                                                                    onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                                    className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
-                                                                >
-                                                                    <option value="resident">Resident</option>
-                                                                    <option value="staff">Staff</option>
-                                                                    <option value="admin">Admin</option>
-                                                                </select>
-                                                            </td>
+
+                                                            <select
+                                                                value={u.role}
+                                                                onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
+                                                                className={`${roleStyle.bg} ${roleStyle.color} border-0 rounded-full px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
+                                                            >
+                                                                <option value="resident">Resident</option>
+                                                                <option value="staff">Staff</option>
+                                                                <option value="admin">Admin</option>
+                                                            </select>
+
                                                         )}
                                                     </td>
                                                     <td className="py-3 px-4 text-sm text-black">
@@ -447,7 +441,11 @@ const AdminPanel = () => {
                                 {filteredStaff.map((u, index) => {
                                     const roleStyle = getRoleStyle(u.role)
                                     return (
-                                        <div key={u.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                                        <div
+                                            key={u.id}
+                                            onClick={() => navigate(`/admin/users/${u.id}`)}
+                                            className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm cursor-pointer hover:bg-gray-100 transition-colors"
+                                        >
                                             <div className="flex items-center justify-between gap-2 mb-2">
                                                 <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
                                                 {u.id === currentUser.id ? (
@@ -455,11 +453,7 @@ const AdminPanel = () => {
                                                         {u.role}
                                                     </span>
                                                 ) : (
-                                                    <tr
-                                                        key={u.id}
-                                                        onClick={() => navigate(`/admin/users/${u.id}`)}
-                                                        className="bg-white cursor-pointer hover:bg-gray-50 transition-colors"
-                                                    >
+                                                    <div onClick={(e) => e.stopPropagation()}>
                                                         <select
                                                             value={u.role}
                                                             onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
@@ -469,7 +463,7 @@ const AdminPanel = () => {
                                                             <option value="staff">Staff</option>
                                                             <option value="admin">Admin</option>
                                                         </select>
-                                                    </tr>
+                                                    </div>
                                                 )}
                                             </div>
                                             <div className="space-y-1.5 text-sm text-gray-700">
@@ -478,7 +472,7 @@ const AdminPanel = () => {
                                                 <div><span className="font-semibold text-gray-900">Joined:</span> {new Date(u.created_at).toLocaleDateString()}</div>
                                             </div>
                                             {u.id !== currentUser.id && (
-                                                <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation}>
+                                                <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"

@@ -218,7 +218,7 @@ const Profile = () => {
                                         type={showPassword ? 'text' : 'password'}
                                         placeholder="Enter current password"
                                         value={passwordForm.currentPassword}
-                                        maxlength="20"
+                                        maxLength="20"
                                         onChange={handlePasswordChange}
                                         required
                                     />
@@ -241,8 +241,8 @@ const Profile = () => {
                                             type={showPassword1 ? 'text' : 'password'}
                                             placeholder="At least 6 characters"
                                             value={passwordForm.newPassword}
-                                            minlength="6"
-                                            maxlength="20"
+                                            minLength="6"
+                                            maxLength="20"
                                             onChange={handlePasswordChange}
                                             required
                                         />
@@ -264,8 +264,8 @@ const Profile = () => {
                                             name="confirmPassword"
                                             type={showPassword2 ? 'text' : 'password'}
                                             placeholder="Re-enter new password"
-                                            minlength="6"
-                                            maxlength="20"
+                                            minLength="6"
+                                            maxLength="20"
                                             value={passwordForm.confirmPassword}
                                             onChange={handlePasswordChange}
                                             required
