@@ -12,15 +12,17 @@ import {
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { useLocation } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext'
 
 const Landing = () => {
     const [purokData, setPurokData] = useState([])
     const [summary, setSummary] = useState(null)
     const [loading, setLoading] = useState(true)
-
     const [form, setForm] = useState({ name: '', contact_info: '', purok: '', message: '' })
     const [submitting, setSubmitting] = useState(false)
     const location = useLocation();
+    const { user } = useAuth();
+    const isResident = user?.role === 'resident';
 
     useEffect(() => {
         fetchData()
@@ -107,7 +109,7 @@ const Landing = () => {
                                 variant="outline"
                                 className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white hover:cursor-pointer"
                             >
-                                Report a Concern
+                                {isResident ? 'Submit Report' : 'Report a Concern'}
                             </Button>
                         </div>
                     </div>
@@ -211,25 +213,32 @@ const Landing = () => {
 
             {/* CONTACT / CONCERN FORM */}
             <section id="contact" className="py-20 bg-white">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-12">
-                    <div>
-                        <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600">Contact</span>
+
+                <div className={`${user ? 'max-w-3xl mx-auto px-4 sm:px-6 text-center' : 'max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-12'}`}>
+
+                    <div className="flex flex-col items-center text-center">
+                        <span className="text-1xl font-semibold uppercase tracking-widest text-cyan-600">
+                            Contact
+                        </span>
+
                         <h2 className="text-3xl font-black tracking-tight text-[#0a1a33] mt-2 mb-4">
                             Noticed something off?
                         </h2>
-                        <p className="text-gray-600 leading-relaxed mb-8">
+
+                        <p className="text-gray-600 leading-relaxed mb-8 max-w-lg">
                             Any resident of Barangay Cabalantian can raise a water quality concern here —
                             you don't need an account. Barangay staff review every submission.
                         </p>
 
                         <div className="space-y-4">
-                            <div className="flex items-center gap-3 text-gray-700">
+                            <div className="flex items-center  gap-3 text-gray-700">
                                 <div className="w-9 h-9 rounded-full bg-cyan-50 flex items-center justify-center shrink-0">
                                     <Mail size={16} className="text-cyan-600" />
                                 </div>
                                 <span className="text-sm">cabalantian.tapaware@gmail.com</span>
                             </div>
-                            <div className="flex items-center gap-3 text-gray-700">
+
+                            <div className="flex items-center justify-center gap-3 text-gray-700">
                                 <div className="w-9 h-9 rounded-full bg-cyan-50 flex items-center justify-center shrink-0">
                                     <Users size={16} className="text-cyan-600" />
                                 </div>
@@ -237,49 +246,52 @@ const Landing = () => {
                             </div>
                         </div>
                     </div>
+                    {!user && (
+                        <Card className="shadow-md">
+                            <CardContent className="pt-6">
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div className="grid sm:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="name">Name (optional)</Label>
+                                            <Input id="name" name="name" value={form.name} onChange={handleChange} placeholder="Juan Dela Cruz" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="purok">Purok</Label>
+                                            <select
+                                                id="purok" name="purok" value={form.purok} onChange={handleChange}
+                                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm h-10 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                            >
+                                                <option value="">Select purok...</option>
+                                                {[1, 2, 3, 4, 5, 6].map(p => <option key={p} value={p}>{p}</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="contact_info">Contact number or email (optional)</Label>
+                                        <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} minLength="11" placeholder="09xx xxx xxxx" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="message">Your concern</Label>
+                                        <textarea
+                                            id="message" name="message" value={form.message} onChange={handleChange}
+                                            required rows={4} placeholder="Describe what you noticed..."
+                                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-vertical"
+                                        />
+                                    </div>
+                                    <Button
+                                        type="submit"
+                                        disabled={submitting}
+                                        className="w-full bg-[#0a1a33] hover:bg-gray-700 text-white gap-2 hover:cursor-pointer"
+                                    >
+                                        <Send size={16} />
+                                        {submitting ? 'Sending...' : 'Submit Concern'}
+                                    </Button>
+                                </form>
+                            </CardContent>
+                        </Card>
 
-                    <Card className="shadow-md">
-                        <CardContent className="pt-6">
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="grid sm:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name">Name (optional)</Label>
-                                        <Input id="name" name="name" value={form.name} onChange={handleChange} placeholder="Juan Dela Cruz" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="purok">Purok</Label>
-                                        <select
-                                            id="purok" name="purok" value={form.purok} onChange={handleChange}
-                                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm h-10 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                        >
-                                            <option value="">Select purok...</option>
-                                            {[1, 2, 3, 4, 5, 6].map(p => <option key={p} value={p}>{p}</option>)}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="contact_info">Contact number or email (optional)</Label>
-                                    <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} minLength="11" placeholder="09xx xxx xxxx" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="message">Your concern</Label>
-                                    <textarea
-                                        id="message" name="message" value={form.message} onChange={handleChange}
-                                        required rows={4} placeholder="Describe what you noticed..."
-                                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-vertical"
-                                    />
-                                </div>
-                                <Button
-                                    type="submit"
-                                    disabled={submitting}
-                                    className="w-full bg-[#0a1a33] hover:bg-gray-700 text-white gap-2 hover:cursor-pointer"
-                                >
-                                    <Send size={16} />
-                                    {submitting ? 'Sending...' : 'Submit Concern'}
-                                </Button>
-                            </form>
-                        </CardContent>
-                    </Card>
+                    )}
+
                 </div>
             </section>
 

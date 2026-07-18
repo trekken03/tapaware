@@ -15,7 +15,7 @@ const Reports = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const navigate = useNavigate()
     const { user } = useAuth()
-    const [searchParams] = useSearchParams()
+    const [searchParams, setSearchParams] = useSearchParams()
     const [selectedPurok, setSelectedPurok] = useState('all');
     const statusFilter = searchParams.get('status')
 
@@ -39,6 +39,14 @@ const Reports = () => {
             toast.error('Failed to fetch reports')
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handleStatusFilterChange = (value) => {
+        if (value === 'all') {
+            setSearchParams({})
+        } else {
+            setSearchParams({ status: value })
         }
     }
 
@@ -164,8 +172,7 @@ const Reports = () => {
                             <div className="flex items-center gap-3">
                                 {/* Purok spinner */}
                                 {!isResident && (
-
-                                    < select
+                                    <select
                                         value={selectedPurok}
                                         onChange={(e) => setSelectedPurok(e.target.value)}
                                         className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -176,6 +183,20 @@ const Reports = () => {
                                                 Purok {purok}
                                             </option>
                                         ))}
+                                    </select>
+                                )}
+
+                                {/* Status spinner */}
+                                {isResident && (
+                                    <select
+                                        value={statusFilter || 'all'}
+                                        onChange={(e) => handleStatusFilterChange(e.target.value)}
+                                        className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="all">All</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="investigating">Investigating</option>
+                                        <option value="resolved">Resolved</option>
                                     </select>
                                 )}
 

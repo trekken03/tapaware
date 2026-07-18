@@ -28,6 +28,8 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError('')
@@ -35,10 +37,12 @@ const Login = () => {
 
         try {
             const res = await API.post('/auth/login', { email, password });
+            const role = res.data.user.role;
+
 
             login(res.data.token, res.data.user);
-            navigate('/dashboard');
-            toast.success('Welcome back')
+            navigate(role === "resident" ? "/reports" : "/dashboard");
+            toast.success('Welcome back! ' + res.data.user.name + '!')
         } catch (err) {
             setError(err.response?.data?.message || 'Something went wrong')
         } finally {
