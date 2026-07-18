@@ -7,7 +7,7 @@ const sendEmail = require('../utils/emailSender');
 
 
 exports.register = async (req, res) => {
-    const { name, email, role, household_id, household_number, purok, password } = req.body;
+    const { name, email, role, household_id, household_number, purok, address, password } = req.body;
     const currentUser = req.user;
 
     try {
@@ -37,10 +37,21 @@ exports.register = async (req, res) => {
 
             if (existingHousehold.length > 0) {
                 finalHouseholdId = existingHousehold[0].id;
+
+                const [existingResident] = await db.query(
+                    `SELECT id FROM users WHERE household_id = ? AND role = 'resident'`,
+                    [finalHouseholdId]
+                );
+
+                if (existingResident.length > 0) {
+                    return res.status(400).json({
+                        message: `Household #${houseNum} in Purok ${purokNum} already has a resident account linked to it. Please use a different household number or purok.`
+                    });
+                }
             } else {
                 const [newHousehold] = await db.query(
                     'INSERT INTO households(household_number, purok, owner_name, address) VALUES (?,?,?,?)',
-                    [houseNum, purokNum, name, '']
+                    [houseNum, purokNum, name, address || '']
                 );
                 finalHouseholdId = newHousehold.insertId;
             }
@@ -85,8 +96,12 @@ exports.register = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
 
+    if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        return res.status(400).json({ message: 'Please provide a valid email address' });
+    }
+
     try {
-        const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+        const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email.trim()]);
 
         // Always respond the same way, whether the email exists or not.
         // This prevents someone from using this form to check which emails are registered.
@@ -259,10 +274,22 @@ exports.updateProfile = async (req, res) => {
             return res.status(400).json({ message: 'Email already in use by another account' });
         }
 
+        const [[currentUserRow]] = await db.query(
+            'SELECT household_id, role FROM users WHERE id = ?',
+            [userId]
+        );
+
         await db.query(
             'UPDATE users SET name = ?, email = ? WHERE id = ?',
             [name, email, userId]
         );
+
+        if (currentUserRow.role === 'resident' && currentUserRow.household_id) {
+            await db.query(
+                'UPDATE households SET owner_name = ? WHERE id = ?',
+                [name, currentUserRow.household_id]
+            );
+        }
 
         await auditLog({
             user_id: userId,

@@ -19,7 +19,8 @@ const AddUser = () => {
         password: '',
         role: 'resident',
         household_number: '',
-        purok: ''
+        purok: '',
+        adress: ''
     })
 
     const handleChange = (e) => {
@@ -39,7 +40,8 @@ const AddUser = () => {
                 password: form.password,
                 role: form.role,
                 household_number: form.role === 'resident' && form.household_number ? parseInt(form.household_number, 10) : null,
-                purok: form.role === 'resident' && form.purok ? parseInt(form.purok, 10) : null
+                purok: form.role === 'resident' && form.purok ? parseInt(form.purok, 10) : null,
+                address: form.role === 'resident' ? form.address : null
             }
 
             console.log('Submitting user data:', submitData)
@@ -107,8 +109,8 @@ const AddUser = () => {
                                             type={showPassword ? 'text' : 'password'}
                                             placeholder="Enter password"
                                             value={form.password}
-                                            minlength="6"
-                                            maxlength="20"
+                                            minLength="6"
+                                            maxLength="20"
                                             className="pr-10"
                                             onChange={handleChange}
                                             required
@@ -194,7 +196,7 @@ const AddUser = () => {
                                         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         <option value="">Select purok...</option>
-                                        {[1, 2, 3, 4, 5, 6, 7].map(p => (
+                                        {[1, 2, 3, 4, 5, 6].map(p => (
                                             <option key={p} value={p}>{p}</option>
                                         ))}
                                     </select>

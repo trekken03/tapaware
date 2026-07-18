@@ -286,7 +286,7 @@ const Homepage = () => {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="contact_info">Contact number or email (optional)</Label>
-                                        <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} minLength="11" placeholder="09xx xxx xxxx" />
+                                        <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} minLength="11" placeholder="09xx xxx xxxx or juandelacruz@gmail.com" />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="message">Your concern</Label>

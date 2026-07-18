@@ -129,6 +129,17 @@ exports.updateUserInfo = async (req, res) => {
 
             if (existingHousehold.length > 0) {
                 finalHouseholdId = existingHousehold[0].id;
+
+                const [existingResident] = await db.query(
+                    `SELECT id FROM users WHERE household_id = ? AND role = 'resident' AND id != ?`,
+                    [finalHouseholdId, id]
+                );
+
+                if (existingResident.length > 0) {
+                    return res.status(400).json({
+                        message: `Household #${houseNum} in Purok ${purokNum} already has a resident account linked to it. Please use a different household number or purok.`
+                    });
+                }
             } else {
                 const [newHousehold] = await db.query(
                     'INSERT INTO households(household_number, purok, owner_name, address) VALUES (?,?,?,?)',
@@ -143,6 +154,12 @@ exports.updateUserInfo = async (req, res) => {
             [name, email, finalHouseholdId, id]
         );
 
+        if (existing[0].role === 'resident' && finalHouseholdId) {
+            await db.query(
+                'UPDATE households SET owner_name = ? WHERE id = ?',
+                [name, finalHouseholdId]
+            );
+        }
         await auditLog({
             user_id: currentUser.id,
             user_name: currentUser.name,
