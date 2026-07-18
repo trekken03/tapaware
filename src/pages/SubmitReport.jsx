@@ -80,7 +80,7 @@ const SubmitReport = () => {
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate('/reports')}
+                        onClick={() => navigate(-1)}
                         className="flex items-center gap-2"
                     >
                         <ArrowLeft size={16} />

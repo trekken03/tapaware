@@ -70,11 +70,11 @@ const LandingNavbar = () => {
 
                 {/* Desktop */}
                 <div className="hidden md:flex items-center gap-4">
-                    {navLinks.map((link) => (
+                    {(user ? navLinks.filter(link => link.id === 'home') : navLinks).map((link) => (
                         <button
                             key={link.id}
                             onClick={() => goToSection(link.id)}
-                            className="text-sm font-medium text-blue-100 hover:text-white transition-colors"
+                            className="text-sm font-medium text-blue-100 hover:text-white transition-colors hover:cursor-pointer"
                         >
                             {link.label}
                         </button>
@@ -83,20 +83,20 @@ const LandingNavbar = () => {
                     {isResident && (
                         <>
                             <button
-                                onClick={() => navigate('/profile')}
-                                className="text-sm font-medium text-blue-100 hover:text-white transition-colors"
-                            >
-                                Hi, {user.name}
-                            </button>
-                            <button
                                 onClick={() => navigate('/reports')}
-                                className="text-sm font-medium text-blue-100 hover:text-white transition-colors"
+                                className="text-sm font-medium text-blue-100 hover:text-white transition-colors hover:cursor-pointer"
                             >
                                 My Reports
                             </button>
+                            <button
+                                onClick={() => navigate('/profile')}
+                                className="text-sm font-medium text-blue-100 hover:text-white transition-colors hover:cursor-pointer underline underline-offset-4"
+                            >
+                                Hi, {user.name}
+                            </button>
                             <Button
                                 onClick={handleLogout}
-                                className="bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2"
+                                className="bg-blue-500 hover:bg-blue-400 text-slate-950 flex items-center gap-2 hover:cursor-pointer hover:text-white"
                             >
                                 <LogOut size={16} />
                                 Logout
@@ -146,7 +146,7 @@ const LandingNavbar = () => {
             {isOpen && (
                 <div className="md:hidden bg-[#0a1a33] border-t border-white/10 mt-3">
                     <div className="flex flex-col px-4 py-4 gap-1">
-                        {navLinks.map((link) => (
+                        {(user ? navLinks.filter(link => link.id === 'home') : navLinks).map((link) => (
                             <button
                                 key={link.id}
                                 onClick={() => goToSection(link.id)}
@@ -159,16 +159,16 @@ const LandingNavbar = () => {
                         {isResident && (
                             <>
                                 <button
-                                    onClick={() => { setIsOpen(false); navigate('/profile') }}
-                                    className="text-left py-2.5 text-blue-100 hover:text-white text-sm font-medium"
-                                >
-                                    Hi, {user.name}
-                                </button>
-                                <button
                                     onClick={() => { setIsOpen(false); navigate('/reports') }}
                                     className="text-left py-2.5 text-blue-100 hover:text-white text-sm font-medium"
                                 >
                                     My Reports
+                                </button>
+                                <button
+                                    onClick={() => { setIsOpen(false); navigate('/profile') }}
+                                    className="text-left py-2.5 text-blue-100 hover:text-white text-sm font-medium underline underline-offset-4"
+                                >
+                                    Hi, {user.name}
                                 </button>
                                 <Button onClick={handleLogout} className="mt-2 bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 justify-center">
                                     <LogOut size={16} />

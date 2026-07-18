@@ -11,10 +11,11 @@ import {
 } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
-import { useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext'
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 
-const Landing = () => {
+
+const Homepage = () => {
     const [purokData, setPurokData] = useState([])
     const [summary, setSummary] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -23,6 +24,7 @@ const Landing = () => {
     const location = useLocation();
     const { user } = useAuth();
     const isResident = user?.role === 'resident';
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchData()
@@ -94,7 +96,7 @@ const Landing = () => {
                         </h1>
                         <p className="text-blue-100 text-base sm:text-lg mb-8 max-w-md">
                             TapAware tracks water quality across every purok in the barangay,
-                            so residents always know where things stand — and can speak up when something's wrong.
+                            so residents always know where things stand, and can speak up when something's wrong.
                         </p>
                         <div className="flex flex-wrap gap-3">
                             <Button
@@ -104,13 +106,28 @@ const Landing = () => {
                                 View Water Quality
                                 <ArrowDown size={16} className="ml-1" />
                             </Button>
-                            <Button
-                                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                                variant="outline"
-                                className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white hover:cursor-pointer"
-                            >
-                                {isResident ? 'Submit Report' : 'Report a Concern'}
-                            </Button>
+                            {user ? (
+                                isResident && (<Button
+                                    onClick={() => navigate('/reports/add')}
+                                    variant="outline"
+                                    className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white hover:cursor-pointer"
+                                >
+                                    Submit Report
+                                </Button>
+                                )
+
+                            ) : (
+                                <Button
+                                    onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                                    variant="outline"
+                                    className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white hover:cursor-pointer"
+                                >
+                                    {isResident ? 'Submit Report' : 'Report a Concern'}
+                                </Button>
+
+                            )}
+
+
                         </div>
                     </div>
 
@@ -150,7 +167,7 @@ const Landing = () => {
                         <p className="text-gray-600 leading-relaxed">
                             TDS, or Total Dissolved Solids, measures the minerals and salts dissolved in drinking water,
                             measured in parts per million (ppm). It's one of the clearest early signs of a water quality
-                            problem — a sudden change usually means something in the system needs attention.
+                            problem, a sudden change usually means something in the system needs attention.
                         </p>
                     </div>
 
@@ -173,7 +190,7 @@ const Landing = () => {
                             <CardContent className="pt-6">
                                 <AlertTriangle className="text-red-600 mb-3" size={28} />
                                 <p className="font-bold text-gray-900 mb-1">1000+ ppm</p>
-                                <p className="text-sm text-gray-500">May need attention — this is when reports matter most.</p>
+                                <p className="text-sm text-gray-500">May need attention, this is when reports matter most.</p>
                             </CardContent>
                         </Card>
                     </div>
@@ -212,41 +229,42 @@ const Landing = () => {
             </section>
 
             {/* CONTACT / CONCERN FORM */}
-            <section id="contact" className="py-20 bg-white">
+            {!user && (
+                <section id="contact" className="py-20 bg-white">
 
-                <div className={`${user ? 'max-w-3xl mx-auto px-4 sm:px-6 text-center' : 'max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-12'}`}>
+                    <div className={`${user ? 'max-w-3xl mx-auto px-4 sm:px-6 text-center' : 'max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-12'}`}>
 
-                    <div className="flex flex-col items-center text-center">
-                        <span className="text-1xl font-semibold uppercase tracking-widest text-cyan-600">
-                            Contact
-                        </span>
+                        <div className="flex flex-col items-center text-center">
+                            <span className="text-1xl font-semibold uppercase tracking-widest text-cyan-600">
+                                Contact
+                            </span>
 
-                        <h2 className="text-3xl font-black tracking-tight text-[#0a1a33] mt-2 mb-4">
-                            Noticed something off?
-                        </h2>
+                            <h2 className="text-3xl font-black tracking-tight text-[#0a1a33] mt-2 mb-4">
+                                Noticed something off?
+                            </h2>
 
-                        <p className="text-gray-600 leading-relaxed mb-8 max-w-lg">
-                            Any resident of Barangay Cabalantian can raise a water quality concern here —
-                            you don't need an account. Barangay staff review every submission.
-                        </p>
+                            <p className="text-gray-600 leading-relaxed mb-8 max-w-lg">
+                                Any resident of Barangay Cabalantian can raise a water quality concern here,
+                                you don't need an account. Barangay staff review every submission.
+                            </p>
 
-                        <div className="space-y-4">
-                            <div className="flex items-center  gap-3 text-gray-700">
-                                <div className="w-9 h-9 rounded-full bg-cyan-50 flex items-center justify-center shrink-0">
-                                    <Mail size={16} className="text-cyan-600" />
+                            <div className="space-y-4">
+                                <div className="flex items-center  gap-3 text-gray-700">
+                                    <div className="w-9 h-9 rounded-full bg-cyan-50 flex items-center justify-center shrink-0">
+                                        <Mail size={16} className="text-cyan-600" />
+                                    </div>
+                                    <span className="text-sm">cabalantian.tapaware@gmail.com</span>
                                 </div>
-                                <span className="text-sm">cabalantian.tapaware@gmail.com</span>
-                            </div>
 
-                            <div className="flex items-center justify-center gap-3 text-gray-700">
-                                <div className="w-9 h-9 rounded-full bg-cyan-50 flex items-center justify-center shrink-0">
-                                    <Users size={16} className="text-cyan-600" />
+                                <div className="flex items-center justify-center gap-3 text-gray-700">
+                                    <div className="w-9 h-9 rounded-full bg-cyan-50 flex items-center justify-center shrink-0">
+                                        <Users size={16} className="text-cyan-600" />
+                                    </div>
+                                    <span className="text-sm">Barangay Cabalantian Hall, Bacolor, Pampanga</span>
                                 </div>
-                                <span className="text-sm">Barangay Cabalantian Hall, Bacolor, Pampanga</span>
                             </div>
                         </div>
-                    </div>
-                    {!user && (
+
                         <Card className="shadow-md">
                             <CardContent className="pt-6">
                                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -290,10 +308,11 @@ const Landing = () => {
                             </CardContent>
                         </Card>
 
-                    )}
 
-                </div>
-            </section>
+
+                    </div>
+                </section>
+            )}
 
             {/* FOOTER */}
             <footer className="bg-[#0a1a33] text-blue-200 py-8">
@@ -309,4 +328,4 @@ const Landing = () => {
     )
 }
 
-export default Landing
+export default Homepage

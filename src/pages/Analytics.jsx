@@ -49,6 +49,7 @@ const Analytics = () => {
     const [byPurok, setByPurok] = useState([])
     const [tdsTrend, setTdsTrend] = useState([])
     const [trendingIssues, setTrendingIssues] = useState([])
+    const [trendingByTime, setTrendingByTime] = useState([])
     const [loading, setLoading] = useState(true)
     const [isExporting, setIsExporting] = useState(false)
     const [exportError, setExportError] = useState('')
@@ -284,16 +285,18 @@ const Analytics = () => {
         setLoading(true)
         try {
             const params = { from: dateRange.from, to: dateRange.to }
-            const [issueRes, purokRes, trendRes, trendingRes] = await Promise.all([
+            const [issueRes, purokRes, trendRes, trendingRes, timeRes] = await Promise.all([
                 API.get('/analytics/reports-by-issue', { params }),
                 API.get('/analytics/reports-by-purok', { params }),
                 API.get('/analytics/tds-trend', { params }),
-                API.get('/analytics/trending-issues', { params })
+                API.get('/analytics/trending-issues', { params }),
+                API.get('/analytics/trending-by-time', { params })
             ])
             setByIssue(issueRes.data)
             setByPurok(purokRes.data)
             setTdsTrend(trendRes.data)
             setTrendingIssues(trendingRes.data)
+            setTrendingByTime(timeRes.data)
         } catch (error) {
             console.log('Error fetching analytics:', error)
             toast.error('Failed to load analytics data')
@@ -313,6 +316,20 @@ const Analytics = () => {
         }
         return acc
     }, [])
+
+    const topIssuePerTimeBucket = trendingByTime.reduce((acc, row) => {
+        if (!acc.find(item => item.time_bucket === row.time_bucket)) {
+            acc.push(row)
+        }
+        return acc
+    }, [])
+
+    const timeBucketLabels = {
+        morning: 'Morning (5am–11am)',
+        afternoon: 'Afternoon (11am–5pm)',
+        evening: 'Evening (5pm–9pm)',
+        night: 'Night (9pm–5am)',
+    }
 
     if (loading) {
         return (
@@ -571,8 +588,54 @@ const Analytics = () => {
                     )}
                 </CardContent>
             </Card>
+
+            {/* Trending issue per time of day */}
+            <Card className="mt-6">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                        <BarChart3 size={18} className="text-blue-600" />
+                        Trending Issue per Time of Day
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {topIssuePerTimeBucket.length === 0 ? (
+                        <p className="text-gray-500 text-sm text-center py-12">
+                            No reports recorded yet.
+                        </p>
+                    ) : (
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b">
+                                    {['#', 'Time of Day', 'Top Issue', 'Times Reported'].map(h => (
+                                        <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
+                                            {h}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {topIssuePerTimeBucket.map((row, index) => (
+                                    <tr key={row.time_bucket} className="bg-white">
+                                        <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
+                                        <td className="py-3 px-4 text-sm font-semibold">
+                                            {timeBucketLabels[row.time_bucket]}
+                                        </td>
+                                        <td className="py-3 px-4">
+                                            <span className="bg-blue-100 text-blue-700 px-2 py-1 text-xs font-semibold capitalize">
+                                                {row.issue_type}
+                                            </span>
+                                        </td>
+                                        <td className="py-3 px-4 text-sm font-semibold text-blue-600">
+                                            {row.count}x
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </CardContent>
+            </Card>
         </Layout>
     )
 }
-
 export default Analytics;

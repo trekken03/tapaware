@@ -177,7 +177,7 @@ exports.getReportsByPurokCount = async (req, res) => {
         const params = [];
 
         if (from && to) {
-            query += ` AND reports.created_at BETWEEN ? AND ?`;
+            query += ` WHERE reports.created_at BETWEEN ? AND ?`;
             params.push(from, `${to} 23:59:59`);
         }
 
@@ -202,6 +202,37 @@ exports.getTrendingIssuesByPurok = async (req, res) => {
         }
 
         query += ` GROUP BY households.purok, reports.issue_type ORDER BY households.purok ASC, count DESC`;
+        const [rows] = await db.query(query, params);
+        res.json(rows);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+exports.getTrendingIssuesByTime = async (req, res) => {
+    const { from, to } = req.query;
+    try {
+        let query = `SELECT
+                CASE
+                    WHEN HOUR(occurred_at) >= 5 AND HOUR(occurred_at) < 11 THEN 'morning'
+                    WHEN HOUR(occurred_at) >= 11 AND HOUR(occurred_at) < 17 THEN 'afternoon'
+                    WHEN HOUR(occurred_at) >= 17 AND HOUR(occurred_at) < 21 THEN 'evening'
+                    ELSE 'night'
+                END AS time_bucket,
+                issue_type,
+                COUNT(*) as count
+            FROM reports`;
+        const params = [];
+
+        if (from && to) {
+            query += ` WHERE created_at BETWEEN ? AND ?`;
+            params.push(from, `${to} 23:59:59`);
+        }
+
+        query += ` GROUP BY time_bucket, issue_type
+            ORDER BY FIELD(time_bucket, 'morning','afternoon','evening','night'), count DESC`;
+
         const [rows] = await db.query(query, params);
         res.json(rows);
     }

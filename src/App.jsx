@@ -21,7 +21,7 @@ const ReportDetail = lazy(() => import('./pages/ReportDetail'));
 const EditUser = lazy(() => import('./pages/EditUser'));
 const ForgotPass = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
-const Landing = lazy(() => import('./pages/Landing'));
+const Homepage = lazy(() => import('./pages/Homepage'));
 const ConcernDetail = lazy(() => import('./pages/ConcernDetail'));
 const UserDetail = lazy(() => import('./pages/UserDetail'));
 
@@ -31,7 +31,7 @@ const App = () => {
         <>
             <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
                 <Routes>
-                    <Route path="/" element={<Landing />} />
+                    <Route path="/" element={<Homepage />} />
                     <Route path="/login" element={<Login />} />
 
                     {/* Dashboard - All roles */}
@@ -72,7 +72,7 @@ const App = () => {
                     <Route path="/reset-password" element={<ResetPassword />} />
 
                 </Routes>
-                <Toaster position="top-right" richColors />
+                <Toaster position="bottom-right" richColors />
             </Suspense>
         </>
     )
