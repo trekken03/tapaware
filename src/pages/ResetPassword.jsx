@@ -77,19 +77,26 @@ const ResetPassword = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-            <div className="pointer-events-none fixed inset-30 flex items-center justify-center opacity-10">
+        <div className="relative min-h-screen bg-gray-50 flex items-center justify-center p-4">
+            <LandingNavbar />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
                 <img
                     src="/assets/logo.webp"
                     alt=""
-                    className="w-[1000px] max-w-[50vw] object-contain"
+                    className="w-[700px] opacity-10 object-contain"
                 />
             </div>
 
-            <Card className="w-full max-w-sm shadow-lg">
+            <Card className="relative z-10 w-full max-w-sm bg-white shadow-lg">
                 <div className="flex flex-col items-center mb-6">
                     <div className="flex items-center justify-center gap-2">
-                        <Droplet className="text-blue-800" />
+                        <img
+                            src="/assets/logo.webp"
+                            onClick={() => navigate('/')}
+                            alt="logo"
+                            className="w-10 h-10 object-contain hover:cursor-pointer "
+                        />
+                        {/* <Droplet className="text-blue-800" /> */}
                         <h1 className="text-2xl font-bold text-blue-900">
                             Reset Password
                         </h1>

@@ -46,7 +46,7 @@ const AddUser = () => {
 
             console.log('Submitting user data:', submitData)
             await API.post('/auth/register', submitData)
-            toast.success('User added successfullyS')
+            toast.success('User added successfully')
             navigate('/admin')
         } catch (error) {
             const message = error.response?.data?.message || 'Failed to add user'
