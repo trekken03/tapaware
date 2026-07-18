@@ -120,10 +120,10 @@ const EditUser = () => {
 
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="household">Household No.</Label>
+                                    <Label htmlFor="household_number">Household No.</Label>
                                     <Input
-                                        id="household"
-                                        name="household_id"
+                                        id="household_number"
+                                        name="household_number"
                                         type="number"
                                         value={form.household_number}
                                         onChange={handleChange}
