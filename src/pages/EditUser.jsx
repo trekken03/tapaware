@@ -20,7 +20,7 @@ const EditUser = () => {
     const [form, setForm] = useState({
         name: existingUser?.name || '',
         email: existingUser?.email || '',
-        household_num: existingUser?.household_num || '',
+        household_number: existingUser?.household_number || '',
         purok: existingUser?.purok || ''
 
     })
@@ -125,7 +125,7 @@ const EditUser = () => {
                                         id="household"
                                         name="household_id"
                                         type="number"
-                                        value={form.household_num}
+                                        value={form.household_number}
                                         onChange={handleChange}
                                         required
                                     />

@@ -150,8 +150,8 @@ exports.updateUserInfo = async (req, res) => {
         }
 
         await db.query(
-            'UPDATE users SET name = ?, email = ?, household_num = ? WHERE id = ?',
-            [name, email, household_number, id]
+            'UPDATE users SET name = ?, email = ?, household_id = ? WHERE id = ?',
+            [name, email, finalHouseholdId, id]
         );
 
         if (existing[0].role === 'resident' && finalHouseholdId) {
