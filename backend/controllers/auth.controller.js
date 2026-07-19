@@ -295,7 +295,7 @@ exports.updateProfile = async (req, res) => {
             user_id: userId,
             user_name: name,
             user_role: req.user.role,
-            action: 'UPDATE_PROFILE',
+            action: 'UPDATE_PROFILEs',
             table_affected: 'users',
             record_id: userId,
             details: `User updated their own profile info`,

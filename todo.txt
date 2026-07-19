@@ -35,12 +35,15 @@ through so that the system also knows when are these issues keep happening
 i tould show the home, about and contact in the navbar but also the Profile which is Hi,(name) then its clickable then it will go to profile page, then the reports page then logout, then for the staff and admin (home,about,contact,dashboard,logout)
 (✓)-and also in the report tab of the resident i would like a spinner there for each status where its like the purok spinner but in the resident tab its the status spinner, got it?
 (✓)-waiting for the table for trending issue per time
+(✓)-if same household and purok prevent add user, because i added a new user with the same household and purok and it works, but when i tried looking at it in households its not there and when i looked in the users management, its there, then when i tried logging it in, then tried submitting a report the registered household and purok is on the other user not the new one, i need that fix
+(✓)-after change name the names on tds readings and households and reports should be change too? what do you think?
+(✓)-in the forgot password, my friend tried it and he removed the required function in the email input and clicked send link and it works, how could i prevent that? i think is backend logic right?
 
--if same household and purok prevent add user
--after change name the names on tds readings and households and reports should be change too? what do you think?
+
 -idempotency
 
 
 
 VITE_API_URL=https://backend-production-cfb9.up.railway.app/api
 
+VITE_API_URL=https://tapaware-production.up.railway.app/api

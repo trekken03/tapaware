@@ -29,9 +29,9 @@ exports.addReadings = async (req, res) => {
             [household_id, staff_id, tds_value, notes || null]
         );
         await auditLog({
-            user_id: req.user ? req.user.id : null,
-            user_name: req.user ? req.user.name : 'Unknown',
-            user_role: req.user ? req.user.role : 'staff',
+            user_id: req.user.id,
+            user_name: req.user.name,
+            user_role: req.user.role,
             action: 'ADD_TDS_READING',
             table_affected: 'tds_readings',
             record_id: result.insertId,
