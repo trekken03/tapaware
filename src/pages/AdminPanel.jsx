@@ -532,7 +532,11 @@ const AdminPanel = () => {
                                                 </thead>
                                                 <tbody>
                                                     {flagged.map((f, index) => (
-                                                        <tr key={f.id} className={`bg-white`}>
+                                                        <tr
+                                                            key={f.id}
+                                                            onClick={() => navigate(`/admin/flags/${f.id}`)}
+                                                            className="bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+                                                        >
                                                             <td className="py-3 px-4 text-sm ">{index + 1}</td>
                                                             <td className="py-3 px-4 text-sm ">#{f.household_number}</td>
                                                             <td className="py-3 px-4 text-sm">{f.owner_name}</td>
@@ -543,7 +547,7 @@ const AdminPanel = () => {
                                                                     {f.times_reported}x
                                                                 </span>
                                                             </td>
-                                                            <td className="py-3 px-4">
+                                                            <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                                                                 <select
                                                                     value={f.status}
                                                                     onChange={(e) => handleFlagStatusUpdate(f.id, e.target.value)}
@@ -561,7 +565,11 @@ const AdminPanel = () => {
 
                                         <div className="space-y-3 md:hidden">
                                             {flagged.map((f, index) => (
-                                                <div key={f.id} className=" border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                                                <div
+                                                    key={f.id}
+                                                    onClick={() => navigate(`/admin/flags/${f.id}`)}
+                                                    className=" border border-gray-200 bg-gray-50 p-4 shadow-sm cursor-pointer hover:bg-gray-100 transition-colors"
+                                                >
                                                     <div className="flex items-center justify-between gap-2 mb-2">
                                                         <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
                                                         <span className=" bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">
@@ -573,7 +581,7 @@ const AdminPanel = () => {
                                                         <div><span className="font-semibold text-gray-900">Owner:</span> {f.owner_name}</div>
                                                         <div><span className="font-semibold text-gray-900">Purok:</span> {f.purok}</div>
                                                         <div><span className="font-semibold text-gray-900">Issue:</span> {f.issue_type}</div>
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                                             <span className="font-semibold text-gray-900">Status:</span>
                                                             <select
                                                                 value={f.status}

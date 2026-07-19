@@ -13,5 +13,6 @@ router.put('/users/:id', verifyToken, requireRole('admin'), adminController.upda
 router.put('/flags/:id/status', verifyToken, requireRole('admin'), adminController.updateFlagStatus);
 router.get('/users/:id', verifyToken, requireRole('admin'), adminController.getUserById);
 router.get('/audit-trail/:id', verifyToken, requireRole('admin'), adminController.getAuditLogById);
+router.get('/flags/:id', verifyToken, requireRole('admin'), adminController.getFlagById);
 
 module.exports = router;

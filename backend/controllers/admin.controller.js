@@ -274,3 +274,36 @@ exports.getAuditLogById = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+exports.getFlagById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const [[flag]] = await db.query(
+            `SELECT recurring_flags.*,
+            households.household_number,
+            households.owner_name,
+            households.purok,
+            households.address
+            FROM recurring_flags JOIN households ON recurring_flags.household_id = households.id
+            WHERE recurring_flags.id = ?`,
+            [id]
+        );
+
+        if (!flag) {
+            return res.status(404).json({ message: 'Flag not found' });
+        }
+
+        const [contributingReports] = await db.query(
+            `SELECT reports.*, users.name as reported_by
+            FROM reports JOIN users ON reports.user_id = users.id
+            WHERE reports.household_id = ? AND reports.issue_type = ?
+            ORDER BY reports.created_at DESC`,
+            [flag.household_id, flag.issue_type]
+        );
+
+        res.json({ ...flag, contributing_reports: contributingReports });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
