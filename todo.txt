@@ -47,6 +47,4 @@ i tould show the home, about and contact in the navbar but also the Profile whic
 
 
 
-VITE_API_URL=https://backend-production-cfb9.up.railway.app/api
-
 VITE_API_URL=https://tapaware-production.up.railway.app/api

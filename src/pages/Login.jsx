@@ -17,7 +17,7 @@ import { Eye, EyeOff } from "lucide-react";
 import API from "@/services/api";
 import { Link } from "react-router-dom";
 import { toast } from 'sonner'
-import LandingNavbar from "@/components/LandingNavbar";
+import LandingNavbar from "@/components/NavBar";
 
 const Login = () => {
     const navigate = useNavigate();

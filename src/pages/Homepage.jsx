@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import LandingNavbar from '@/components/LandingNavbar'
+import LandingNavbar from '@/components/NavBar'
 import WaterGauge, { getGaugeStatus } from '@/components/WaterGauge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import API from '@/services/api'
 import { toast } from 'sonner'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+
 
 
 const Homepage = () => {
@@ -84,76 +85,105 @@ const Homepage = () => {
             <LandingNavbar />
 
             {/* HERO */}
-            <section id="home" className=" bg-[#0a1a33] text-white overflow-hidden">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-32 pb-28 grid md:grid-cols-2 gap-12 items-center">
+            <section
+                id="home"
+                className="relative min-h-screen overflow-hidden flex items-center text-white"
+            >
+                {/* Background Video */}
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover"
+                >
+                    <source src="/videos/tap-water.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+
+                {/* Dark Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-[#081426]/90 via-[#081426]/70 to-[#081426]/40"></div>
+
+                {/* Hero Content */}
+                <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-32 pb-28 grid md:grid-cols-2 gap-12 items-center">
+
+                    {/* Left Side */}
                     <div>
                         <span className="inline-flex items-center gap-2 text-cyan-300 text-xs font-semibold uppercase tracking-widest mb-4">
                             <MapPin size={14} />
                             Barangay Cabalantian, Bacolor, Pampanga
                         </span>
-                        <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-[1.05] mb-5">
-                            Know what's<br />in your water.
+
+                        <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.05] mb-5">
+                            Know what's
+                            <br />
+                            in your water.
                         </h1>
+
                         <p className="text-blue-100 text-base sm:text-lg mb-8 max-w-md">
-                            TapAware tracks water quality across every purok in the barangay,
-                            so residents always know where things stand, and can speak up when something's wrong.
+                            TapAware tracks water quality across every purok in the
+                            barangay, so residents always know where things stand,
+                            and can speak up when something's wrong.
                         </p>
+
                         <div className="flex flex-wrap gap-3">
                             <Button
-                                onClick={() => document.getElementById('quality')?.scrollIntoView({ behavior: 'smooth' })}
-                                className="bg-white hover:bg-gray-500 text-black font-semibold hover:cursor-pointer"
+                                onClick={() =>
+                                    document
+                                        .getElementById('quality')
+                                        ?.scrollIntoView({ behavior: 'smooth' })
+                                }
+                                className="bg-white hover:bg-gray-200 text-black font-semibold hover:cursor-pointer"
                             >
                                 View Water Quality
                                 <ArrowDown size={16} className="ml-1" />
                             </Button>
-                            {user ? (
-                                isResident && (<Button
-                                    onClick={() => navigate('/reports/add')}
-                                    variant="outline"
-                                    className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white hover:cursor-pointer"
-                                >
-                                    Submit Report
-                                </Button>
-                                )
 
+                            {user ? (
+                                isResident && (
+                                    <Button
+                                        onClick={() => navigate('/reports/add')}
+                                        variant="outline"
+                                        className="border-white/30 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 hover:text-white hover:cursor-pointer"
+                                    >
+                                        Submit Report
+                                    </Button>
+                                )
                             ) : (
                                 <Button
-                                    onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                                    onClick={() =>
+                                        document
+                                            .getElementById('contact')
+                                            ?.scrollIntoView({ behavior: 'smooth' })
+                                    }
                                     variant="outline"
-                                    className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white hover:cursor-pointer"
+                                    className="border-white/30 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 hover:text-white hover:cursor-pointer"
                                 >
-                                    {isResident ? 'Submit Report' : 'Report a Concern'}
+                                    Report a Concern
                                 </Button>
-
                             )}
-
-
                         </div>
                     </div>
 
-                    <div className="flex justify-center">
+                    {/* Right Side */}
+                    <div className="flex justify-center pl-50">
                         {loading ? (
-                            <div className="w-[180px] h-[180px] rounded-full border-4 border-white/10 animate-pulse" />
+                            <div className="w-[220px] h-[220px] rounded-full border-4 border-white/20 animate-pulse" />
                         ) : summary && overallStatus ? (
-                            <div className="bg-white rounded-sm p-6 shadow-2xl">
-                                <p className="text-center text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
-                                    Barangay-wide average
+                            <div className="bg-white backdrop-blur-xl border border-white rounded-2xl p-8 shadow-2xl">
+                                <p className="text-center text-xs font-semibold uppercase tracking-widest text-white/70 mb-4">
+                                    Barangay-wide Average
                                 </p>
-                                <WaterGauge value={summary.average_tds} label="Total Dissolved Solids" size={180} />
+
+                                <WaterGauge
+                                    value={summary.average_tds}
+                                    label="Total Dissolved Solids"
+                                    size={190}
+                                />
                             </div>
                         ) : null}
                     </div>
                 </div>
-
-                {/* Wave divider */}
-                {/* <svg
-                    className="absolute bottom-0 left-0 w-full text-white"
-                    viewBox="0 0 1440 80"
-                    fill="currentColor"
-                    preserveAspectRatio="none"
-                >
-                    <path d="M0,40 C240,90 480,0 720,30 C960,60 1200,10 1440,40 L1440,80 L0,80 Z" />
-                </svg> */}
             </section>
 
             {/* ABOUT */}

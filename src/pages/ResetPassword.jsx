@@ -15,7 +15,7 @@ import API from "@/services/api";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2, AlertCircle, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
-import LandingNavbar from "@/components/LandingNavbar";
+import LandingNavbar from "@/components/NavBar";
 
 const ResetPassword = () => {
     const navigate = useNavigate();

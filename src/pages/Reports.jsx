@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Home, Plus, Search, Hourglass, ClockFading, CircleCheck } from 'lucide-react'
+import { Home, Plus, Search, Hourglass, ClockFading, CircleCheck, FileText } from 'lucide-react'
 import { InputGroupAddon, InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
@@ -162,7 +162,7 @@ const Reports = () => {
                     <CardHeader>
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <CardTitle className="flex items-center gap-2">
-                                <Home size={20} className="text-blue-600" />
+                                <FileText size={20} className="text-blue-600" />
                                 {isResident
                                     ? 'My Reports'
                                     : statusLabel

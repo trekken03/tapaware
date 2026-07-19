@@ -15,7 +15,7 @@ import API from "@/services/api";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { MailCheck, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
-import LandingNavbar from "@/components/LandingNavbar";
+import LandingNavbar from "@/components/NavBar";
 
 const ForgotPass = () => {
     const navigate = useNavigate();

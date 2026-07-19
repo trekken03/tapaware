@@ -1,7 +1,7 @@
 import { useAuth } from '@/context/AuthContext'
 import Sidebar from './Sidebar'
 
-import LandingNavbar from './LandingNavbar';
+import Navbar from './NavBar';
 
 const Layout = ({ children }) => {
     const { user } = useAuth()
@@ -19,7 +19,7 @@ const Layout = ({ children }) => {
                 />
             </div>
 
-            {isResident ? <LandingNavbar /> : <Sidebar />}
+            {isResident ? <Navbar /> : <Sidebar />}
 
             <div
                 className={`relative z-10 flex-1 flex flex-col min-h-screen ${isResident ? 'pt-16' : 'lg:ml-64'
