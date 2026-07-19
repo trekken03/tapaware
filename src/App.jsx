@@ -24,6 +24,7 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Homepage = lazy(() => import('./pages/Homepage'));
 const ConcernDetail = lazy(() => import('./pages/ConcernDetail'));
 const UserDetail = lazy(() => import('./pages/UserDetail'));
+const AuditDetail = lazy(() => import('./pages/AuditDetail'));
 
 
 const App = () => {
@@ -70,6 +71,7 @@ const App = () => {
                     <Route path="/admin/concerns/:id" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><ConcernDetail /></RoleBasedRoute>} />
                     <Route path="/forgot-password" element={<ForgotPass />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/audit-trail/:id" element={<RoleBasedRoute allowedRoles={['admin']}><AuditDetail /></RoleBasedRoute>} />
 
                 </Routes>
                 <Toaster position="bottom-right" richColors />

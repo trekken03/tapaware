@@ -250,3 +250,27 @@ exports.getUserById = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+exports.getAuditLogById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const [[log]] = await db.query('SELECT * FROM audit_trail WHERE id = ?', [id]);
+
+        if (!log) {
+            return res.status(404).json({ message: 'Audit log entry not found' });
+        }
+
+        let otherActivity = [];
+        if (log.user_id) {
+            [otherActivity] = await db.query(
+                'SELECT * FROM audit_trail WHERE user_id = ? AND id != ? ORDER BY created_at DESC LIMIT 10',
+                [log.user_id, id]
+            );
+        }
+
+        res.json({ ...log, other_activity: otherActivity });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};

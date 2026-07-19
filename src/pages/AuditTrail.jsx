@@ -6,10 +6,12 @@ import { Home, Plus, Eye, Search } from 'lucide-react'
 import { InputGroupAddon, InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import API from '@/services/api'
 import { toast } from 'sonner'
+import { useNavigate } from 'react-router-dom'
 
 const AuditTrail = () => {
     const [auditTrails, setAuditTrails] = useState([])
     const [loading, setLoading] = useState(true)
+    const navigate = useNavigate()
     const [searchTerm, setSearchTerm] = useState('')
 
 
@@ -102,7 +104,11 @@ const AuditTrail = () => {
                                         </thead>
                                         <tbody>
                                             {filteredAuditTrails.map((trail, index) => (
-                                                <tr key={trail.id} className={` bg-white`}>
+                                                <tr
+                                                    key={trail.id}
+                                                    onClick={() => navigate(`/audit-trail/${trail.id}`)}
+                                                    className="bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+                                                >
                                                     <td className="py-3 px-4 text-sm">{index + 1}</td>
                                                     <td className="py-3 px-4 text-sm">{trail.user_name}</td>
                                                     <td className="py-3 px-4 text-sm">{trail.action}</td>
@@ -119,7 +125,11 @@ const AuditTrail = () => {
 
                                 <div className="space-y-3 md:hidden">
                                     {filteredAuditTrails.map((trail, index) => (
-                                        <div key={trail.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                                        <div
+                                            key={trail.id}
+                                            onClick={() => navigate(`/audit-trail/${trail.id}`)}
+                                            className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm cursor-pointer hover:bg-gray-100 transition-colors"
+                                        >
                                             <div className="flex items-center justify-between gap-2 mb-2">
                                                 <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
                                                 <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700">
