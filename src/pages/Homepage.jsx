@@ -166,7 +166,7 @@ const Homepage = () => {
                     </div>
 
                     {/* Right Side */}
-                    <div className="flex justify-center pl-50">
+                    <div className="flex justify-center items-center">
                         {loading ? (
                             <div className="w-[220px] h-[220px] rounded-full border-4 border-white/20 animate-pulse" />
                         ) : summary && overallStatus ? (
