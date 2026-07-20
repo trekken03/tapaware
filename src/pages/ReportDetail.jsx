@@ -114,7 +114,7 @@ const ReportDetail = () => {
                             onClick={handleDelete}
                         >
                             <Trash2 size={14} />
-                            Delete Household
+                            Delete Report
                         </Button>
                     )}
                 </div>
