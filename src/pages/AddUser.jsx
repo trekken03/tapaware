@@ -24,7 +24,14 @@ const AddUser = () => {
     })
 
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value })
+        const { name, value } = e.target;
+        if (name === "name") {
+            if (!/^[a-zA-Z\s]*$/.test(value)) {
+                return;
+            }
+
+        }
+        setForm({ ...form, [name]: value })
     }
 
     const handleSubmit = async (e) => {
@@ -33,7 +40,7 @@ const AddUser = () => {
         setLoading(true)
 
         try {
-            // Only send household info for residents
+
             const submitData = {
                 name: form.name,
                 email: form.email,

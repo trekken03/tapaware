@@ -72,7 +72,7 @@ const Homepage = () => {
             }
         }
         setForm({
-            ...form, [name]: value,
+            ...form, [name]: value
 
         });
     }
@@ -330,7 +330,7 @@ const Homepage = () => {
                                         <Label htmlFor="contact_info">Email address (optional)</Label>
                                         <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} minLength="11" placeholder="juandelacruz@gmail.com" />
                                         <p className="text-xs text-gray-500 mt-1">
-                                            Optional. Provide a valid email if you'd like the administrator to reply to your concern.
+                                            Provide a valid email if you'd like the administrator to reply to your concern.
                                         </p>
                                     </div>
                                     <div className="space-y-2">

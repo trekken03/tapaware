@@ -25,9 +25,10 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- =========================================================
 -- TEST LOGIN CREDENTIALS
--- Admin:    admin@tapaware.com     / Admin@12345
--- Staff:    harvey.specter@tapaware.com / Suits@123
--- Resident: mike.ross@tapaware.com / Suits@123  (any resident below, same password)
+-- Admin:    admin@tapaware.com     / admin123
+-- Staff:    staff@tapaware.com / staff123
+-- Resident: resident@tapaware.com / resident123  
+-- (any resident below, password:Suits@123 )
 -- =========================================================
 
 -- ---------------------------------------------------------
