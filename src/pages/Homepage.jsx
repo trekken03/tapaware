@@ -327,8 +327,11 @@ const Homepage = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="contact_info">Contact number or email (optional)</Label>
-                                        <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} minLength="11" placeholder="09xx xxx xxxx or juandelacruz@gmail.com" />
+                                        <Label htmlFor="contact_info">Email address (optional)</Label>
+                                        <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} minLength="11" placeholder="juandelacruz@gmail.com" />
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Optional. Provide a valid email if you'd like the administrator to reply to your concern.
+                                        </p>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="message">Your concern</Label>
@@ -361,7 +364,7 @@ const Homepage = () => {
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                         <Droplets size={16} className="text-cyan-400" />
-                        <span className="text-sm">TapAware — Barangay Cabalantian Water Quality System</span>
+                        <span className="text-sm">TapAware — Barangay Cabalantian Water Quality Monitoring System</span>
                     </div>
                     <p className="text-xs text-blue-300">© {new Date().getFullYear()} Barangay Cabalantian, Bacolor, Pampanga</p>
                 </div>
