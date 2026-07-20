@@ -178,19 +178,6 @@ const AddUser = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="household_number">
-                                        Address (for residents only)
-                                    </Label>
-                                    <Input
-                                        id="address"
-                                        name="address"
-                                        placeholder="Don jose st."
-                                        value={form.address}
-                                        onChange={handleChange}
-                                        required={form.role === 'resident'}
-                                    />
-                                </div>
-                                <div className="space-y-2">
                                     <Label htmlFor="purok">
                                         Purok (for residents only)
                                     </Label>
@@ -208,6 +195,20 @@ const AddUser = () => {
                                         ))}
                                     </select>
                                 </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="household_number">
+                                        Address (for residents only)
+                                    </Label>
+                                    <Input
+                                        id="address"
+                                        name="address"
+                                        placeholder="Don jose st."
+                                        value={form.address}
+                                        onChange={handleChange}
+                                        required={form.role === 'resident'}
+                                    />
+                                </div>
+
                             </div>
 
                             <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 pt-4">
