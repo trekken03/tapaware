@@ -17,7 +17,8 @@ exports.getAllReports = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -124,7 +125,8 @@ exports.submitReport = async (req, res) => {
 
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -150,7 +152,8 @@ exports.updateReportStatus = async (req, res) => {
         res.json({ message: 'Report status updated successfully ' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 
 };
@@ -169,7 +172,8 @@ exports.getReportsByHousehold = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -206,7 +210,8 @@ exports.getReportById = async (req, res) => {
         res.json({ ...report, household_reports: otherReports });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -248,6 +253,7 @@ exports.deleteReport = async (req, res) => {
         res.json({ message: 'Report deleted successfully' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };

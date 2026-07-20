@@ -62,8 +62,20 @@ const Homepage = () => {
         }
     }, [location]);
 
-    const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+    const handleChange = (e) => {
+        const { name, value } = e.target;
 
+        if (name === "name") {
+            if (!/^[a-zA-Z\s]*$/.test(value) && value !== "") {
+                return;
+
+            }
+        }
+        setForm({
+            ...form, [name]: value,
+
+        });
+    }
     const handleSubmit = async (e) => {
         e.preventDefault()
         setSubmitting(true)
@@ -166,7 +178,7 @@ const Homepage = () => {
                     </div>
 
                     {/* Right Side */}
-                    <div className="flex justify-center items-center">
+                    <div className="flex justify-center ">
                         {loading ? (
                             <div className="w-[220px] h-[220px] rounded-full border-4 border-white/20 animate-pulse" />
                         ) : summary && overallStatus ? (

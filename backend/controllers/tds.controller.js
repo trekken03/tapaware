@@ -16,12 +16,19 @@ exports.getAllReadings = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
 exports.addReadings = async (req, res) => {
-    const { household_id, staff_id, tds_value, notes } = req.body;
+    const { household_id, tds_value, notes } = req.body;
+    const staff_id = req.user.id;
+
+    const numericTds = Number(tds_value);
+    if (isNaN(numericTds) || numericTds < 0 || numericTds > 1500) {
+        return res.status(400).json({ message: 'Invalid TDS value' });
+    }
 
     try {
         const [result] = await db.query(
@@ -41,7 +48,8 @@ exports.addReadings = async (req, res) => {
         res.status(201).json({ message: 'TDS Reading added successfully' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -62,7 +70,8 @@ exports.getReadingsByHousehold = async (req, res) => {
 
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -86,7 +95,8 @@ exports.getLatestReadingByHousehold = async (req, res) => {
         res.json(row);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -123,7 +133,8 @@ exports.getReadingById = async (req, res) => {
         res.json({ ...reading, household_history: history });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 exports.deleteReading = async (req, res) => {
@@ -152,7 +163,8 @@ exports.deleteReading = async (req, res) => {
         res.json({ message: 'TDS reading deleted successfully' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 

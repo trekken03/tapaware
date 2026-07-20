@@ -29,7 +29,8 @@ exports.getSummary = async (req, res) => {
 
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -49,7 +50,8 @@ exports.getReportByIssueType = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -64,7 +66,8 @@ exports.getReportsByHouseholdCount = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -82,7 +85,8 @@ exports.getFlaggedHouseholds = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -106,7 +110,8 @@ exports.getTdsTrend = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -124,7 +129,8 @@ exports.getTdsByPurok = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -166,7 +172,8 @@ exports.getResidentSummary = async (req, res) => {
         });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 exports.getReportsByPurokCount = async (req, res) => {
@@ -186,7 +193,8 @@ exports.getReportsByPurokCount = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 exports.getTrendingIssuesByPurok = async (req, res) => {
@@ -206,7 +214,8 @@ exports.getTrendingIssuesByPurok = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -237,6 +246,7 @@ exports.getTrendingIssuesByTime = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };

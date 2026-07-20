@@ -20,7 +20,8 @@ exports.submitConcern = async (req, res) => {
         res.status(201).json({ message: 'Concern submitted successfully' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -30,7 +31,8 @@ exports.getAllConcerns = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -47,7 +49,8 @@ exports.getConcernById = async (req, res) => {
         res.json(concern);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -110,6 +113,7 @@ exports.replyToConcern = async (req, res) => {
         });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };

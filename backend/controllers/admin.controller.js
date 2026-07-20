@@ -9,8 +9,8 @@ exports.getAllUsers = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -36,7 +36,8 @@ exports.updateUserRole = async (req, res) => {
 
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 
 };
@@ -72,7 +73,8 @@ exports.deleteUser = async (req, res) => {
                 message: 'Cannot delete this user — they have submitted reports or recorded TDS readings. Change their role instead, or delete those records first.'
             });
         }
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -83,9 +85,9 @@ exports.getAuditTrail = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
-
 };
 
 exports.getAuditTrailByUser = async (req, res) => {
@@ -95,7 +97,8 @@ exports.getAuditTrailByUser = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 
 };
@@ -174,7 +177,8 @@ exports.updateUserInfo = async (req, res) => {
         res.json({ message: 'User updated successfully' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -200,7 +204,8 @@ exports.updateFlagStatus = async (req, res) => {
         res.json({ message: 'Flag status updated successfully' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -247,7 +252,8 @@ exports.getUserById = async (req, res) => {
         res.json({ ...user, reports, tds_readings: tdsReadings, recent_activity: recentActivity });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 exports.getAuditLogById = async (req, res) => {
@@ -271,7 +277,8 @@ exports.getAuditLogById = async (req, res) => {
         res.json({ ...log, other_activity: otherActivity });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 exports.getFlagById = async (req, res) => {
@@ -304,6 +311,7 @@ exports.getFlagById = async (req, res) => {
         res.json({ ...flag, contributing_reports: contributingReports });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };

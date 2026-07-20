@@ -88,7 +88,8 @@ exports.register = async (req, res) => {
     }
 
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 
 
@@ -135,7 +136,8 @@ exports.forgotPassword = async (req, res) => {
         res.json({ message: 'If that email exists, a reset link has been sent.' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -170,7 +172,8 @@ exports.resetPassword = async (req, res) => {
         res.json({ message: 'Password reset successful. You can now log in.' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -189,7 +192,7 @@ exports.login = async (req, res) => {
         );
 
         if (rows.length === 0) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         const user = rows[0];
@@ -197,7 +200,7 @@ exports.login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(401).json({ message: 'Incorrect password' });
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         const token = generateToken(user);
@@ -234,7 +237,8 @@ exports.login = async (req, res) => {
 
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 
 };
@@ -257,7 +261,8 @@ exports.getAllUsers = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 exports.updateProfile = async (req, res) => {
@@ -305,7 +310,8 @@ exports.updateProfile = async (req, res) => {
         res.json({ message: 'Profile updated successfully', user: { name, email } });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -344,7 +350,8 @@ exports.changePassword = async (req, res) => {
         res.json({ message: 'Password changed successfully' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 

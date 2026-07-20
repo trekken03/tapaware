@@ -91,7 +91,7 @@ const UserDetail = () => {
                         <ArrowLeft size={14} />
                         Back
                     </Button>
-                    <div className="flex gap-2">
+                    {user.role !== 'admin' && (<div className="flex gap-2">
                         <Button
                             variant="outline"
                             size="sm"
@@ -111,6 +111,9 @@ const UserDetail = () => {
                             Delete
                         </Button>
                     </div>
+                    )}
+
+
                 </div>
 
                 {/* Header */}

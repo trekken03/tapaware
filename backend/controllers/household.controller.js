@@ -22,7 +22,8 @@ exports.getAllHouseholds = async (req, res) => {
         res.json(rows);
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -48,7 +49,8 @@ exports.addHousehold = async (req, res) => {
         res.status(201).json({ message: 'household added successfully' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message })
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -102,7 +104,8 @@ exports.getHouseholdById = async (req, res) => {
         res.json({ ...household, reports, tds_readings: tdsReadings, flags });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 exports.deleteHousehold = async (req, res) => {
@@ -131,6 +134,7 @@ exports.deleteHousehold = async (req, res) => {
         res.json({ message: 'Household deleted successfully' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };

@@ -44,7 +44,7 @@ const FlagDetail = () => {
             toast.success('Flag status updated successfully')
             fetchFlag()
         } catch (error) {
-            toast.error('Error updating flag status:', error.response?.data?.message || error.message)
+            toast.error(error.response?.data?.message || 'Error updating flag status')
         }
     }
 
@@ -70,6 +70,10 @@ const FlagDetail = () => {
             </Layout>
         )
     }
+
+    const allReportsResolved = flag.contributing_reports.length > 0 &&
+        flag.contributing_reports.every(r => r.status === 'resolved')
+    const readyToClose = flag.status === 'active' && allReportsResolved
 
     return (
         <Layout>
@@ -112,6 +116,12 @@ const FlagDetail = () => {
                                 </p>
                             </div>
                         </div>
+
+                        {readyToClose && (
+                            <div className="mb-4 bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-800">
+                                ✓ All {flag.contributing_reports.length} contributing report{flag.contributing_reports.length === 1 ? '' : 's'} {flag.contributing_reports.length === 1 ? 'is' : 'are'} resolved. Consider marking this flag resolved too.
+                            </div>
+                        )}
 
                         <div>
                             <p className="text-gray-500 text-sm mb-2">Flag Status</p>

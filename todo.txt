@@ -43,8 +43,11 @@ i tould show the home, about and contact in the navbar but also the Profile whic
 
 -idempotency
 
+
+
 - i tested the flagged functionality but when i updated the status of the reports on that households to resolved shouldnt it supposed to be okay after that? help me decide here
 
-
+-Login reveals whether an email exists"User not found" vs "Incorrect password" tells an attacker which emails are real accountsMake both cases return the same generic message, like "Invalid email or password"
+Server sends raw error details to the browserIf something breaks, the exact internal error text (sometimes naming database columns) gets shown to whoever's using the siteLog the detailed error only on your server (console.error), send just "Server error" to the user
 
 VITE_API_URL=https://tapaware-production.up.railway.app/api

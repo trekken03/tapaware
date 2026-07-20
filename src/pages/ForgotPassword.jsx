@@ -37,7 +37,7 @@ const ForgotPass = () => {
             await API.post('/auth/forgot-password', { email });
             setSubmitted(true)
             setCooldown(300)
-            toast.success('Password reset link sent successfully')
+            toast.success('If that user exist password reset link has been sent successfully')
         } catch (err) {
             const message = err.response?.data?.message || 'Something went wrong'
             setError(message)
