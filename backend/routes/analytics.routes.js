@@ -4,7 +4,7 @@ const analyticsController = require('../controllers/analytics.controller');
 const { verifyToken } = require('../middleware/auth.middleware');
 const { requireRole } = require('../middleware/role.middleware');
 
-router.get('/summary', requireRole('admin', 'staff'), analyticsController.getSummary);
+router.get('/summary', analyticsController.getSummary);
 router.get('/reports-by-issue', verifyToken, requireRole('admin', 'staff'), analyticsController.getReportByIssueType);
 router.get('/reports-by-household', verifyToken, requireRole('admin', 'staff'), analyticsController.getReportsByHouseholdCount);
 router.get('/reports-by-purok', verifyToken, requireRole('admin', 'staff'), analyticsController.getReportsByPurokCount);
