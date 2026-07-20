@@ -7,8 +7,8 @@ const { requireRole } = require('../middleware/role.middleware')
 router.get('/', verifyToken, requireRole('staff', 'admin'), reportController.getAllReports);
 router.post('/', verifyToken, reportController.submitReport);
 router.put('/:id/status', verifyToken, requireRole('staff', 'admin'), reportController.updateReportStatus);
-router.get('/household/:id', verifyToken, requireRole('staff', 'admin'), reportController.getReportsByHousehold);
-router.get('/:id', verifyToken, requireRole('staff', 'admin'), reportController.getReportById);
-router.delete('/:id', verifyToken, requireRole('staff', 'admin'), reportController.deleteReport);
+router.get('/household/:id', verifyToken, reportController.getReportsByHousehold);
+router.get('/:id', verifyToken, reportController.getReportById);
+router.delete('/:id', verifyToken, reportController.deleteReport);
 
 module.exports = router;
