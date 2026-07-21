@@ -82,6 +82,7 @@ const LandingNavbar = () => {
 
                     {isResident && (
                         <>
+
                             <button
                                 onClick={() => navigate('/reports')}
                                 className="text-sm font-medium text-blue-100 hover:text-white transition-colors hover:cursor-pointer"

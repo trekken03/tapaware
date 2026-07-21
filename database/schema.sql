@@ -21,7 +21,7 @@ create table users(
     household_id int,
     password varchar(255) not null,
     created_at timestamp default current_timestamp,
-    foreign key(household_id) references households(id) on delete cascade,
+    foreign key(household_id) references households(id) on delete set null,
     index idx_users_household_id (household_id),
     index idx_users_role (role)
 );
@@ -34,7 +34,7 @@ create table tds_readings(
     tds_value decimal(10,2) not null default 0,
     notes text,
     recorded_at timestamp default current_timestamp,
-    foreign key(household_id) references households(id) on delete set null,
+    foreign key(household_id) references households(id) on delete cascade,
     foreign key(staff_id) references users(id),
     index idx_tds_household_recorded (household_id, recorded_at),
     index idx_tds_staff_id (staff_id)
@@ -48,7 +48,7 @@ create table reports(
     description text,
     status enum('pending','investigating','resolved') not null default 'pending',
     created_at timestamp default current_timestamp,
-    occurred_at TIME NOT NULL DEFAULT (CURRENT_TIME);
+    occurred_at TIME NOT NULL DEFAULT (CURRENT_TIME),
     foreign key(household_id) references households(id) on delete cascade,
     foreign key(user_id) references users(id),
     index idx_reports_household_created (household_id, created_at),

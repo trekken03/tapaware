@@ -4,7 +4,7 @@ const reportController = require('../controllers/report.controller')
 const { verifyToken } = require('../middleware/auth.middleware');
 const { requireRole } = require('../middleware/role.middleware')
 
-router.get('/', verifyToken, requireRole('staff', 'admin'), reportController.getAllReports);
+router.get('/', verifyToken, reportController.getAllReports);
 router.post('/', verifyToken, reportController.submitReport);
 router.put('/:id/status', verifyToken, requireRole('staff', 'admin'), reportController.updateReportStatus);
 router.get('/household/:id', verifyToken, reportController.getReportsByHousehold);

@@ -155,53 +155,7 @@ const ResidentDashboard = () => {
 
                 {/* Water Quality Information */}
                 <div className="grid grid-cols-1 gap-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Info size={20} className="text-blue-600" />
-                                About TDS (Total Dissolved Solids)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <p className="text-gray-700">
-                                    <strong>TDS (Total Dissolved Solids)</strong> measures the concentration of dissolved minerals and salts in water, expressed in parts per million (ppm).
-                                </p>
 
-                                <div className="space-y-3 mt-4">
-                                    <div className="flex gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                                        <div className="inline-block w-4 h-4 rounded-full bg-green-500 mt-0.5 flex-shrink-0"></div>
-                                        <div>
-                                            <p className="font-medium text-gray-700">0-500 ppm: Fresh Water</p>
-                                            <p className="text-sm text-gray-600">Safe for all uses including drinking, cooking, and washing.</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                                        <div className="inline-block w-4 h-4 rounded-full bg-yellow-500 mt-0.5 flex-shrink-0"></div>
-                                        <div>
-                                            <p className="font-medium text-gray-700">500-1000 ppm: Acceptable</p>
-                                            <p className="text-sm text-gray-600">Generally safe but may have slight taste. Monitor water quality closely.</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
-                                        <div className="inline-block w-4 h-4 rounded-full bg-red-500 mt-0.5 flex-shrink-0"></div>
-                                        <div>
-                                            <p className="font-medium text-gray-700">1000+ ppm: High Salinity</p>
-                                            <p className="text-sm text-gray-600">Water may be unsuitable for drinking. Report any issues to barangay officials.</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                    <p className="text-sm text-gray-700">
-                                        <strong>Why is TDS important?</strong> High TDS levels can affect water taste, quality, and suitability for different uses. Regular monitoring helps ensure safe water access for your community.
-                                    </p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
 
                     {/* Submit Report Button */}
                     <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">

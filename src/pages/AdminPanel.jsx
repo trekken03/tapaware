@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Settings, Users, Flag, Plus, Search, Pencil, MessageSquare } from 'lucide-react'
+import { Settings, Users, Flag, Plus, Search, Pencil, MessageSquare, UserStar } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
@@ -98,7 +98,20 @@ const AdminPanel = () => {
         const searchLower = searchTerm.toLowerCase();
 
         return (
-            (u.role === "staff" || u.role === "admin") &&
+            (u.role === "staff") &&
+            (
+                u.name?.toLowerCase().includes(searchLower) ||
+                u.email?.toLowerCase().includes(searchLower) ||
+                u.household_number?.toString().includes(searchLower)
+            )
+        );
+    });
+
+    const filteredAdmin = users.filter(u => {
+        const searchLower = searchTerm.toLowerCase();
+
+        return (
+            (u.role === "admin") &&
             (
                 u.name?.toLowerCase().includes(searchLower) ||
                 u.email?.toLowerCase().includes(searchLower) ||
@@ -127,7 +140,7 @@ const AdminPanel = () => {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
                     <div>
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Admin Panel</h1>
-                        <p className="text-gray-500 mt-1">Manage users and monitor flagged households</p>
+                        <p className="text-gray-500 mt-1">Manage users, Flagged households, and Concerns.</p>
                     </div>
                     {(activeTab === 'users' || activeTab === 'staff') && (
                         <Button
@@ -145,6 +158,7 @@ const AdminPanel = () => {
                     {[
                         { key: 'users', label: 'User Management', icon: Users },
                         { key: 'staff', label: 'Staff Management', icon: Pencil },
+                        { key: 'admin', label: 'Admin Management', icon: Users },
                         { key: 'flagged', label: 'Flagged Households', icon: Flag },
                         { key: 'concerns', label: 'Concerns', icon: MessageSquare },
 
@@ -197,7 +211,7 @@ const AdminPanel = () => {
                                 <table className="w-full min-w-[760px]">
                                     <thead>
                                         <tr className="border-b">
-                                            {['#', 'Name', 'Email', 'Role', 'Household', 'Purok', 'Date Joined', 'Actions'].map(h => (
+                                            {['#', 'Name', 'Email', 'Household', 'Purok', 'Date Joined', 'Actions'].map(h => (
                                                 <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-black uppercase">
                                                     {h}
                                                 </th>
@@ -206,7 +220,7 @@ const AdminPanel = () => {
                                     </thead>
                                     <tbody>
                                         {filteredResidents.map((u, index) => {
-                                            const roleStyle = getRoleStyle(u.role)
+
                                             return (
                                                 <tr
                                                     key={u.id}
@@ -216,23 +230,7 @@ const AdminPanel = () => {
                                                     <td className="py-3 px-4 text-sm text-black">{index + 1}</td>
                                                     <td className="py-3 px-4 text-sm font-semibold">{u.name}</td>
                                                     <td className="py-3 px-4 text-sm text-black break-all">{u.email}</td>
-                                                    <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
-                                                        {u.id === currentUser.id ? (
-                                                            <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1  text-xs font-semibold capitalize`}>
-                                                                {u.role}
-                                                            </span>
-                                                        ) : (
-                                                            <select
-                                                                value={u.role}
-                                                                onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                                className={`${roleStyle.bg} ${roleStyle.color} border-0  px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
-                                                            >
-                                                                <option value="resident">Resident</option>
-                                                                <option value="staff">Staff</option>
-                                                                <option value="admin">Admin</option>
-                                                            </select>
-                                                        )}
-                                                    </td>
+
                                                     <td className="py-3 px-4 text-sm text-black">{u.household_number}</td>
                                                     <td className="py-3 px-4 text-sm text-black">{u.purok}</td>
                                                     <td className="py-3 px-4 text-sm text-black">
@@ -272,28 +270,12 @@ const AdminPanel = () => {
 
                             <div className="space-y-3 md:hidden">
                                 {filteredResidents.map((u, index) => {
-                                    const roleStyle = getRoleStyle(u.role)
+
                                     return (
-                                        <div key={u.id} className=" border border-gray-200 bg-gray-50 p-4 shadow-sm  cursor-pointer hover:bg-gray-200" onClick={() => navigate(`/admin/users/${u.id}`)}>
+                                        <div key={u.id} className=" border border-gray-200 bg-gray-50 p-4 shadow-sm  cursor-pointer hover:bg-gray-100" onClick={() => navigate(`/admin/users/${u.id}`)}>
                                             <div className="flex items-center justify-between gap-2 mb-2">
                                                 <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
-                                                {u.id === currentUser.id ? (
-                                                    <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1  text-xs font-semibold capitalize`}>
-                                                        {u.role}
-                                                    </span>
-                                                ) : (
-                                                    <div onClick={(e) => e.stopPropagation()}>
-                                                        <select
-                                                            value={u.role}
-                                                            onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                            className={`${roleStyle.bg} ${roleStyle.color} border-0  px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none`}
-                                                        >
-                                                            <option value="resident">Resident</option>
-                                                            <option value="staff">Staff</option>
-                                                            <option value="admin">Admin</option>
-                                                        </select>
-                                                    </div>
-                                                )}
+
                                             </div>
                                             <div className="space-y-1.5 text-sm text-gray-700">
                                                 <div><span className="font-semibold text-gray-900">Name:</span> {u.name}</div>
@@ -430,6 +412,153 @@ const AdminPanel = () => {
                                                             </div>
                                                         )}
                                                     </td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="space-y-3 md:hidden">
+                                {filteredStaff.map((u, index) => {
+                                    const roleStyle = getRoleStyle(u.role)
+                                    return (
+                                        <div
+                                            key={u.id}
+                                            onClick={() => navigate(`/admin/users/${u.id}`)}
+                                            className=" border border-gray-200 bg-gray-50 p-4 shadow-sm cursor-pointer hover:bg-gray-100 transition-colors"
+                                        >
+                                            <div className="flex items-center justify-between gap-2 mb-2">
+                                                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
+                                                {u.id === currentUser.id ? (
+                                                    <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1  text-xs font-semibold capitalize`}>
+                                                        {u.role}
+                                                    </span>
+                                                ) : (
+                                                    <div onClick={(e) => e.stopPropagation()}>
+                                                        <select
+                                                            value={u.role}
+                                                            onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
+                                                            className={`${roleStyle.bg} ${roleStyle.color} border-0  px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none`}
+                                                        >
+                                                            <option value="resident">Resident</option>
+                                                            <option value="staff">Staff</option>
+                                                            <option value="admin">Admin</option>
+                                                        </select>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="space-y-1.5 text-sm text-gray-700">
+                                                <div><span className="font-semibold text-gray-900">Name:</span> {u.name}</div>
+                                                <div className="break-all"><span className="font-semibold text-gray-900">Email:</span> {u.email}</div>
+                                                <div><span className="font-semibold text-gray-900">Joined:</span> {new Date(u.created_at).toLocaleDateString()}</div>
+                                            </div>
+                                            {u.id !== currentUser.id && (
+                                                <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                                                        onClick={() => navigate(`/admin/edit-user/${u.id}`, { state: u })}
+                                                    >
+                                                        <Pencil size={14} className='mr-1' />
+                                                        Edit
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                        onClick={() => handleDeleteUser(u.id, u.name)}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )
+                }
+                {activeTab === 'admin' && (
+
+                    <Card>
+                        <CardHeader>
+
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <CardTitle className="flex items-center gap-2">
+                                    <UserStar size={20} className="text-blue-600" />
+                                    Registered Admin ({filteredAdmin.length})
+                                </CardTitle>
+                                <InputGroup className="w-full sm:max-w-xs">
+                                    <InputGroupInput
+                                        placeholder="Search..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                    <InputGroupAddon>
+                                        <Search size={16} />
+                                    </InputGroupAddon>
+                                </InputGroup>
+                            </div>
+
+
+
+
+                        </CardHeader>
+                        <CardContent>
+                            <div className="hidden md:block overflow-x-auto">
+                                <table className="w-full min-w-[760px]">
+                                    <thead>
+                                        <tr className="border-b">
+                                            {['#', 'Name', 'Email', 'Role', 'Date Joined'].map(h => (
+                                                <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-black uppercase">
+                                                    {h}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredAdmin.map((u, index) => {
+                                            const roleStyle = getRoleStyle(u.role)
+                                            return (
+                                                <tr
+                                                    key={u.id}
+                                                    onClick={() => navigate(`/admin/users/${u.id}`)}
+                                                    className="bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+                                                >
+                                                    <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
+                                                    <td className="py-3 px-4 text-sm font-semibold">{u.name}</td>
+                                                    <td className="py-3 px-4 text-sm text-black break-all">{u.email}</td>
+                                                    <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                                                        {u.id === currentUser.id ? (
+                                                            <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1  text-xs font-semibold capitalize`}>
+                                                                {u.role}
+                                                            </span>
+                                                        ) : (
+
+
+
+                                                            <select
+                                                                value={u.role}
+                                                                onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
+                                                                className={`${roleStyle.bg} ${roleStyle.color} border-0  px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
+                                                            >
+                                                                <option value="resident">Resident</option>
+                                                                <option value="staff">Staff</option>
+                                                                <option value="admin">Admin</option>
+                                                            </select>
+
+                                                        )}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-sm text-black">
+                                                        {new Date(u.created_at).toLocaleDateString('en-US', {
+                                                            year: 'numeric', month: 'long', day: 'numeric',
+                                                        })}
+                                                    </td>
+
                                                 </tr>
                                             )
                                         })}
