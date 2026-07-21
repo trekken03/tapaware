@@ -3,12 +3,14 @@ import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Droplets, Home, Flag, ClockFading, AlertTriangle, FileText, TrendingUp } from 'lucide-react'
 import API from '@/services/api'
+import { useNavigate } from 'react-router-dom'
 
 const StaffDashboard = () => {
     const [summary, setSummary] = useState(null)
     const [flagged, setFlagged] = useState([])
     const [tdsByPurok, setTdsByPurok] = useState([])
     const [loading, setLoading] = useState(true)
+    const navigate = useNavigate()
 
     useEffect(() => {
         fetchData()
@@ -64,7 +66,7 @@ const StaffDashboard = () => {
                     {statCards.map((stat) => {
                         const Icon = stat.icon
                         return (
-                            <Card key={stat.label} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => stat.path && (window.location.href = stat.path)}>
+                            <Card key={stat.label} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(stat.path)}>
                                 <CardContent className="pt-6">
                                     <div className="flex items-center justify-between">
                                         <div>

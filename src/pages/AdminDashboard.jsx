@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Droplets, Home, Flag, ClockFading, AlertTriangle, FileText, TrendingUp } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
+import { useNavigate } from 'react-router-dom'
 
 
 const AdminDashboard = () => {
@@ -11,6 +12,7 @@ const AdminDashboard = () => {
     const [flagged, setFlagged] = useState([])
     const [tdsByPurok, setTdsByPurok] = useState([])
     const [loading, setLoading] = useState(true)
+    const navigate = useNavigate()
 
     useEffect(() => {
         fetchData()
@@ -68,7 +70,7 @@ const AdminDashboard = () => {
                     {statCards.map((stat) => {
                         const Icon = stat.icon
                         return (
-                            <Card key={stat.label} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = stat.path}>
+                            <Card key={stat.label} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(stat.path)}>
                                 <CardContent className="pt-1">
                                     <div className="flex items-center justify-between">
                                         <div>
