@@ -338,6 +338,7 @@ const Homepage = () => {
                                         <textarea
                                             id="message" name="message" value={form.message} onChange={handleChange}
                                             required rows={4} placeholder="Describe what you noticed..."
+                                            maxLength="120"
                                             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-vertical"
                                         />
                                     </div>

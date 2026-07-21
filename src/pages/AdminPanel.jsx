@@ -158,7 +158,7 @@ const AdminPanel = () => {
                     {[
                         { key: 'users', label: 'User Management', icon: Users },
                         { key: 'staff', label: 'Staff Management', icon: Pencil },
-                        { key: 'admin', label: 'Admin Management', icon: Users },
+                        { key: 'admin', label: 'Admin Management', icon: UserStar },
                         { key: 'flagged', label: 'Flagged Households', icon: Flag },
                         { key: 'concerns', label: 'Concerns', icon: MessageSquare },
 
@@ -533,25 +533,11 @@ const AdminPanel = () => {
                                                     <td className="py-3 px-4 text-sm font-semibold">{u.name}</td>
                                                     <td className="py-3 px-4 text-sm text-black break-all">{u.email}</td>
                                                     <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
-                                                        {u.id === currentUser.id ? (
-                                                            <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1  text-xs font-semibold capitalize`}>
-                                                                {u.role}
-                                                            </span>
-                                                        ) : (
 
+                                                        <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1  text-xs font-semibold capitalize`}>
+                                                            {u.role}
+                                                        </span>
 
-
-                                                            <select
-                                                                value={u.role}
-                                                                onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                                className={`${roleStyle.bg} ${roleStyle.color} border-0  px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
-                                                            >
-                                                                <option value="resident">Resident</option>
-                                                                <option value="staff">Staff</option>
-                                                                <option value="admin">Admin</option>
-                                                            </select>
-
-                                                        )}
                                                     </td>
                                                     <td className="py-3 px-4 text-sm text-black">
                                                         {new Date(u.created_at).toLocaleDateString('en-US', {
@@ -567,7 +553,7 @@ const AdminPanel = () => {
                             </div>
 
                             <div className="space-y-3 md:hidden">
-                                {filteredStaff.map((u, index) => {
+                                {filteredAdmin.map((u, index) => {
                                     const roleStyle = getRoleStyle(u.role)
                                     return (
                                         <div
@@ -577,50 +563,18 @@ const AdminPanel = () => {
                                         >
                                             <div className="flex items-center justify-between gap-2 mb-2">
                                                 <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
-                                                {u.id === currentUser.id ? (
-                                                    <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1  text-xs font-semibold capitalize`}>
-                                                        {u.role}
-                                                    </span>
-                                                ) : (
-                                                    <div onClick={(e) => e.stopPropagation()}>
-                                                        <select
-                                                            value={u.role}
-                                                            onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
-                                                            className={`${roleStyle.bg} ${roleStyle.color} border-0  px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none`}
-                                                        >
-                                                            <option value="resident">Resident</option>
-                                                            <option value="staff">Staff</option>
-                                                            <option value="admin">Admin</option>
-                                                        </select>
-                                                    </div>
-                                                )}
+
+                                                <span className={`${roleStyle.bg} ${roleStyle.color} px-2 py-1  text-xs font-semibold capitalize`}>
+                                                    {u.role}
+                                                </span>
+
                                             </div>
                                             <div className="space-y-1.5 text-sm text-gray-700">
                                                 <div><span className="font-semibold text-gray-900">Name:</span> {u.name}</div>
                                                 <div className="break-all"><span className="font-semibold text-gray-900">Email:</span> {u.email}</div>
                                                 <div><span className="font-semibold text-gray-900">Joined:</span> {new Date(u.created_at).toLocaleDateString()}</div>
                                             </div>
-                                            {u.id !== currentUser.id && (
-                                                <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
-                                                        onClick={() => navigate(`/admin/edit-user/${u.id}`, { state: u })}
-                                                    >
-                                                        <Pencil size={14} className='mr-1' />
-                                                        Edit
-                                                    </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
-                                                        onClick={() => handleDeleteUser(u.id, u.name)}
-                                                    >
-                                                        Delete
-                                                    </Button>
-                                                </div>
-                                            )}
+
                                         </div>
                                     )
                                 })}
