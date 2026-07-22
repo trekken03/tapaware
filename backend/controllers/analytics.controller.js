@@ -116,16 +116,22 @@ exports.getTdsTrend = async (req, res) => {
 };
 
 exports.getTdsByPurok = async (req, res) => {
+    const { from, to } = req.query;
     try {
-        const [rows] = await db.query(
-            `SELECT households.purok,
+        let query = `SELECT households.purok,
             AVG(tds_readings.tds_value) as average_tds,
             COUNT(tds_readings.id) as reading_count
             FROM households 
-            LEFT JOIN tds_readings ON households.id = tds_readings.household_id
-            GROUP BY households.purok
-            ORDER BY households.purok ASC`
-        );
+            LEFT JOIN tds_readings ON households.id = tds_readings.household_id`;
+        const params = [];
+
+        if (from && to) {
+            query += ` AND tds_readings.recorded_at BETWEEN ? AND ?`;
+            params.push(from, `${to} 23:59:59`);
+        }
+
+        query += ` GROUP BY households.purok ORDER BY households.purok ASC`;
+        const [rows] = await db.query(query, params);
         res.json(rows);
     }
     catch (error) {

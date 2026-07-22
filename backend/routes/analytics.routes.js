@@ -15,4 +15,5 @@ router.get('/resident/summary', verifyToken, analyticsController.getResidentSumm
 router.get('/trending-issues', verifyToken, requireRole('admin', 'staff'), analyticsController.getTrendingIssuesByPurok);
 router.get('/trending-by-time', verifyToken, requireRole('admin', 'staff'), analyticsController.getTrendingIssuesByTime);
 
+
 module.exports = router;

@@ -15,7 +15,7 @@ const Layout = ({ children }) => {
                     alt=""
                     loading="lazy"
                     decoding="async"
-                    className="w-[1000px] max-w-[50vw] object-contain"
+                    className="w-[40vw] max-w-[1000px] min-w-[250px] h-auto object-contain"
                 />
             </div>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import Layout from '@/components/Layout'
+import DateRangePicker from '@/components/DateRangePicker'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BarChart3 } from 'lucide-react'
@@ -50,6 +51,8 @@ const Analytics = () => {
     const [tdsTrend, setTdsTrend] = useState([])
     const [trendingIssues, setTrendingIssues] = useState([])
     const [trendingByTime, setTrendingByTime] = useState([])
+    const [tdsByPurok, setTdsByPurok] = useState([])
+
     const [loading, setLoading] = useState(true)
     const [isExporting, setIsExporting] = useState(false)
     const [exportError, setExportError] = useState('')
@@ -157,6 +160,8 @@ const Analytics = () => {
             const totalReports = byPurok.reduce((sum, purok) => sum + Number(purok.report_count || 0), 0)
             const maxReports = Math.max(...byPurok.map((purok) => Number(purok.report_count || 0)), 1)
             const latestTds = tdsTrend.length > 0 ? tdsTrend[0] : null
+
+
 
             // --- Header: logo + title centered as one block, date top-right ---
             const logoSize = 16 // mm, square
@@ -285,18 +290,22 @@ const Analytics = () => {
         setLoading(true)
         try {
             const params = { from: dateRange.from, to: dateRange.to }
-            const [issueRes, purokRes, trendRes, trendingRes, timeRes] = await Promise.all([
+            const [issueRes, purokRes, trendRes, trendingRes, timeRes, tdsByPurokRes] = await Promise.all([
                 API.get('/analytics/reports-by-issue', { params }),
                 API.get('/analytics/reports-by-purok', { params }),
                 API.get('/analytics/tds-trend', { params }),
                 API.get('/analytics/trending-issues', { params }),
-                API.get('/analytics/trending-by-time', { params })
+                API.get('/analytics/trending-by-time', { params }),
+                API.get('/analytics/tds-by-purok', { params }),
+
             ])
             setByIssue(issueRes.data)
             setByPurok(purokRes.data)
             setTdsTrend(trendRes.data)
             setTrendingIssues(trendingRes.data)
             setTrendingByTime(timeRes.data)
+            setTdsByPurok(tdsByPurokRes.data)
+
         } catch (error) {
             console.log('Error fetching analytics:', error)
             toast.error('Failed to load analytics data')
@@ -331,6 +340,14 @@ const Analytics = () => {
         night: 'Night (9pm–5am)',
     }
 
+    // Get color based on TDS value
+    const getTDSColor = (tdsValue) => {
+        const value = Number(tdsValue) || 0
+        if (value <= 500) return '#0f6e56' // Green - Safe
+        if (value <= 1000) return '#f59e0b' // Amber/Orange - Warning
+        return '#dc2626' // Red - Danger
+    }
+
     if (loading) {
         return (
             <Layout>
@@ -352,27 +369,7 @@ const Analytics = () => {
                         <p className="text-gray-500 mt-1">Visual breakdown of water quality data</p>
                     </div>
                     <div className="flex flex-wrap items-end gap-3">
-                        <div>
-                            <label className="text-xs font-semibold text-black uppercase block mb-1">From</label>
-                            <input
-                                type="date"
-                                value={dateRange.from}
-                                max={dateRange.to}
-                                onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-                                className="border border-black bg-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-8"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs font-semibold text-black uppercase block mb-1">To</label>
-                            <input
-                                type="date"
-                                value={dateRange.to}
-                                min={dateRange.from}
-                                max={new Date().toISOString().split('T')[0]}
-                                onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-                                className="border border-black bg-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-8"
-                            />
-                        </div>
+                        <DateRangePicker dateRange={dateRange} setDateRange={setDateRange} />
                         <Button
                             onClick={handleDownloadPdf}
                             disabled={isExporting}
@@ -490,6 +487,49 @@ const Analytics = () => {
                                             activeDot={{ r: 6 }}
                                         />
                                     </LineChart>
+                                </ResponsiveContainer>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Average TDS by purok */}
+                    <Card className="mb-6">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-base">
+                                <BarChart3 size={18} className="text-blue-600" />
+                                Average TDS by Purok
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {tdsByPurok.every(p => p.reading_count == 0) ? (
+                                <p className="text-gray-500 text-sm text-center py-12">
+                                    No TDS readings recorded yet.
+                                </p>
+                            ) : (
+                                <ResponsiveContainer width="100%" height={280}>
+                                    <BarChart data={tdsByPurok}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                        <XAxis
+                                            dataKey="purok"
+                                            fontSize={12}
+                                            tick={{ fill: '#6b7280' }}
+                                            tickFormatter={(v) => `Purok ${v}`}
+                                        />
+                                        <YAxis
+                                            fontSize={12}
+                                            tick={{ fill: '#6b7280' }}
+                                            label={{ value: 'TDS (ppm)', angle: -90, position: 'insideLeft', style: { fill: '#6b7280', fontSize: 12 } }}
+                                        />
+                                        <Tooltip
+                                            formatter={(value) => [`${Number(value).toFixed(2)} ppm`, 'Avg TDS']}
+                                            labelFormatter={(label) => `Purok ${label}`}
+                                        />
+                                        <Bar dataKey="average_tds" radius={[2, 2, 0, 0]}>
+                                            {tdsByPurok.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={getTDSColor(entry.average_tds)} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
                                 </ResponsiveContainer>
                             )}
                         </CardContent>
