@@ -271,41 +271,42 @@ const Homepage = () => {
             </section>
 
             {/* CONTACT / CONCERN FORM */}
-            {!user && (
-                <section id="contact" className="py-20 bg-white">
 
-                    <div className={`${user ? 'max-w-3xl mx-auto px-4 sm:px-6 text-center' : 'max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-12'}`}>
+            <section id="contact" className="py-20 bg-white">
 
-                        <div className="flex flex-col items-center text-center">
-                            <span className="text-1xl font-semibold uppercase tracking-widest text-cyan-600">
-                                Contact
-                            </span>
+                <div className={`${user ? 'max-w-3xl mx-auto px-4 sm:px-6 text-center' : 'max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-12'}`}>
 
-                            <h2 className="text-3xl font-black tracking-tight text-[#0a1a33] mt-2 mb-4">
-                                Noticed something off?
-                            </h2>
+                    <div className="flex flex-col items-center text-center">
+                        <span className="text-1xl font-semibold uppercase tracking-widest text-cyan-600">
+                            Contact
+                        </span>
 
-                            <p className="text-gray-600 leading-relaxed mb-8 max-w-lg">
-                                Any resident of Barangay Cabalantian can raise a water quality concern here,
-                                you don't need an account. Barangay staff review every submission.
-                            </p>
+                        <h2 className="text-3xl font-black tracking-tight text-[#0a1a33] mt-2 mb-4">
+                            Noticed something off?
+                        </h2>
 
-                            <div className="space-y-4">
-                                <div className="flex items-center  gap-3 text-gray-700">
-                                    <div className="w-9 h-9 rounded-full bg-cyan-50 flex items-center justify-center shrink-0">
-                                        <Mail size={16} className="text-cyan-600" />
-                                    </div>
-                                    <span className="text-sm">cabalantian.tapaware@gmail.com</span>
+                        <p className="text-gray-600 leading-relaxed mb-8 max-w-lg">
+                            Any resident of Barangay Cabalantian can raise a water quality concern here,
+                            you don't need an account. Barangay staff review every submission.
+                        </p>
+
+                        <div className="space-y-4">
+                            <div className="flex items-center  gap-3 text-gray-700">
+                                <div className="w-9 h-9 rounded-full bg-cyan-50 flex items-center justify-center shrink-0">
+                                    <Mail size={16} className="text-cyan-600" />
                                 </div>
+                                <span className="text-sm">cabalantian.tapaware@gmail.com</span>
+                            </div>
 
-                                <div className="flex items-center justify-center gap-3 text-gray-700">
-                                    <div className="w-9 h-9 rounded-full bg-cyan-50 flex items-center justify-center shrink-0">
-                                        <Users size={16} className="text-cyan-600" />
-                                    </div>
-                                    <span className="text-sm">Barangay Cabalantian Hall, Bacolor, Pampanga</span>
+                            <div className="flex items-center justify-center gap-3 text-gray-700">
+                                <div className="w-9 h-9 rounded-full bg-cyan-50 flex items-center justify-center shrink-0">
+                                    <Users size={16} className="text-cyan-600" />
                                 </div>
+                                <span className="text-sm">Barangay Cabalantian Hall, Bacolor, Pampanga</span>
                             </div>
                         </div>
+                    </div>
+                    {!user && (
 
                         <Card className="shadow-md">
                             <CardContent className="pt-6">
@@ -353,12 +354,13 @@ const Homepage = () => {
                                 </form>
                             </CardContent>
                         </Card>
+                    )}
 
 
 
-                    </div>
-                </section>
-            )}
+                </div>
+            </section>
+
 
             {/* FOOTER */}
             <footer className="bg-[#0a1a33] text-blue-200 py-8">

@@ -238,7 +238,7 @@ const Reports = () => {
                                         <div
                                             key={r.id}
                                             onClick={() => navigate(`/reports/${r.id}`)}
-                                            className={`flex gap-4 rounded-lg border-l-3 ${statusStyle.border} shadow-lg bg-gray-50 p-4 h-full cursor-pointer hover:bg-gray-200 transition-all duration-200`}>
+                                            className={`flex gap-4 rounded-lg border-l-3 border ${statusStyle.border} shadow-lg bg-gray-50 p-4 h-full cursor-pointer hover:bg-gray-200 transition-all duration-200`}>
                                             <div className={`hidden sm:flex items-center justify-center w-14 h-14 rounded-full ${statusStyle.bg} shrink-0`}>
                                                 <Icon size={24} className={`${statusStyle.color}`} />
                                             </div>

@@ -41,7 +41,7 @@ const Login = () => {
 
 
             login(res.data.token, res.data.user);
-            navigate(role === "resident" ? "/reports" : "/dashboard");
+            navigate(role === "resident" ? "/dashboard" : "/dashboard");
             toast.success('Welcome back! ' + res.data.user.name + '!')
         } catch (err) {
             setError(err.response?.data?.message || 'Something went wrong')

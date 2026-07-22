@@ -7,8 +7,8 @@ const { requireRole } = require('../middleware/role.middleware');
 
 router.get('/', verifyToken, requireRole('staff', 'admin'), tdsController.getAllReadings);
 router.post('/', verifyToken, requireRole('staff', 'admin'), tdsController.addReadings);
-router.get('/household/:id/latest', verifyToken, requireRole('staff', 'admin'), tdsController.getLatestReadingByHousehold);
-router.get('/household/:id', verifyToken, requireRole('staff', 'admin'), tdsController.getReadingsByHousehold);
+router.get('/household/:id/latest', verifyToken, tdsController.getLatestReadingByHousehold);
+router.get('/household/:id', verifyToken, tdsController.getReadingsByHousehold);
 router.get('/:id', verifyToken, requireRole('staff', 'admin'), tdsController.getReadingById);
 router.delete('/:id', verifyToken, requireRole('admin'), tdsController.deleteReading);
 
