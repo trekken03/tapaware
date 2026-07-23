@@ -376,7 +376,7 @@ const Analytics = () => {
                             className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
                         >
                             <Download size={16} />
-                            {isExporting ? 'Preparing PDF...' : 'Download PDF'}
+                            {isExporting ? 'Preparing PDF....' : 'Download PDF'}
                         </Button>
                     </div>
                 </div>
