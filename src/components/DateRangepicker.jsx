@@ -11,7 +11,7 @@ import {
 const toISODate = (date) => date.toISOString().split('T')[0]
 
 const DateRangePicker = ({ dateRange, setDateRange }) => {
-    const selected = {
+    const selectedDate = {
         from: new Date(dateRange.from + 'T00:00:00'),
         to: new Date(dateRange.to + 'T00:00:00'),
     }
@@ -37,7 +37,7 @@ const DateRangePicker = ({ dateRange, setDateRange }) => {
                     >
                         <CalendarIcon className="mr-2 h-4 w-4 text-black" />
                         <span className="text-sm text-2xl text-black ">
-                            {format(selected.from, 'MMM d, yyyy')} – {format(selected.to, 'MMM d, yyyy')}
+                            {format(selectedDate.from, 'MMM d, yyyy')} – {format(selectedDate.to, 'MMM d, yyyy')}
                         </span>
                     </Button>
                 </PopoverTrigger>
@@ -45,11 +45,11 @@ const DateRangePicker = ({ dateRange, setDateRange }) => {
                     <Calendar
                         className="text-black border-black"
                         mode="range"
-                        selected={selected}
+                        selected={selectedDate}
                         onSelect={handleSelect}
                         numberOfMonths={2}
                         disabled={{ after: new Date() }}
-                        defaultMonth={selected.from}
+                        defaultMonth={selectedDate.from}
                     />
                 </PopoverContent>
             </Popover>
