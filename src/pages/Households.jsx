@@ -82,6 +82,7 @@ const Households = () => {
             h.address?.toLowerCase().includes(searchLower)
         )
     })
+    const formattedStatus = statusFilter ? statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1) : 'All';
 
     if (loading) {
         return (
@@ -122,7 +123,8 @@ const Households = () => {
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <CardTitle className="flex items-center gap-2">
                                 <Home size={20} className="text-blue-600" />
-                                All Households ({filteredHouseholds.length})
+
+                                All {statusFilter ? formattedStatus : ''} Households ({filteredHouseholds.length})
                             </CardTitle>
                             <div className="flex items-center gap-3">
                                 {/* Purok spinner */}

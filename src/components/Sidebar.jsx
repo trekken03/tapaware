@@ -52,8 +52,8 @@ const getNavItems = (role) => {
         icon: Droplets,
         children: [
             { path: '/tds?status=safe', label: 'Safe' },
-            { path: '/tds?status=mild', label: 'Mild' },
-            { path: '/tds?status=danger', label: 'Danger' },
+            { path: '/tds?status=moderate', label: 'Moderate' },
+            { path: '/tds?status=high', label: 'High' },
         ],
     };
 

@@ -166,8 +166,8 @@ const Reports = () => {
                                 {isResident
                                     ? 'My Reports'
                                     : statusLabel
-                                        ? `All ${statusLabel}`
-                                        : 'All Reports'}
+                                        ? `All ${statusLabel} Reports (${filteredReports.length})`
+                                        : `All Reports (${filteredReports.length})`}
                             </CardTitle>
                             <div className="flex items-center gap-3">
                                 {/* Purok spinner */}

@@ -77,7 +77,7 @@ const TdsReadings = () => {
 
         if (statusFilter) {
             const readingStatus = getTdsStatus(r.tds_value).label.toLowerCase()
-            const statusMap = { safe: 'safe', mild: 'moderate', danger: 'high' }
+            const statusMap = { safe: 'safe', moderate: 'moderate', high: 'high' }
             if (readingStatus !== statusMap[statusFilter]) {
                 return false
             }
@@ -101,6 +101,8 @@ const TdsReadings = () => {
             </Layout>
         )
     }
+
+    const formattedStatus = statusFilter ? statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1) : 'All';
 
     return (
         <Layout>
@@ -128,7 +130,7 @@ const TdsReadings = () => {
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <CardTitle className="flex items-center gap-2">
                                 <Droplets size={20} className="text-blue-600" />
-                                All TDS Readings ({filteredReadings.length})
+                                All {statusFilter ? formattedStatus : ''} TDS Readings ({filteredReadings.length})
                             </CardTitle>
 
                             <div className="flex items-center gap-3">

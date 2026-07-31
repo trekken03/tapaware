@@ -145,7 +145,7 @@ const EditUser = () => {
                                         name="purok"
                                         type="number"
                                         min="1"
-                                        max="7"
+                                        max="6"
                                         step="1"
                                         value={form.purok}
                                         onChange={handleChange}
@@ -155,9 +155,9 @@ const EditUser = () => {
                             </div>
 
                             {householdChanged && (
-                                <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 space-y-3">
-                                    <p className="text-sm font-semibold text-yellow-900">
-                                        You're changing this user's household. What does this change represent?
+                                <div className="rounded-lg border border-blue-400 bg-blue-200 p-4 space-y-3">
+                                    <p className="text-sm font-semibold text-gray-700">
+                                        What does this change represent?
                                     </p>
                                     <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
                                         <input
@@ -169,7 +169,7 @@ const EditUser = () => {
                                             className="mt-1"
                                         />
                                         <span>
-                                            <strong>The resident moved to a new address.</strong> Keep the old household's report and TDS history as-is; this user starts fresh at the new household.
+                                            <strong>The resident moved to a new address.</strong>
                                         </span>
                                     </label>
                                     <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
@@ -182,7 +182,7 @@ const EditUser = () => {
                                             className="mt-1"
                                         />
                                         <span>
-                                            <strong>This is a data entry correction.</strong> It's the same physical household — move all reports, TDS readings, and flags to the corrected household number/purok.
+                                            <strong>This is a data entry correction.</strong>
                                         </span>
                                     </label>
                                 </div>
