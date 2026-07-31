@@ -181,7 +181,140 @@ exports.updateUserInfo = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+exports.updateUserInfo = async (req, res) => {
+    const { id } = req.params;
+    const { name, email, household_number, purok, transfer_data } = req.body;
+    const currentUser = req.user;
 
+    try {
+        const [existing] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const [emailCheck] = await db.query('SELECT * FROM users WHERE email = ? AND id != ?', [email, id]);
+        if (emailCheck.length > 0) {
+            return res.status(400).json({ message: 'Email already in use by another account' });
+        }
+
+        const oldHouseholdId = existing[0].household_id;
+        let finalHouseholdId = existing[0].household_id;
+
+        if (household_number && purok) {
+            const houseNum = parseInt(household_number, 10);
+            const purokNum = parseInt(purok, 10);
+
+            const [existingHousehold] = await db.query(
+                'SELECT id FROM households WHERE household_number = ? AND purok = ?',
+                [houseNum, purokNum]
+            );
+
+            if (existingHousehold.length > 0) {
+                finalHouseholdId = existingHousehold[0].id;
+
+                const [existingResident] = await db.query(
+                    `SELECT id FROM users WHERE household_id = ? AND role = 'resident' AND id != ?`,
+                    [finalHouseholdId, id]
+                );
+
+                if (existingResident.length > 0) {
+                    return res.status(400).json({
+                        message: `Household #${houseNum} in Purok ${purokNum} already has a resident account linked to it. Please use a different household number or purok.`
+                    });
+                }
+            } else {
+                const [newHousehold] = await db.query(
+                    'INSERT INTO households(household_number, purok, owner_name, address) VALUES (?,?,?,?)',
+                    [houseNum, purokNum, name, '']
+                );
+                finalHouseholdId = newHousehold.insertId;
+            }
+        }
+
+        await db.query(
+            'UPDATE users SET name = ?, email = ?, household_id = ? WHERE id = ?',
+            [name, email, finalHouseholdId, id]
+        );
+
+        if (existing[0].role === 'resident' && finalHouseholdId) {
+            await db.query(
+                'UPDATE households SET owner_name = ? WHERE id = ?',
+                [name, finalHouseholdId]
+            );
+        }
+
+        // Household changed and admin explicitly chose "same household, fix a data entry error" —
+        // move the old household's history over to the corrected one.
+        const householdActuallyChanged = oldHouseholdId && finalHouseholdId && oldHouseholdId !== finalHouseholdId;
+
+        if (transfer_data && householdActuallyChanged) {
+            await db.query(
+                'UPDATE reports SET household_id = ? WHERE household_id = ?',
+                [finalHouseholdId, oldHouseholdId]
+            );
+            await db.query(
+                'UPDATE tds_readings SET household_id = ? WHERE household_id = ?',
+                [finalHouseholdId, oldHouseholdId]
+            );
+
+            // recurring_flags has a unique (household_id, issue_type, status) constraint —
+            // if the target household already has a matching active flag, merge counts
+            // instead of moving the row, to avoid a constraint violation.
+            const [oldFlags] = await db.query(
+                'SELECT * FROM recurring_flags WHERE household_id = ?',
+                [oldHouseholdId]
+            );
+
+            for (const flag of oldFlags) {
+                const [[conflict]] = await db.query(
+                    'SELECT * FROM recurring_flags WHERE household_id = ? AND issue_type = ? AND status = ?',
+                    [finalHouseholdId, flag.issue_type, flag.status]
+                );
+
+                if (conflict) {
+                    await db.query(
+                        'UPDATE recurring_flags SET times_reported = times_reported + ?, last_reported_at = GREATEST(last_reported_at, ?) WHERE id = ?',
+                        [flag.times_reported, flag.last_reported_at, conflict.id]
+                    );
+                    await db.query('DELETE FROM recurring_flags WHERE id = ?', [flag.id]);
+                } else {
+                    await db.query(
+                        'UPDATE recurring_flags SET household_id = ? WHERE id = ?',
+                        [finalHouseholdId, flag.id]
+                    );
+                }
+            }
+
+            await auditLog({
+                user_id: currentUser.id,
+                user_name: currentUser.name,
+                user_role: currentUser.role,
+                action: 'TRANSFER_HOUSEHOLD_DATA',
+                table_affected: 'households',
+                record_id: finalHouseholdId,
+                details: `Transferred reports, TDS readings, and flags from household #${oldHouseholdId} to #${finalHouseholdId} for user ${existing[0].name}`,
+                ip_address: req.ip
+            });
+        }
+
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'UPDATE_USER_INFO',
+            table_affected: 'users',
+            record_id: id,
+            details: `Admin updated user ${existing[0].name}'s info`,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'User updated successfully' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
 exports.updateFlagStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;

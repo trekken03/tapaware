@@ -3,10 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Settings, Users, Flag, Plus, Search, Pencil, MessageSquare, UserStar } from 'lucide-react'
+import { Settings, Users, Flag, Plus, Search, Pencil, MessageSquare, UserStar, Trash2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { toast } from 'sonner'
 
 const AdminPanel = () => {
@@ -63,7 +64,6 @@ const AdminPanel = () => {
     }
 
     const handleDeleteUser = async (userId, userName) => {
-        if (!window.confirm(`Are you sure you want to delete ${userName}?`)) return
         try {
             await API.delete(`/admin/users/${userId}`)
             toast.success(`User ${userName} deleted successfully`)
@@ -250,14 +250,22 @@ const AdminPanel = () => {
                                                                     <Pencil size={14} className='mr-1' />
                                                                     Edit
                                                                 </Button>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    className="text-red-600 border-red-200 hover:bg-red-50"
-                                                                    onClick={() => handleDeleteUser(u.id, u.name)}
+                                                                <ConfirmDialog
+                                                                    title={`Deleting user ${u.name}?`}
+                                                                    description="This cannot be undone."
+                                                                    actionText="Delete User"
+                                                                    actionVariant="destructive"
+                                                                    onConfirm={() => handleDeleteUser(u.id, u.name)}
                                                                 >
-                                                                    Delete
-                                                                </Button>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                                    >
+                                                                        <Trash2 size={14} />
+                                                                        Delete
+                                                                    </Button>
+                                                                </ConfirmDialog>
                                                             </div>
                                                         )}
                                                     </td>
@@ -296,14 +304,22 @@ const AdminPanel = () => {
                                                         <Pencil size={14} className='mr-1' />
                                                         Edit
                                                     </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
-                                                        onClick={() => handleDeleteUser(u.id, u.name)}
+                                                    <ConfirmDialog
+                                                        title={`Deleting user ${u.name}?`}
+                                                        description="This cannot be undone."
+                                                        actionText="Delete User"
+                                                        actionVariant="destructive"
+                                                        onConfirm={() => handleDeleteUser(u.id, u.name)}
                                                     >
-                                                        Delete
-                                                    </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            Delete
+                                                        </Button>
+                                                    </ConfirmDialog>
                                                 </div>
                                             )}
                                         </div>
@@ -401,14 +417,22 @@ const AdminPanel = () => {
                                                                     <Pencil size={14} className='mr-1' />
                                                                     Edit
                                                                 </Button>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    className="text-red-600 border-red-200 hover:bg-red-50"
-                                                                    onClick={() => handleDeleteUser(u.id, u.name)}
+                                                                <ConfirmDialog
+                                                                    title={`Deleting user ${u.name}?`}
+                                                                    description="This cannot be undone."
+                                                                    actionText="Delete User"
+                                                                    actionVariant="destructive"
+                                                                    onConfirm={() => handleDeleteUser(u.id, u.name)}
                                                                 >
-                                                                    Delete
-                                                                </Button>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                                    >
+                                                                        <Trash2 size={14} />
+                                                                        Delete
+                                                                    </Button>
+                                                                </ConfirmDialog>
                                                             </div>
                                                         )}
                                                     </td>
@@ -464,14 +488,22 @@ const AdminPanel = () => {
                                                         <Pencil size={14} className='mr-1' />
                                                         Edit
                                                     </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
-                                                        onClick={() => handleDeleteUser(u.id, u.name)}
+                                                    <ConfirmDialog
+                                                        title={`Deleting user ${u.name}?`}
+                                                        description="This cannot be undone."
+                                                        actionText="Delete User"
+                                                        actionVariant="destructive"
+                                                        onConfirm={() => handleDeleteUser(u.id, u.name)}
                                                     >
-                                                        Delete
-                                                    </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            Delete
+                                                        </Button>
+                                                    </ConfirmDialog>
                                                 </div>
                                             )}
                                         </div>

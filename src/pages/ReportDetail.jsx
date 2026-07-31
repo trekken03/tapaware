@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ArrowLeft, Home, FileText } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
@@ -83,8 +84,6 @@ const ReportDetail = () => {
     const status = getStatusStyle(report.status)
     const isResident = user?.role === 'resident'
     const handleDelete = async () => {
-        if (!window.confirm('Delete this report? This cannot be undone.')) return
-
         try {
             await API.delete(`/reports/${id}`)
             toast.success('Report deleted successfully')
@@ -107,15 +106,22 @@ const ReportDetail = () => {
                         Back
                     </Button>
                     {(user?.role === 'admin' || (user?.role === 'resident' && report.user_id === user.id && report.status === 'pending')) && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
-                            onClick={handleDelete}
+                        <ConfirmDialog
+                            title="Delete this report?"
+                            description="This cannot be undone."
+                            actionText="Delete Report"
+                            actionVariant="destructive"
+                            onConfirm={handleDelete}
                         >
-                            <Trash2 size={14} />
-                            Delete Report
-                        </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                            >
+                                <Trash2 size={14} />
+                                Delete Report
+                            </Button>
+                        </ConfirmDialog>
                     )}
                 </div>
 

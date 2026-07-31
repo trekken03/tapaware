@@ -18,6 +18,7 @@ import {
     ChevronDown,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 const getNavItems = (role) => {
     const baseItems = [
@@ -135,16 +136,12 @@ const Sidebar = () => {
     };
 
     const handleLogout = () => {
-        if (!window.confirm('Are you sure you want to logout?')) return
         try {
             localStorage.removeItem('sidebar_expanded');
             logout();
             navigate('/login');
             toast.success('Logged out successfully')
-        }
-
-
-        catch (error) {
+        } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to logout')
         }
     }
@@ -315,13 +312,20 @@ const Sidebar = () => {
                             </p>
                         </div>
                     </div>
-                    <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-blue-200 hover:bg-blue-900 hover:text-white text-sm transition-all duration-200"
+                    <ConfirmDialog
+                        title="Confirm logout"
+                        description="Are you sure you want to logout?"
+                        actionText="Logout"
+                        actionVariant="destructive"
+                        onConfirm={handleLogout}
                     >
-                        <LogOut size={16} />
-                        Logout
-                    </button>
+                        <button
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-blue-200 hover:bg-blue-900 hover:text-white text-sm transition-all duration-200"
+                        >
+                            <LogOut size={16} />
+                            Logout
+                        </button>
+                    </ConfirmDialog>
                 </div>
             </div>
         </>

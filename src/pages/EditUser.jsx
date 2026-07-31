@@ -17,17 +17,21 @@ const EditUser = () => {
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [transferChoice, setTransferChoice] = useState('moved')
     const [form, setForm] = useState({
         name: existingUser?.name || '',
         email: existingUser?.email || '',
         household_number: existingUser?.household_number || '',
         purok: existingUser?.purok || ''
-
     })
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
+
+    const householdChanged = existingUser?.household_number &&
+        (form.household_number?.toString() !== existingUser.household_number?.toString() ||
+            form.purok?.toString() !== existingUser.purok?.toString())
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -35,7 +39,12 @@ const EditUser = () => {
         setLoading(true)
 
         try {
-            await API.put(`/admin/users/${id}`, form)
+            const payload = { ...form }
+            if (householdChanged) {
+                payload.transfer_data = transferChoice === 'correction'
+            }
+
+            await API.put(`/admin/users/${id}`, payload)
             toast.success('User updated successfully')
             navigate('/admin')
         } catch (error) {
@@ -118,7 +127,6 @@ const EditUser = () => {
                                     />
                                 </div>
 
-
                                 <div className="space-y-2">
                                     <Label htmlFor="household_number">Household No.</Label>
                                     <Input
@@ -145,6 +153,40 @@ const EditUser = () => {
                                     />
                                 </div>
                             </div>
+
+                            {householdChanged && (
+                                <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 space-y-3">
+                                    <p className="text-sm font-semibold text-yellow-900">
+                                        You're changing this user's household. What does this change represent?
+                                    </p>
+                                    <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="transferChoice"
+                                            value="moved"
+                                            checked={transferChoice === 'moved'}
+                                            onChange={(e) => setTransferChoice(e.target.value)}
+                                            className="mt-1"
+                                        />
+                                        <span>
+                                            <strong>The resident moved to a new address.</strong> Keep the old household's report and TDS history as-is; this user starts fresh at the new household.
+                                        </span>
+                                    </label>
+                                    <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="transferChoice"
+                                            value="correction"
+                                            checked={transferChoice === 'correction'}
+                                            onChange={(e) => setTransferChoice(e.target.value)}
+                                            className="mt-1"
+                                        />
+                                        <span>
+                                            <strong>This is a data entry correction.</strong> It's the same physical household — move all reports, TDS readings, and flags to the corrected household number/purok.
+                                        </span>
+                                    </label>
+                                </div>
+                            )}
 
                             <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 pt-4">
                                 <Button

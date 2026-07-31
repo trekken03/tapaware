@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ArrowLeft, Home, FileText, Droplets, Flag } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
@@ -84,8 +85,6 @@ const HouseholdDetail = () => {
     const status = getHouseholdStatusStyle(household.computed_status)
 
     const handleDelete = async () => {
-        if (!window.confirm(`Delete household #${household.household_number}? This will permanently remove all its reports and TDS history. This cannot be undone.`)) return
-
         try {
             await API.delete(`/households/${id}`)
             toast.success('Household deleted successfully')
@@ -108,15 +107,22 @@ const HouseholdDetail = () => {
                         Back
                     </Button>
                     {user?.role === 'admin' && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
-                            onClick={handleDelete}
+                        <ConfirmDialog
+                            title={`Delete household #${household.household_number}?`}
+                            description="This will permanently remove all its reports and TDS history. This cannot be undone."
+                            actionText="Delete Household"
+                            actionVariant="destructive"
+                            onConfirm={handleDelete}
                         >
-                            <Trash2 size={14} />
-                            Delete Household
-                        </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                            >
+                                <Trash2 size={14} />
+                                Delete Household
+                            </Button>
+                        </ConfirmDialog>
                     )}
                 </div>
                 <Card className={`border-l-4 ${status.border} mb-6`}>

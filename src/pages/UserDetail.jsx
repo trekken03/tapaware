@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ArrowLeft, User, Pencil, Trash2, Home, FileText, Droplets, ClipboardList, Mail, MapPin } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
@@ -50,7 +51,6 @@ const UserDetail = () => {
     }
 
     const handleDelete = async () => {
-        if (!window.confirm(`Delete ${user.name}? This cannot be undone.`)) return
         try {
             await API.delete(`/admin/users/${id}`)
             toast.success('User deleted successfully')
@@ -101,15 +101,22 @@ const UserDetail = () => {
                             <Pencil size={14} />
                             Edit
                         </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
-                            onClick={handleDelete}
+                        <ConfirmDialog
+                            title={`Delete ${user.name}?`}
+                            description="This cannot be undone."
+                            actionText="Delete"
+                            actionVariant="destructive"
+                            onConfirm={handleDelete}
                         >
-                            <Trash2 size={14} />
-                            Delete
-                        </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                            >
+                                <Trash2 size={14} />
+                                Delete
+                            </Button>
+                        </ConfirmDialog>
                     </div>
                     )}
 
