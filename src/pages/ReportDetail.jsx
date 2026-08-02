@@ -134,7 +134,7 @@ const ReportDetail = () => {
                                     Household #{report.household_number} - Purok {report.purok}
                                 </p>
                             </div>
-                            <span className={`${status.bg} ${status.color} px-3 py-1 rounded-full text-sm font-semibold`}>
+                            <span className={`${status.bg} ${status.color} px-3 py-1  text-sm font-semibold`}>
                                 {status.label}
                             </span>
                         </div>
@@ -172,7 +172,7 @@ const ReportDetail = () => {
                                 <select
                                     value={report.status}
                                     onChange={(e) => handleStatusUpdate(e.target.value)}
-                                    className={`${status.bg} ${status.color} border-0 rounded-full px-3 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
+                                    className={`${status.bg} ${status.color} border-0  px-3 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
                                 >
                                     <option value="pending">Pending</option>
                                     <option value="investigating">Investigating</option>
@@ -209,7 +209,7 @@ const ReportDetail = () => {
                                                     {new Date(r.created_at).toLocaleDateString()}
                                                 </p>
                                             </div>
-                                            <span className={`${s.bg} ${s.color} px-2 py-1 rounded-full text-xs font-semibold`}>
+                                            <span className={`${s.bg} ${s.color} px-2 py-1 text-xs font-semibold`}>
                                                 {s.label}
                                             </span>
                                         </div>

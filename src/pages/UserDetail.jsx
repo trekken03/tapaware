@@ -133,7 +133,7 @@ const UserDetail = () => {
                             <div className="flex-1">
                                 <div className="flex flex-wrap items-center gap-2 mb-1">
                                     <h1 className="text-xl font-bold text-gray-900">{user.name}</h1>
-                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${roleBadgeStyle[user.role] || 'bg-gray-100 text-gray-700'}`}>
+                                    <span className={`px-2.5 py-0.5 text-xs font-semibold capitalize ${roleBadgeStyle[user.role] || 'bg-gray-100 text-gray-700'}`}>
                                         {user.role}
                                     </span>
                                 </div>

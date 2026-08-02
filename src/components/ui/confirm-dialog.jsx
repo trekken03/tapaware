@@ -21,14 +21,14 @@ function ConfirmDialog({
     size = "sm",
 }) {
     return (
-        <AlertDialog>
+        <AlertDialog >
             <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
             <AlertDialogContent size={size}>
                 <AlertDialogHeader>
                     <AlertDialogTitle>{title}</AlertDialogTitle>
                     {description ? <AlertDialogDescription>{description}</AlertDialogDescription> : null}
                 </AlertDialogHeader>
-                <AlertDialogFooter>
+                <AlertDialogFooter className="border-t-0 bg-white">
                     <AlertDialogCancel className="hover:cursor-pointer">Cancel</AlertDialogCancel>
                     <AlertDialogAction variant={actionVariant} onClick={onConfirm} className="hover:cursor-pointer">
                         {actionText}

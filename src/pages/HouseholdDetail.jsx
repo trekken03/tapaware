@@ -134,7 +134,7 @@ const HouseholdDetail = () => {
                                     Household #{household.household_number} - Purok {household.purok}
                                 </p>
                             </div>
-                            <span className={`${status.bg} ${status.color} px-3 py-1 rounded-full text-sm font-semibold`}>
+                            <span className={`${status.bg} ${status.color} px-3 py-1  text-sm font-semibold`}>
                                 {status.label}
                             </span>
                         </div>
@@ -171,7 +171,7 @@ const HouseholdDetail = () => {
                                         <p className="font-semibold text-gray-900 capitalize">{f.issue_type}</p>
                                         <p className="text-xs text-gray-500">Reported {f.times_reported} times</p>
                                     </div>
-                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${f.status === 'active' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}`}>
+                                    <span className={`px-2 py-1 text-xs font-semibold ${f.status === 'active' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}`}>
                                         {f.status}
                                     </span>
                                 </div>
@@ -206,7 +206,7 @@ const HouseholdDetail = () => {
                                                     {r.reported_by} • {new Date(r.created_at).toLocaleDateString()}
                                                 </p>
                                             </div>
-                                            <span className={`${s.bg} ${s.color} px-2 py-1 rounded-full text-xs font-semibold`}>
+                                            <span className={`${s.bg} ${s.color} px-2 py-1  text-xs font-semibold`}>
                                                 {s.label}
                                             </span>
                                         </div>
@@ -243,7 +243,7 @@ const HouseholdDetail = () => {
                                                     {t.staff_name} • {new Date(t.recorded_at).toLocaleDateString()}
                                                 </p>
                                             </div>
-                                            <span className={`${s.bg} ${s.color} px-2 py-1 rounded-full text-xs font-semibold`}>
+                                            <span className={`${s.bg} ${s.color} px-2 py-1 text-xs font-semibold`}>
                                                 {s.label}
                                             </span>
                                         </div>

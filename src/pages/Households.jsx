@@ -162,7 +162,7 @@ const Households = () => {
 
                             </div>
                         ) : (
-                            <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,290px))] gap-4 bg-white ">
+                            <div className="grid justify-center grid-cols-[repeat(auto-fit,minmax(220px,290px))] gap-4 bg-white ">
                                 {filteredHouseholds.map((h) => {
                                     const status = getHouseholdStatusStyle(h.computed_status)
                                     return (

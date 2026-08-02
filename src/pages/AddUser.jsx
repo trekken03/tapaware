@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,9 +8,11 @@ import { Label } from '@/components/ui/label'
 import { ArrowLeft, Users, Eye, EyeOff } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 const AddUser = () => {
     const navigate = useNavigate()
+    const formRef = useRef(null)
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false);
     const [form, setForm] = useState({
@@ -20,7 +22,7 @@ const AddUser = () => {
         role: 'resident',
         household_number: '',
         purok: '',
-        adress: ''
+        address: ''
     })
 
     const handleChange = (e) => {
@@ -33,6 +35,13 @@ const AddUser = () => {
         }
         setForm({ ...form, [name]: value })
     }
+
+    const isResident = form.role === 'resident'
+    const isFormReady =
+        form.email.trim() !== '' &&
+        form.password.trim() !== '' &&
+        form.name.trim() !== '' &&
+        (!isResident || (form.household_number.trim() !== '' && form.purok.trim() !== '' && form.address.trim() !== ''))
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -93,7 +102,7 @@ const AddUser = () => {
                     </CardHeader>
                     <CardContent>
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
@@ -196,7 +205,7 @@ const AddUser = () => {
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="household_number">
+                                    <Label htmlFor="address">
                                         Address (for residents only)
                                     </Label>
                                     <Input
@@ -212,13 +221,28 @@ const AddUser = () => {
                             </div>
 
                             <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 pt-4">
-                                <Button
-                                    type="submit"
-                                    className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white"
-                                    disabled={loading}
+                                <ConfirmDialog
+                                    title="Save user?"
+                                    description="Confirm to save this user."
+                                    actionText="Save"
+                                    actionVariant="success"
+                                    onConfirm={() => {
+                                        if (formRef.current?.checkValidity()) {
+                                            formRef.current.requestSubmit()
+                                        } else {
+                                            formRef.current?.reportValidity()
+                                        }
+                                    }}
                                 >
-                                    {loading ? 'Saving...' : 'Save User'}
-                                </Button>
+                                    <Button
+                                        type="button"
+                                        className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white"
+                                        disabled={loading || !isFormReady}
+                                    >
+                                        {loading ? 'Saving...' : 'Save User'}
+                                    </Button>
+                                </ConfirmDialog>
+
                                 <Button
                                     type="button"
                                     variant="outline"

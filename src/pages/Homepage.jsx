@@ -183,7 +183,7 @@ const Homepage = () => {
                             <div className="w-[220px] h-[220px] rounded-full border-4 border-white/20 animate-pulse" />
                         ) : summary && overallStatus ? (
                             <div className="bg-white backdrop-blur-xl border border-white rounded-2xl p-8 shadow-2xl">
-                                <p className="text-center text-xs font-semibold uppercase tracking-widest text-white/70 mb-4">
+                                <p className="text-center text-xs font-semibold uppercase tracking-widest text-black mb-4">
                                     Barangay-wide Average
                                 </p>
 

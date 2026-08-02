@@ -70,7 +70,7 @@ const AuditDetail = () => {
                                 <h1 className="text-xl font-bold text-gray-900">{log.action.replace(/_/g, ' ')}</h1>
                                 <p className="text-gray-500 text-sm">{log.details}</p>
                             </div>
-                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold shrink-0">
+                            <span className="bg-blue-100 text-blue-700 px-3 py-1  text-xs font-semibold shrink-0">
                                 {log.table_affected}
                             </span>
                         </div>

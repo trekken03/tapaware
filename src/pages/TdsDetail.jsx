@@ -117,7 +117,7 @@ const TdsDetail = () => {
                                     Household #{reading.household_number} - Purok {reading.purok}
                                 </p>
                             </div>
-                            <span className={`${status.bg} ${status.color} px-3 py-1 rounded-full text-sm font-semibold`}>
+                            <span className={`${status.bg} ${status.color} px-3 py-1  text-sm font-semibold`}>
                                 {status.label}
                             </span>
                         </div>
@@ -177,7 +177,7 @@ const TdsDetail = () => {
                                                     {h.staff_name} • {new Date(h.recorded_at).toLocaleDateString()}
                                                 </p>
                                             </div>
-                                            <span className={`${s.bg} ${s.color} px-2 py-1 rounded-full text-xs font-semibold`}>
+                                            <span className={`${s.bg} ${s.color} px-2 py-1 text-xs font-semibold`}>
                                                 {s.label}
                                             </span>
                                         </div>
