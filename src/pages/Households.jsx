@@ -169,7 +169,7 @@ const Households = () => {
                                         <div
                                             key={h.id}
                                             onClick={() => navigate(`/households/${h.id}`)}
-                                            className={`flex gap-4 rounded-2xl border-t-4 border ${status.border} p-4 shadow-lg h-full cursor-pointer hover:shadow-md hover:bg-gray-200 transition-all duration-200`}>
+                                            className={`flex gap-4 rounded-2xl border-t-4 border ${status.border} p-4 shadow-lg h-full cursor-pointer hover:shadow-md transition-all duration-200 hover:-translate-y-2`}>
                                             <div className={`hidden sm:flex items-center justify-center w-14 h-14 rounded-full ${status.bg} shrink-0`}>
                                                 <Home size={24} className={status.color} />
                                             </div>

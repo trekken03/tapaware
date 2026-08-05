@@ -66,11 +66,11 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Stat cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8 ">
                     {statCards.map((stat) => {
                         const Icon = stat.icon
                         return (
-                            <Card key={stat.label} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(stat.path)}>
+                            <Card key={stat.label} className="cursor-pointer hover:shadow-lg transition-shadow hover:-translate-y-2 duration-300 transition-all" onClick={() => navigate(stat.path)}>
                                 <CardContent className="pt-1">
                                     <div className="flex items-center justify-between">
                                         <div>

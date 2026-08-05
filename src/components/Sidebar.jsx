@@ -215,7 +215,7 @@ const Sidebar = () => {
                         if (hasChildren) {
                             return (
                                 <div key={item.path}>
-                                    <div className="flex items-center rounded-lg text-blue-200 hover:bg-blue-900 hover:text-white transition-all duration-200">
+                                    <div className="group flex items-center rounded-lg text-blue-200 hover:bg-blue-900 hover:text-white transition-all duration-200">
                                         <NavLink
                                             to={item.path}
                                             onClick={() => {
@@ -229,7 +229,7 @@ const Sidebar = () => {
                                                 }`
                                             }
                                         >
-                                            <Icon size={18} />
+                                            <Icon size={18} className="transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5" />
                                             {item.label}
                                             {item.path === '/reports' && hasNewReports && (
                                                 <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
@@ -275,13 +275,13 @@ const Sidebar = () => {
                                 to={item.path}
                                 onClick={() => setIsOpen(false)}
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
+                                    ` group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
                                         ? 'bg-blue-600 text-white'
                                         : 'text-blue-200 hover:bg-blue-900 hover:text-white'
                                     }`
                                 }
                             >
-                                <Icon size={18} />
+                                <Icon size={18} className="transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5" />
                                 {item.label}
                             </NavLink>
                         );
@@ -320,9 +320,9 @@ const Sidebar = () => {
                         onConfirm={handleLogout}
                     >
                         <button
-                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-blue-200 hover:bg-blue-900 hover:text-white text-sm transition-all duration-200"
+                            className="group w-full flex items-center gap-2 px-3 py-2 rounded-lg text-blue-200 hover:bg-blue-900 hover:text-white text-sm transition-all duration-200"
                         >
-                            <LogOut size={16} />
+                            <LogOut size={16} className="transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5" />
                             Logout
                         </button>
                     </ConfirmDialog>

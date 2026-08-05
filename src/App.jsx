@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
+import LoadingScreen from '@/components/ui/LoadingScreen';
 const Login = lazy(() => import('./pages/Login'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Households = lazy(() => import('./pages/Households'));
@@ -31,7 +32,7 @@ const FlagDetail = lazy(() => import('./pages/FlagDetail'));
 const App = () => {
     return (
         <>
-            <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+            <Suspense fallback={<LoadingScreen />}>
                 <Routes>
                     <Route path="/" element={<Homepage />} />
                     <Route path="/login" element={<Login />} />

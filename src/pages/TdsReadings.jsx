@@ -125,7 +125,7 @@ const TdsReadings = () => {
 
 
                 {/* Table */}
-                <Card className="bg-white/80">
+                <Card className="bg-white">
                     <CardHeader>
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <CardTitle className="flex items-center gap-2">
@@ -176,7 +176,7 @@ const TdsReadings = () => {
                                         <div
                                             key={r.id}
                                             onClick={() => navigate(`/tds/${r.id}`)}
-                                            className={`flex gap-4 rounded-2xl border-t-4 border ${status.border} p-4 shadow-lg h-full cursor-pointer hover:shadow-md hover:bg-gray-200 transition-all duration-200`}
+                                            className={`flex gap-4 rounded-2xl border-t-4 border ${status.border} p-4 shadow-lg h-full cursor-pointer hover:shadow-md hover:-translate-y-2 transition-all duration-200`}
                                         >
                                             <div className={`hidden sm:flex items-center justify-center w-14 h-14 rounded-full ${status.bg} shrink-0`}>
                                                 <Droplets size={24} className={status.color} />

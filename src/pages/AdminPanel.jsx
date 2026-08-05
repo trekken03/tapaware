@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Settings, Users, Flag, Plus, Search, Pencil, MessageSquare, UserStar, Trash2 } from 'lucide-react'
+import { Settings, Users, Flag, Plus, Search, Pencil, MessageSquare, UserStar, Trash2, ChevronDown } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
@@ -153,31 +153,57 @@ const AdminPanel = () => {
                     )}
                 </div>
 
-                {/* Tabs */}
-                <div className="flex flex-wrap gap-1 border-b mb-6">
-                    {[
-                        { key: 'users', label: 'User Management', icon: Users },
-                        { key: 'staff', label: 'Staff Management', icon: Pencil },
-                        { key: 'admin', label: 'Admin Management', icon: UserStar },
-                        { key: 'flagged', label: 'Flagged Households', icon: Flag },
-                        { key: 'concerns', label: 'Concerns', icon: MessageSquare },
 
-                    ].map(tab => {
-                        const Icon = tab.icon
-                        return (
-                            <button
-                                key={tab.key}
-                                onClick={() => setSearchParams({ tab: tab.key })}
-                                className={`flex items-center gap-2 px-4 sm:px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.key
-                                    ? 'border-blue-600 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                                    }`}
-                            >
-                                <Icon size={16} />
-                                {tab.label}
-                            </button>
-                        )
-                    })}
+                {/* Tabs */}
+                <div className="mb-6">
+                    {/* Mobile: dropdown spinner */}
+                    <div className="sm:hidden relative">
+                        <select
+                            value={activeTab}
+                            onChange={(e) => setSearchParams({ tab: e.target.value })}
+                            className="w-full appearance-none border border-gray-300 rounded-lg px-4 py-3 text-sm font-medium text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            {[
+                                { key: 'users', label: 'User Management' },
+                                { key: 'staff', label: 'Staff Management' },
+                                { key: 'admin', label: 'Admin Management' },
+                                { key: 'flagged', label: 'Flagged Households' },
+                                { key: 'concerns', label: 'Concerns' },
+
+                            ].map(tab => (
+                                <option key={tab.key} value={tab.key}>{tab.label}</option>
+                            ))}
+                        </select>
+                        <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+
+                    {/* Desktop: existing tab row */}
+                    {/* Desktop: existing tab row */}
+                    <div className="hidden sm:flex gap-1 border-b">
+                        {[
+                            { key: 'users', label: 'User Management', icon: Users },
+                            { key: 'staff', label: 'Staff Management', icon: Pencil },
+                            { key: 'admin', label: 'Admin Management', icon: UserStar },
+                            { key: 'flagged', label: 'Flagged Households', icon: Flag },
+                            { key: 'concerns', label: 'Concerns', icon: MessageSquare },
+
+                        ].map(tab => {
+                            const Icon = tab.icon
+                            return (
+                                <button
+                                    key={tab.key}
+                                    onClick={() => setSearchParams({ tab: tab.key })}
+                                    className={`flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.key
+                                        ? 'border-blue-600 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                        }`}
+                                >
+                                    <Icon size={16} />
+                                    {tab.label}
+                                </button>
+                            )
+                        })}
+                    </div>
                 </div>
 
                 {/* Users tab */}

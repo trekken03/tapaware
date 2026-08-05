@@ -392,11 +392,12 @@ const Analytics = () => {
                         <Card ref={purokChartRef}>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={280}>
-                                    <BarChart data={byPurok}>
+                                    <BarChart data={byPurok} >
                                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                         <XAxis
                                             dataKey="purok"
                                             fontSize={12}
+
                                             tick={{ fill: '#6b7280' }}
                                             tickFormatter={(v) => `Purok ${v}`}
                                         />
@@ -424,6 +425,7 @@ const Analytics = () => {
                                             data={byIssue}
                                             dataKey="count"
                                             nameKey="issue_type"
+                                            className="transition-all duration-300 hover:-translate-y-2 "
                                             cx="50%"
                                             cy="50%"
                                             outerRadius={90}

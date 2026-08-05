@@ -213,22 +213,22 @@ const Homepage = () => {
                         </p>
                     </div>
 
-                    <div className="grid sm:grid-cols-3 gap-6">
-                        <Card className="border-t-4 border-t-green-500">
+                    <div className="grid sm:grid-cols-3 gap-6 ">
+                        <Card className="border-t-4 border-t-green-500  hover:-translate-y-2 translate-all duration-300">
                             <CardContent className="pt-6">
                                 <ShieldCheck className="text-green-600 mb-3" size={28} />
                                 <p className="font-bold text-gray-900 mb-1">0–500 ppm</p>
                                 <p className="text-sm text-gray-500">Safe for everyday drinking and household use.</p>
                             </CardContent>
                         </Card>
-                        <Card className="border-t-4 border-t-yellow-500">
+                        <Card className="border-t-4 border-t-yellow-500 hover:-translate-y-2 translate-all duration-300">
                             <CardContent className="pt-6">
                                 <Beaker className="text-yellow-600 mb-3" size={28} />
                                 <p className="font-bold text-gray-900 mb-1">501–1000 ppm</p>
                                 <p className="text-sm text-gray-500">Still usable, but worth monitoring closely.</p>
                             </CardContent>
                         </Card>
-                        <Card className="border-t-4 border-t-red-500">
+                        <Card className="border-t-4 border-t-red-500 hover:-translate-y-2 translate-all duration-300">
                             <CardContent className="pt-6">
                                 <AlertTriangle className="text-red-600 mb-3" size={28} />
                                 <p className="font-bold text-gray-900 mb-1">1000+ ppm</p>
@@ -257,7 +257,7 @@ const Homepage = () => {
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
                             {purokData.map((p) => (
-                                <div key={p.purok} className="bg-white p-5 shadow-sm flex justify-center">
+                                <div key={p.purok} className="bg-white p-5 shadow-sm flex justify-center hover:-translate-y-2 duration-300 translate-all rounded-lg">
                                     <WaterGauge
                                         value={p.average_tds}
                                         label={`Purok ${p.purok}`}

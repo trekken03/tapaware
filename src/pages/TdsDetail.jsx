@@ -96,11 +96,7 @@ const TdsDetail = () => {
                             actionVariant="destructive"
                             onConfirm={handleDelete}
                         >
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
-                            >
+                            <Button className="bg-white rounded-sm flex items-center gap-1 text-white bg-red-600 hover:bg-red-500 hover:cursor-pointer">
                                 <Trash2 size={14} />
                                 Delete Reading
                             </Button>
@@ -155,7 +151,7 @@ const TdsDetail = () => {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Droplets size={20} className="text-blue-600" />
-                            Past Readings from this Household
+                            Past readings from this household
                         </CardTitle>
                     </CardHeader>
                     <CardContent>

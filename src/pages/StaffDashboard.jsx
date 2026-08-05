@@ -66,7 +66,7 @@ const StaffDashboard = () => {
                     {statCards.map((stat) => {
                         const Icon = stat.icon
                         return (
-                            <Card key={stat.label} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(stat.path)}>
+                            <Card key={stat.label} className="cursor-pointer hover:shadow-lg transition-shadow transition-shadow hover:-translate-y-2 duration-300 transition-all" onClick={() => navigate(stat.path)}>
                                 <CardContent className="pt-6">
                                     <div className="flex items-center justify-between">
                                         <div>

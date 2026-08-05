@@ -213,7 +213,7 @@ const Reports = () => {
                             </div>
                         </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent >
                         {filteredReports.length === 0 ? (
                             <div className="text-center py-12">
                                 <Home size={48} className="text-gray-300 mx-auto mb-4" />
@@ -238,7 +238,7 @@ const Reports = () => {
                                         <div
                                             key={r.id}
                                             onClick={() => navigate(`/reports/${r.id}`)}
-                                            className={`flex gap-4 rounded-2xl border-t-4 border ${statusStyle.border} shadow-lg bg-white p-4 h-full cursor-pointer hover:bg-gray-200 transition-all duration-200`}>
+                                            className={`flex gap-4 rounded-2xl border-t-4 border ${statusStyle.border} shadow-lg bg-white p-4 h-full cursor-pointer  transition-all duration-200 hover:-translate-y-2`}>
                                             <div className={`hidden sm:flex items-center justify-center w-14 h-14 rounded-full ${statusStyle.bg} shrink-0`}>
                                                 <Icon size={24} className={`${statusStyle.color}`} />
                                             </div>

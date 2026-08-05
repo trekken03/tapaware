@@ -22,8 +22,8 @@ function ConfirmDialog({
 }) {
     return (
         <AlertDialog >
-            <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
-            <AlertDialogContent size={size}>
+            <AlertDialogTrigger className="rounded-full" asChild>{children}</AlertDialogTrigger>
+            <AlertDialogContent size={size} >
                 <AlertDialogHeader>
                     <AlertDialogTitle>{title}</AlertDialogTitle>
                     {description ? <AlertDialogDescription>{description}</AlertDialogDescription> : null}
