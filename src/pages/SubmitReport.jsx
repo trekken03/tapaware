@@ -62,7 +62,7 @@ const SubmitReport = () => {
         try {
             await API.post('/reports', form)
             toast.success("Report submitted successfully")
-            setTimeout(() => navigate('/reports'), 2000)
+            setTimeout(() => navigate('/dashboard'), 2000)
         } catch (error) {
             const message = error.response?.data?.message || 'Failed to submit report'
 
@@ -188,7 +188,7 @@ const SubmitReport = () => {
                                         type="button"
                                         variant="outline"
                                         className="w-full sm:w-auto"
-                                        onClick={() => navigate('/reports')}
+                                        onClick={() => navigate('/dashboard')}
                                     >
                                         Cancel
                                     </Button>

@@ -142,7 +142,7 @@ const AdminPanel = () => {
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Admin Panel</h1>
                         <p className="text-gray-500 mt-1">Manage users, Flagged households, and Concerns.</p>
                     </div>
-                    {(activeTab === 'users' || activeTab === 'staff') && (
+                    {(activeTab === 'users' || activeTab === 'staff' || activeTab === 'admin') && (
                         <Button
                             className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
                             onClick={() => navigate('/admin/add-user')}

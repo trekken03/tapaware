@@ -171,7 +171,7 @@ const ResidentDashboard = () => {
                             )}
                         </CardContent>
                     </Card>
-                    <Card className="mb-6">
+                    <Card className="mb-6 h-min">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-base">
                                 <Droplets size={18} className="text-blue-600" />
@@ -272,7 +272,7 @@ const ResidentDashboard = () => {
                                         <div
                                             key={r.id}
                                             onClick={() => navigate(`/reports/${r.id}`)}
-                                            className={`flex gap-4 rounded-lg border-l-3 ${s.border} border shadow-lg bg-gray-50 p-4 cursor-pointer hover:bg-gray-200 transition-all duration-200`}
+                                            className={`flex gap-4 rounded-lg border-t-3 ${s.border} border shadow-lg bg-gray-50 p-4 cursor-pointer transition-all duration-200 hover:-translate-y-2`}
                                         >
                                             <div className={`hidden sm:flex items-center justify-center w-14 h-14 rounded-full ${s.bg} shrink-0`}>
                                                 <Icon size={24} className={s.color} />
@@ -284,7 +284,7 @@ const ResidentDashboard = () => {
                                                         year: 'numeric', month: 'long', day: 'numeric',
                                                     })}
                                                 </p>
-                                                <span className={`${s.bg} ${s.color} mt-auto pt-2 text-xs font-semibold capitalize`}>
+                                                <span className={`${s.bg} ${s.color} mt-auto pt-2 text-xs font-semibold capitalize w-min`}>
                                                     {r.status}
                                                 </span>
                                             </div>

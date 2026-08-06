@@ -118,7 +118,7 @@ const AdminDashboard = () => {
                     </Card>
 
                     {/* Water Quality Info */}
-                    <Card>
+                    <Card className="h-min">
                         <CardHeader>
                             <CardTitle>Water Quality Guidelines</CardTitle>
                         </CardHeader>
