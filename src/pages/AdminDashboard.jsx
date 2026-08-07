@@ -175,8 +175,8 @@ const AdminDashboard = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {flagged.map((flag, index) => (
-                                                <tr key={flag.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                            {flagged.map((flag) => (
+                                                <tr key={flag.id} className="bg-white">
                                                     <td className="py-3 px-4 text-sm font-semibold">{flag.household_number}</td>
                                                     <td className="py-3 px-4 text-sm">{flag.owner_name}</td>
                                                     <td className="py-3 px-4 text-sm">Purok {flag.purok}</td>

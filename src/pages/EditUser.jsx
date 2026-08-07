@@ -106,7 +106,7 @@ const EditUser = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleLeave(-1)}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-2 rounded-lg"
                         >
                             <ArrowLeft size={16} />
                             Back
@@ -237,8 +237,8 @@ const EditUser = () => {
                                     onConfirm={handleSubmit}
                                 >
                                     <Button
-                                        type="button"
-                                        className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white"
+
+                                        className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white rounded-lg"
                                         disabled={loading || !hasChanges}
                                     >
                                         {loading ? 'Saving...' : 'Save Changes'}
@@ -259,7 +259,7 @@ const EditUser = () => {
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            className="w-full sm:w-auto"
+                                            className="w-full sm:w-auto rounded-lg"
                                             onClick={() => handleLeave('/admin')}
                                         >
                                             Cancel

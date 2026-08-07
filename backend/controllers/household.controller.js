@@ -32,6 +32,10 @@ exports.addHousehold = async (req, res) => {
     const { household_number, purok, owner_name, address } = req.body;
 
     try {
+        const [existing] = await db.query('SELECT * FROM households WHERE household_number = ? and purok = ?', [household_number, purok]);
+        if (existing.length > 0) {
+            return res.status(400).json({ message: 'Household address already exists' });
+        }
         const [result] = await db.query(
             'INSERT INTO households(household_number,purok,owner_name,address) VALUES (?,?,?,?)',
             [household_number, purok, owner_name, address]
@@ -49,8 +53,8 @@ exports.addHousehold = async (req, res) => {
         res.status(201).json({ message: 'household added successfully' });
     }
     catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 

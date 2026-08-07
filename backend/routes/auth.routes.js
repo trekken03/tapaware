@@ -9,7 +9,7 @@ router.post('/register', verifyToken, requireRole('admin'), authController.regis
 router.post('/login', loginLimiter, authController.login);
 router.post('/forgot-password', forgotPasswordLimiter, authController.forgotPassword);
 router.post('/reset-password', forgotPasswordLimiter, authController.resetPassword);
-router.put('/profile', verifyToken, authController.updateProfile)
-router.put('/change-password', verifyToken, authController.changePassword)
+router.put('/profile', verifyToken, authController.updateProfile);
+router.put('/change-password', verifyToken, authController.changePassword);
 
 module.exports = router;

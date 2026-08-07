@@ -202,7 +202,7 @@ const Homepage = () => {
             <section id="about" className="py-20 bg-white">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
                     <div className="max-w-2xl mb-14">
-                        <span className="text-1xl font-semibold uppercase tracking-widest text-cyan-600">About the system</span>
+                        <span className="text-1xl font-semibold uppercase tracking-widest text-cyan-600">About</span>
                         <h2 className="text-3xl font-black tracking-tight text-[#0a1a33] mt-2 mb-4">
                             What TDS means for your water
                         </h2>

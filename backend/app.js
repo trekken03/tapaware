@@ -11,7 +11,6 @@ const analyticsRoutes = require('./routes/analytics.routes');
 const adminRoutes = require('./routes/admin.routes');
 const concernRoutes = require('./routes/concern.routes');
 
-
 const app = express();
 
 app.set('trust proxy', 1);

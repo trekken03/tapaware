@@ -286,7 +286,7 @@ const AdminPanel = () => {
                                                                     <Button
                                                                         variant="outline"
                                                                         size="sm"
-                                                                        className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                                        className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50 rounded-lg"
                                                                     >
                                                                         <Trash2 size={14} />
                                                                         Delete
@@ -340,7 +340,7 @@ const AdminPanel = () => {
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
-                                                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50 rounded-lg"
                                                         >
                                                             <Trash2 size={14} />
                                                             Delete
@@ -453,7 +453,7 @@ const AdminPanel = () => {
                                                                     <Button
                                                                         variant="outline"
                                                                         size="sm"
-                                                                        className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                                        className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50 rounded-lg"
                                                                     >
                                                                         <Trash2 size={14} />
                                                                         Delete
@@ -524,7 +524,7 @@ const AdminPanel = () => {
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
-                                                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50 rounded-lg"
                                                         >
                                                             <Trash2 size={14} />
                                                             Delete
