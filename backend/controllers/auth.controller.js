@@ -4,6 +4,7 @@ const generateToken = require('../utils/generateToken');
 const auditLog = require('../utils/auditLogger');
 const crypto = require('crypto');
 const sendEmail = require('../utils/emailSender');
+const { authCookieOptions, csrfCookieOptions } = require('../utils/cookieOptions');
 
 
 exports.register = async (req, res) => {
@@ -17,6 +18,9 @@ exports.register = async (req, res) => {
         );
 
         if (existing.length > 0) {
+            if (existing[0].deleted_at) {
+                return res.status(400).json({ message: 'This email belongs to a previously archived account. Restore it from the Archive instead of creating a new one.' });
+            }
             return res.status(400).json({ message: 'Email already registered' });
         }
 
@@ -203,7 +207,12 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
+        if (user.deleted_at) {
+            return res.status(403).json({ message: 'This account has been deactivated. Please contact an administrator.' });
+        }
+
         const token = generateToken(user);
+        const csrfToken = crypto.randomBytes(32).toString('hex');
 
         await auditLog({
             user_id: user.id,
@@ -217,9 +226,11 @@ exports.login = async (req, res) => {
 
         });
 
+        res.cookie('token', token, authCookieOptions);
+        res.cookie('XSRF-TOKEN', csrfToken, csrfCookieOptions);
+
         res.json({
             message: 'Login successful',
-            token,
             user: {
                 id: user.id,
                 name: user.name,
@@ -240,6 +251,48 @@ exports.login = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 
+};
+
+exports.logout = async (req, res) => {
+    res.clearCookie('token', authCookieOptions);
+    res.clearCookie('XSRF-TOKEN', csrfCookieOptions);
+    res.json({ message: 'Logged out successfully' });
+};
+
+exports.getMe = async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            `SELECT users.*,
+            households.household_number,
+            households.purok
+            FROM users
+            LEFT JOIN households ON users.household_id = households.id
+            WHERE users.id = ?`,
+            [req.user.id]
+        );
+
+        if (rows.length === 0 || rows[0].deleted_at) {
+            return res.status(401).json({ message: 'Not authenticated' });
+        }
+
+        const user = rows[0];
+
+        res.json({
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                household_id: user.household_id,
+                household_number: user.household_number,
+                purok: user.purok
+            }
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
 };
 
 exports.getAllUsers = async (req, res) => {

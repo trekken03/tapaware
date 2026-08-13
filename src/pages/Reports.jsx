@@ -3,16 +3,23 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
+import { Pagination } from '@/components/ui/pagination'
 import { Home, Plus, Search, Hourglass, ClockFading, CircleCheck, FileText } from 'lucide-react'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { InputGroupAddon, InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { toast } from 'sonner'
 
+
 const Reports = () => {
     const [reports, setReports] = useState([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
+    const [currentPage, setCurrentPage] = useState(1)
+    const [pageSize] = useState(10)
     const navigate = useNavigate()
     const { user } = useAuth()
     const [searchParams, setSearchParams] = useSearchParams()
@@ -99,23 +106,42 @@ const Reports = () => {
     const purokOptions = [...new Set(reports.map(r => r.purok).filter(Boolean))]
         .sort((a, b) => a.toString().localeCompare(b.toString(), undefined, { numeric: true }))
 
-    const filteredReports = reports.filter(r => {
+    const statusPurokFiltered = reports.filter(r => {
         if (selectedPurok !== 'all' && r.purok?.toString() !== selectedPurok) {
             return false
         }
         const matchesStatus = !statusFilter || r.status === statusFilter
+        return matchesStatus
+    })
 
+    const filteredReports = statusPurokFiltered.filter(r => {
         const searchLower = searchTerm.toLowerCase()
-        const matchesSearch = (
+        return (
             r.issue_type.toLowerCase().includes(searchLower) ||
             r.household_number?.toString().includes(searchLower) ||
             r.owner_name?.toLowerCase().includes(searchLower) ||
-            r.description?.toLowerCase().includes(searchLower) ||
             r.purok?.toString().includes(searchLower)
         )
-
-        return matchesStatus && matchesSearch
     })
+
+
+
+    const totalPages = Math.max(1, Math.ceil(filteredReports.length / pageSize))
+
+    const paginatedReports = filteredReports.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    )
+
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [searchTerm, selectedPurok, statusFilter])
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages)
+        }
+    }, [currentPage, totalPages])
 
     if (loading) {
         return (
@@ -131,7 +157,7 @@ const Reports = () => {
 
     const statusLabel = statusFilter
         ? statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)
-        : null
+        : 'All'
 
     return (
         <Layout>
@@ -144,7 +170,7 @@ const Reports = () => {
                         <p className="text-gray-500 mt-1">
                             {isResident
                                 ? (statusLabel ? `Your ${statusLabel} reports` : 'Your submitted reports')
-                                : (statusLabel ? `Manage all ${statusLabel} reports` : 'Manage all reports')}
+                                : (statusLabel ? `Manage ${statusLabel.toLowerCase()} reports` : 'Manage all reports')}
                         </p>
                     </div>
                     {isResident && (
@@ -160,60 +186,61 @@ const Reports = () => {
 
                 <Card className="bg-white/80">
                     <CardHeader>
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <CardTitle className="flex items-center gap-2">
+                        <div className="flex flex-col gap-4">
+                            <CardTitle className="flex flex-wrap items-center gap-2">
                                 <FileText size={20} className="text-blue-600" />
-                                {isResident
-                                    ? 'My Reports'
-                                    : statusLabel
-                                        ? `All ${statusLabel} Reports (${filteredReports.length})`
-                                        : `All Reports (${filteredReports.length})`}
+                                {!isResident ? `${statusLabel} Reports` : 'My Reports'}
+                                <span className="text-sm font-normal text-gray-500">
+                                    {searchTerm
+                                        ? `Showing ${filteredReports.length} of ${statusPurokFiltered.length}`
+                                        : `(${statusPurokFiltered.length})`}
+                                </span>
                             </CardTitle>
-                            <div className="flex items-center gap-3">
-                                {/* Purok spinner */}
-                                {!isResident && (
-                                    <select
-                                        value={selectedPurok}
-                                        onChange={(e) => setSelectedPurok(e.target.value)}
-                                        className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="all">All Puroks</option>
-                                        {purokOptions.map(purok => (
-                                            <option key={purok} value={purok}>
-                                                Purok {purok}
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
 
-                                {/* Status spinner */}
-                                {isResident && (
-                                    <select
-                                        value={statusFilter || 'all'}
-                                        onChange={(e) => handleStatusFilterChange(e.target.value)}
-                                        className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="all">All</option>
-                                        <option value="pending">Pending</option>
-                                        <option value="investigating">Investigating</option>
-                                        <option value="resolved">Resolved</option>
-                                    </select>
-                                )}
+                            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                <Tabs value={statusFilter || 'all'} onValueChange={handleStatusFilterChange}>
+                                    <TabsList variant="line">
+                                        <TabsTrigger value="all">All</TabsTrigger>
+                                        <TabsTrigger value="pending">Pending</TabsTrigger>
+                                        <TabsTrigger value="investigating">Investigating</TabsTrigger>
+                                        <TabsTrigger value="resolved">Resolved</TabsTrigger>
+                                    </TabsList>
+                                </Tabs>
 
-                                <InputGroup className="max-w-xs">
-                                    <InputGroupInput
-                                        placeholder="Search..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                    <InputGroupAddon>
-                                        <Search size={16} />
-                                    </InputGroupAddon>
-                                </InputGroup>
+                                <div className="flex items-center gap-3">
+                                    {!isResident && (
+                                        <Select value={selectedPurok} onValueChange={setSelectedPurok}>
+                                            <SelectTrigger className="w-[140px]">
+                                                <SelectValue placeholder="All Puroks" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All Puroks</SelectItem>
+                                                {purokOptions.map(purok => (
+                                                    <SelectItem key={purok} value={purok}>
+                                                        Purok {purok}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+
+                                    <InputGroup className="max-w-xs">
+                                        <InputGroupInput
+                                            placeholder="Search..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                        />
+                                        <InputGroupAddon>
+                                            <Search size={16} />
+                                        </InputGroupAddon>
+                                    </InputGroup>
+
+
+                                </div>
                             </div>
                         </div>
                     </CardHeader>
-                    <CardContent >
+                    <CardContent>
                         {filteredReports.length === 0 ? (
                             <div className="text-center py-12">
                                 <Home size={48} className="text-gray-300 mx-auto mb-4" />
@@ -230,58 +257,111 @@ const Reports = () => {
                                 )}
                             </div>
                         ) : (
-                            <div className={`grid grid-cols-${isResident ? '[repeat(auto-fit,minmax(220px,290px))]' : '[repeat(auto-fit,minmax(220px,290px))] '} justify-center gap-4`}>
-                                {filteredReports.map((r) => {
-                                    const statusStyle = getStatusStyle(r.status)
-                                    const Icon = statusStyle.icon
-                                    return (
-                                        <div
-                                            key={r.id}
-                                            onClick={() => navigate(`/reports/${r.id}`)}
-                                            className={`flex gap-4 rounded-2xl border-t-4 border ${statusStyle.border} shadow-lg bg-white p-4 h-full cursor-pointer  transition-all duration-200 hover:-translate-y-2`}>
-                                            <div className={`hidden sm:flex items-center justify-center w-14 h-14 rounded-full ${statusStyle.bg} shrink-0`}>
-                                                <Icon size={24} className={`${statusStyle.color}`} />
-                                            </div>
+                            <>
+                                <Table className="md:min-w-[640px]">
+                                    <TableHeader className="bg-blue-800">
+                                        <TableRow >
+                                            <TableHead>No.</TableHead>
+                                            <TableHead>Issue</TableHead>
+                                            {!isResident && <TableHead>Household</TableHead>}
+                                            <TableHead>Purok</TableHead>
 
-                                            <div className="flex-1 flex flex-col h-full">
-                                                <div className="flex items-center justify-between mb-2 font-semibold">
-                                                    <span className={`text-black-600 ${isResident ? 'text-1xl' : 'text-2xl'} capitalize`}>{r.issue_type}</span>
+                                            <TableHead>Reported</TableHead>
+                                            {!isResident && <TableHead className="text-center">Actions</TableHead>}
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {paginatedReports.map((r, index) => {
+                                            const statusStyle = getStatusStyle(r.status)
+                                            const rowNum = filteredReports.length - ((currentPage - 1) * pageSize + index)
 
-                                                </div>
+                                            return (
 
+                                                <TableRow
+                                                    key={r.id}
+                                                    className="cursor-pointer hover:bg-gray-50"
+                                                    onClick={() => navigate(`/reports/${r.id}`)}
+                                                >
+                                                    <TableCell label="No.">
+                                                        {rowNum}
+                                                    </TableCell>
 
-                                                <div className="flex flex-col gap-1 text-sm text-gray-700">
+                                                    <TableCell label="Issue" className="font-semibold capitalize">
+                                                        {r.issue_type}
+                                                    </TableCell>
+
                                                     {!isResident && (
-                                                        <>
-                                                            <p className="font-semibold text-gray-900">Household: #{r.household_number} - Purok {r.purok}</p>
-                                                            <p className="font-semibold text-gray-900">Description: {r.description || '-'}</p>
-                                                        </>
+                                                        <TableCell label="Household">
+                                                            #{r.household_number}
+                                                        </TableCell>
                                                     )}
-                                                    <p className="font-semibold text-gray-900">Date: {new Date(r.created_at).toLocaleDateString('en-US', {
-                                                        year: 'numeric',
-                                                        month: 'long',
-                                                        day: 'numeric',
-                                                    })}</p>
-                                                </div>
 
-                                                {!isResident && (
-                                                    <div className="mt-auto pt-3" onClick={(e) => e.stopPropagation()}>
-                                                        <select
-                                                            value={r.status}
-                                                            onChange={(e) => handleStatusUpdate(r.id, e.target.value)}
-                                                            className={`${statusStyle.bg} ${statusStyle.color} border-0  px-3 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
-                                                        >
-                                                            <option value="pending">Pending</option>
-                                                            <option value="investigating">Investigating</option>
-                                                            <option value="resolved">Resolved</option>
-                                                        </select>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
+                                                    <TableCell label="Purok">
+                                                        Purok {r.purok || '—'}
+                                                    </TableCell>
+
+                                                    <TableCell label="Reported">
+                                                        {new Date(r.created_at).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric',
+                                                        })}
+                                                    </TableCell>
+
+                                                    {!isResident && (
+                                                        <TableCell label="Status" className="text-center">
+                                                            {r.status !== 'resolved' ? (
+                                                                <select
+                                                                    value={r.status}
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    onChange={(e) =>
+                                                                        handleStatusUpdate(r.id, e.target.value)
+                                                                    }
+                                                                    className={`${statusStyle.bg} ${statusStyle.color} text-center w-[133px] border border-transparent px-2 py-1 text-xs font-medium focus:outline-none`}
+                                                                >
+                                                                    {r.status === 'pending' && (
+                                                                        <>
+                                                                            <option value="pending">
+                                                                                Pending
+                                                                            </option>
+                                                                            <option value="investigating">
+                                                                                Investigating
+                                                                            </option>
+                                                                            <option value="resolved">
+                                                                                Resolved
+                                                                            </option>
+                                                                        </>
+                                                                    )}
+
+                                                                    {r.status === 'investigating' && (
+                                                                        <>
+                                                                            <option value="investigating">
+                                                                                Investigating
+                                                                            </option>
+                                                                            <option value="resolved">
+                                                                                Resolved
+                                                                            </option>
+                                                                        </>
+                                                                    )}
+                                                                </select>
+                                                            ) : (
+                                                                <span
+                                                                    className={`${statusStyle.bg} ${statusStyle.color} inline-block w-[133px] px-2 py-1 text-xs font-semibold`}
+                                                                >
+                                                                    Resolved
+                                                                </span>
+                                                            )}
+                                                        </TableCell>
+                                                    )}
+                                                </TableRow>
+                                            )
+                                        })}
+                                    </TableBody>
+                                </Table>
+                                <div className="mt-4 flex justify-end">
+                                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                                </div>
+                            </>
                         )}
                     </CardContent>
                 </Card>

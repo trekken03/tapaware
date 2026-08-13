@@ -5,14 +5,36 @@ const sendEmail = require('../utils/emailSender');
 exports.getAllReports = async (req, res) => {
     try {
         const [rows] = await db.query(
-            `SELECT reports.*, 
+            `SELECT reports.*,
             households.household_number,
             households.owner_name,
             households.purok,
             users.name as reported_by
             FROM reports JOIN households ON reports.household_id =households.id
             JOIN users ON reports.user_id= users.id
+            WHERE reports.deleted_at IS NULL
             ORDER BY reports.created_at DESC`
+        );
+        res.json(rows);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.getArchivedReports = async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            `SELECT reports.*,
+            households.household_number,
+            households.owner_name,
+            households.purok,
+            users.name as reported_by
+            FROM reports JOIN households ON reports.household_id = households.id
+            JOIN users ON reports.user_id = users.id
+            WHERE reports.deleted_at IS NOT NULL
+            ORDER BY reports.deleted_at DESC`
         );
         res.json(rows);
     }
@@ -67,7 +89,7 @@ exports.submitReport = async (req, res) => {
         else {
             const [countRows] = await db.query(
                 `SELECT COUNT(*) as count FROM reports
-                WHERE household_id = ? AND issue_type =?`,
+                WHERE household_id = ? AND issue_type =? AND deleted_at IS NULL`,
                 [household_id, issue_type]
             );
             if (countRows[0].count >= 3) {
@@ -165,7 +187,7 @@ exports.getReportsByHousehold = async (req, res) => {
         const [rows] = await db.query(
             `SELECT reports.*, users.name as reported_by
             FROM reports JOIN users ON reports.user_id=users.id
-            WHERE reports.household_id=?
+            WHERE reports.household_id=? AND reports.deleted_at IS NULL
             ORDER BY reports.created_at DESC`,
             [id]
         );
@@ -190,7 +212,7 @@ exports.getReportById = async (req, res) => {
             users.name as reported_by
             FROM reports JOIN households ON reports.household_id = households.id
             JOIN users ON reports.user_id = users.id
-            WHERE reports.id = ?`,
+            WHERE reports.id = ? AND reports.deleted_at IS NULL`,
             [id]
         );
 
@@ -201,7 +223,7 @@ exports.getReportById = async (req, res) => {
         const [otherReports] = await db.query(
             `SELECT reports.*, users.name as reported_by
             FROM reports JOIN users ON reports.user_id = users.id
-            WHERE reports.household_id = ? AND reports.id != ?
+            WHERE reports.household_id = ? AND reports.id != ? AND reports.deleted_at IS NULL
             ORDER BY reports.created_at DESC
             LIMIT 5`,
             [report.household_id, id]
@@ -220,7 +242,7 @@ exports.deleteReport = async (req, res) => {
     const currentUser = req.user;
 
     try {
-        const [existing] = await db.query('SELECT * FROM reports WHERE id = ?', [id]);
+        const [existing] = await db.query('SELECT * FROM reports WHERE id = ? AND deleted_at IS NULL', [id]);
         if (existing.length === 0) {
             return res.status(404).json({ message: 'Report not found' });
         }
@@ -237,20 +259,85 @@ exports.deleteReport = async (req, res) => {
             return res.status(400).json({ message: 'This report is already being processed and can no longer be deleted' });
         }
 
+        await db.query('UPDATE reports SET deleted_at = NOW() WHERE id = ?', [id]);
+
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'ARCHIVE_REPORT',
+            table_affected: 'reports',
+            record_id: id,
+            details: `Archived report #${id} (${report.issue_type})`,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'Report archived successfully' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.restoreReport = async (req, res) => {
+    const { id } = req.params;
+    const currentUser = req.user;
+
+    try {
+        const [existing] = await db.query('SELECT * FROM reports WHERE id = ? AND deleted_at IS NOT NULL', [id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ message: 'Archived report not found' });
+        }
+
+        await db.query('UPDATE reports SET deleted_at = NULL WHERE id = ?', [id]);
+
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'RESTORE_REPORT',
+            table_affected: 'reports',
+            record_id: id,
+            details: `Restored report #${id} (${existing[0].issue_type})`,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'Report restored successfully' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Hard delete — the row is removed from the database and cannot be restored.
+// Only allowed on records that are already archived, so nothing live can be
+// wiped by accident.
+exports.permanentDeleteReport = async (req, res) => {
+    const { id } = req.params;
+    const currentUser = req.user;
+
+    try {
+        const [existing] = await db.query('SELECT * FROM reports WHERE id = ? AND deleted_at IS NOT NULL', [id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ message: 'Archived report not found' });
+        }
+
         await db.query('DELETE FROM reports WHERE id = ?', [id]);
 
         await auditLog({
             user_id: currentUser.id,
             user_name: currentUser.name,
             user_role: currentUser.role,
-            action: 'DELETE_REPORT',
+            action: 'PERMANENT_DELETE_REPORT',
             table_affected: 'reports',
             record_id: id,
-            details: `Deleted report #${id} (${report.issue_type})`,
+            details: `Permanently deleted report #${id} (${existing[0].issue_type}) for household ${existing[0].household_id}`,
             ip_address: req.ip
         });
 
-        res.json({ message: 'Report deleted successfully' });
+        res.json({ message: 'Report permanently deleted' });
     }
     catch (error) {
         console.error(error);

@@ -10,7 +10,7 @@ const TdsReadings = lazy(() => import('./pages/TdsReadings'));
 const AddTdsReading = lazy(() => import('./pages/AddTdsReading'));
 const Reports = lazy(() => import('./pages/Reports'));
 const SubmitReport = lazy(() => import('./pages/SubmitReport'));
-const Analytics = lazy(() => import('./pages/Analytics'));
+const Analytics = lazy(() => import('./pages/Visualization'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const AddUser = lazy(() => import('./pages/AddUser'));
 const AuditTrail = lazy(() => import('./pages/AuditTrail'));
@@ -27,6 +27,7 @@ const ConcernDetail = lazy(() => import('./pages/ConcernDetail'));
 const UserDetail = lazy(() => import('./pages/UserDetail'));
 const AuditDetail = lazy(() => import('./pages/AuditDetail'));
 const FlagDetail = lazy(() => import('./pages/FlagDetail'));
+const Archive = lazy(() => import('./pages/Archive'));
 
 
 const App = () => {
@@ -58,6 +59,9 @@ const App = () => {
                     {/* Admin Panel - Admin only */}
                     <Route path="/admin" element={<RoleBasedRoute allowedRoles={['admin']}><AdminPanel /></RoleBasedRoute>} />
                     <Route path="/admin/add-user" element={<RoleBasedRoute allowedRoles={['admin']}><AddUser /></RoleBasedRoute>} />
+
+                    {/* Archive - Admin only */}
+                    <Route path="/archive" element={<RoleBasedRoute allowedRoles={['admin']}><Archive /></RoleBasedRoute>} />
 
                     {/* Audit Trail - Admin only */}
                     <Route path="/audit-trail" element={<RoleBasedRoute allowedRoles={['admin']}><AuditTrail /></RoleBasedRoute>} />

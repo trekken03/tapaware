@@ -23,7 +23,7 @@ const TdsReadings = () => {
     }, [])
     const formatDate = (date) =>
         new Date(date.replace(' ', 'T')).toLocaleDateString('en-US', {
-            month: 'long',
+            month: 'short',
             day: 'numeric',
             year: 'numeric',
         });

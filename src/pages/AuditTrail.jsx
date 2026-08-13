@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Home, Plus, Eye, Search } from 'lucide-react'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
+import { Pagination } from '@/components/ui/pagination'
+import { ScrollText, Search } from 'lucide-react'
 import { InputGroupAddon, InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import API from '@/services/api'
 import { toast } from 'sonner'
@@ -13,6 +14,8 @@ const AuditTrail = () => {
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
     const [searchTerm, setSearchTerm] = useState('')
+    const [currentPage, setCurrentPage] = useState(1)
+    const [pageSize] = useState(10)
 
 
     useEffect(() => {
@@ -41,6 +44,22 @@ const AuditTrail = () => {
         )
     })
 
+    const totalPages = Math.max(1, Math.ceil(filteredAuditTrails.length / pageSize))
+    const paginatedAuditTrails = filteredAuditTrails.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    )
+
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [searchTerm])
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages)
+        }
+    }, [currentPage, totalPages])
+
     if (loading) {
         return (
             <Layout>
@@ -64,12 +83,17 @@ const AuditTrail = () => {
                 </div>
 
 
-                <Card>
+                <Card className="bg-white/80">
                     <CardHeader>
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <CardTitle className="flex items-center gap-2">
-                                <Home size={20} className="text-blue-600" />
+                            <CardTitle className="flex flex-wrap items-center gap-2">
+                                <ScrollText size={20} className="text-blue-600" />
                                 Audit Trail
+                                <span className="text-sm font-normal text-gray-500">
+                                    {searchTerm
+                                        ? `Showing ${filteredAuditTrails.length} of ${auditTrails.length}`
+                                        : `(${auditTrails.length})`}
+                                </span>
                             </CardTitle>
                             <InputGroup className="w-full sm:max-w-xs">
                                 <InputGroupInput
@@ -86,72 +110,53 @@ const AuditTrail = () => {
                     <CardContent>
                         {filteredAuditTrails.length === 0 ? (
                             <div className="text-center py-12">
-                                <Home size={48} className="text-gray-300 mx-auto mb-4" />
+                                <ScrollText size={48} className="text-gray-300 mx-auto mb-4" />
                                 <p className="text-gray-500">No audit trails found.</p>
                             </div>
                         ) : (
                             <>
-                                <div className="hidden md:block overflow-x-auto">
-                                    <table className="w-full min-w-[760px]">
-                                        <thead>
-                                            <tr className="border-b">
-                                                {['#', 'User', 'Action', 'Table', 'Description', 'Timestamp'].map(h => (
-                                                    <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-black uppercase">
-                                                        {h}
-                                                    </th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {filteredAuditTrails.map((trail, index) => (
-                                                <tr
-                                                    key={trail.id}
-                                                    onClick={() => navigate(`/audit-trail/${trail.id}`)}
-                                                    className="bg-white cursor-pointer hover:bg-gray-50 transition-colors"
-                                                >
-                                                    <td className="py-3 px-4 text-sm">{index + 1}</td>
-                                                    <td className="py-3 px-4 text-sm">{trail.user_name}</td>
-                                                    <td className="py-3 px-4 text-sm">{trail.action}</td>
-                                                    <td className="py-3 px-4 text-sm ">{trail.table_affected}</td>
-                                                    <td className="py-3 px-4 text-sm">{trail.details}</td>
-                                                    <td className="py-3 px-4 text-sm ">
-                                                        {new Date(trail.created_at).toLocaleString()}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                <Table className="md:min-w-[860px]">
+                                    <TableHeader className="bg-blue-800">
+                                        <TableRow>
+                                            <TableHead>No.</TableHead>
+                                            <TableHead>User</TableHead>
+                                            <TableHead>Action</TableHead>
+                                            <TableHead>Table</TableHead>
+                                            <TableHead>Description</TableHead>
+                                            <TableHead>Timestamp</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {paginatedAuditTrails.map((trail, index) => {
+                                            const rowNum = filteredAuditTrails.length - ((currentPage - 1) * pageSize + index)
 
-                                <div className="space-y-3 md:hidden">
-                                    {filteredAuditTrails.map((trail, index) => (
-                                        <div
-                                            key={trail.id}
-                                            onClick={() => navigate(`/audit-trail/${trail.id}`)}
-                                            className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm cursor-pointer hover:bg-gray-100 transition-colors"
-                                        >
-                                            <div className="flex items-center justify-between gap-2 mb-2">
-                                                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">#{index + 1}</span>
-                                                <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700">
-                                                    {trail.action}
-                                                </span>
-                                            </div>
-                                            <div className="space-y-2 text-sm text-gray-700">
-                                                <div>
-                                                    <span className="font-semibold text-gray-900">User:</span> {trail.user_name}
-                                                </div>
-                                                <div>
-                                                    <span className="font-semibold text-gray-900">Table:</span> {trail.table_affected}
-                                                </div>
-                                                <div>
-                                                    <span className="font-semibold text-gray-900">Description:</span> {trail.details}
-                                                </div>
-                                                <div>
-                                                    <span className="font-semibold text-gray-900">Timestamp:</span> {new Date(trail.created_at).toLocaleString()}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                            return (
+                                                <TableRow
+                                                    key={trail.id}
+                                                    className="cursor-pointer hover:bg-gray-50"
+                                                    onClick={() => navigate(`/audit-trail/${trail.id}`)}
+                                                >
+                                                    <TableCell label="No.">{rowNum}</TableCell>
+                                                    <TableCell label="User" className="font-semibold">{trail.user_name}</TableCell>
+                                                    <TableCell label="Action">{trail.action}</TableCell>
+                                                    <TableCell label="Table">{trail.table_affected}</TableCell>
+                                                    <TableCell label="Description" className="max-w-[280px] truncate">{trail.details}</TableCell>
+                                                    <TableCell label="Timestamp" className="whitespace-nowrap">
+                                                        {new Date(trail.created_at).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric',
+                                                            hour: 'numeric',
+                                                            minute: '2-digit',
+                                                        })}
+                                                    </TableCell>
+                                                </TableRow>
+                                            )
+                                        })}
+                                    </TableBody>
+                                </Table>
+                                <div className="mt-4 flex justify-end">
+                                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                                 </div>
                             </>
                         )}

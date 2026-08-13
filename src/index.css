@@ -82,3 +82,77 @@ input::-ms-reveal,
 input::-ms-clear {
   display: none;
 }
+
+/* Responsive tables.
+   Below md, a `.table-stacked` table drops its header row and turns every body
+   row into a self-contained card, with each cell rendered as "Label: value"
+   using the data-label the TableCell carries. Phones get readable cards instead
+   of a sideways-scrolling grid, and there is only one set of markup to maintain
+   rather than a desktop table plus a hand-written mobile card list. */
+@media (max-width: 767px) {
+  .table-stacked {
+    display: block;
+    min-width: 0;
+    background-color: transparent;
+  }
+
+  .table-stacked thead {
+    display: none;
+  }
+
+  .table-stacked tbody {
+    display: block;
+    background-color: transparent;
+  }
+
+  .table-stacked tbody tr {
+    display: block;
+    padding: 0.25rem 0.875rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background-color: #f9fafb;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  }
+
+  .table-stacked tbody tr+tr {
+    margin-top: 0.75rem;
+  }
+
+  .table-stacked tbody td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    max-width: none;
+    padding: 0.625rem 0;
+    text-align: right;
+    /* Undo desktop-only truncation so nothing is clipped inside a card. */
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .table-stacked tbody td+td {
+    border-top: 1px solid #f3f4f6;
+  }
+
+  .table-stacked tbody td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-weight: 600;
+    color: #111827;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  /* Unlabelled cells (action buttons) get the whole width of the card. */
+  .table-stacked tbody td:not([data-label]) {
+    justify-content: flex-end;
+  }
+
+  /* Fixed pill widths are a desktop alignment device; let them size naturally. */
+  .table-stacked tbody td>span[class*="w-["] {
+    width: auto;
+  }
+}

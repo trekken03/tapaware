@@ -16,6 +16,9 @@ import {
     Menu,
     X,
     ChevronDown,
+    Trash2,
+    PanelLeftClose,
+    PanelLeftOpen,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -23,54 +26,28 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 const getNavItems = (role) => {
     const baseItems = [
         { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        {
-            path: '/reports',
-            label: 'Reports',
-            icon: FileText,
-            children: [
-                { path: '/reports?status=pending', label: 'Pending' },
-                { path: '/reports?status=investigating', label: 'Investigating' },
-                { path: '/reports?status=resolved', label: 'Resolved' },
-            ],
-        },
+
     ];
 
-    const householdsItem = {
-        path: '/households',
-        label: 'Households',
-        icon: Home,
-        children: [
-            { path: '/households?status=safe', label: 'Safe' },
-            { path: '/households?status=pending', label: 'Pending Reports' },
-            { path: '/households?status=flagged', label: 'Flagged' },
-        ],
-    };
 
-    const tdsItem = {
-        path: '/tds',
-        label: 'TDS Readings',
-        icon: Droplets,
-        children: [
-            { path: '/tds?status=safe', label: 'Safe' },
-            { path: '/tds?status=moderate', label: 'Moderate' },
-            { path: '/tds?status=high', label: 'High' },
-        ],
-    };
+
 
     const adminItems = [
         ...baseItems,
-        householdsItem,
-        tdsItem,
-        { path: '/analytics', label: 'Analytics', icon: BarChart3 },
+        { path: '/reports', label: 'Reports', icon: ClipboardList },
+        { path: '/households', label: 'Households', icon: Home },
+        { path: '/analytics', label: 'Visualization', icon: BarChart3 },
         { path: '/audit-trail', label: 'Audit Trail', icon: ClipboardList },
         { path: '/admin', label: 'Admin Panel', icon: ShieldUser },
+        { path: '/archive', label: 'Archive', icon: Trash2 },
     ];
 
     const staffItems = [
         ...baseItems,
-        householdsItem,
-        tdsItem,
-        { path: '/analytics', label: 'Analytics', icon: BarChart3 },
+        { path: '/reports', label: 'Reports', icon: ClipboardList },
+
+        { path: '/households', label: 'Households', icon: Home },
+        { path: '/analytics', label: 'Visualization', icon: BarChart3 },
     ];
 
     const residentItems = baseItems;
@@ -90,7 +67,7 @@ const getInitialExpanded = () => {
     return localStorage.getItem('sidebar_expanded') || null;
 };
 
-const Sidebar = () => {
+const Sidebar = ({ collapsed = false, onToggleCollapse = () => {} }) => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
     const location = useLocation();
@@ -173,10 +150,21 @@ const Sidebar = () => {
                 />
             )}
 
+            {/* Expand trigger (desktop only, shown when collapsed) */}
+            {collapsed && (
+                <button
+                    onClick={onToggleCollapse}
+                    title="Expand sidebar"
+                    className="hidden lg:flex fixed top-4 left-4 z-50 items-center justify-center w-9 h-9 rounded-lg bg-blue-950 text-white shadow-lg hover:bg-blue-900 transition-colors"
+                >
+                    <PanelLeftOpen size={18} />
+                </button>
+            )}
+
             {/* Sidebar */}
             <div
-                className={`w-64 h-screen max-h-screen overflow-y-auto bg-blue-950 flex flex-col fixed left-0 top-0 z-50 transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
-                    }`}
+                className={`w-64 h-screen max-h-screen overflow-y-auto bg-blue-950 flex flex-col fixed left-0 top-0 z-50 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                    } ${collapsed ? 'lg:-translate-x-full' : 'lg:translate-x-0'}`}
             >
                 {/* Close button (mobile only) */}
                 <button
@@ -184,6 +172,15 @@ const Sidebar = () => {
                     className="lg:hidden absolute top-4 right-4 text-white p-1"
                 >
                     <X size={20} />
+                </button>
+
+                {/* Collapse button (desktop only) */}
+                <button
+                    onClick={onToggleCollapse}
+                    title="Collapse sidebar"
+                    className="hidden lg:flex absolute top-4 right-4 text-blue-300 hover:text-white p-1"
+                >
+                    <PanelLeftClose size={18} />
                 </button>
 
                 {/* Logo section */}

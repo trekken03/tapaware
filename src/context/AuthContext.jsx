@@ -1,45 +1,44 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import API from '../services/api';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Initialize from localStorage on mount
+    // Rehydrate the session from the httpOnly auth cookie on mount.
     useEffect(() => {
-        const storedToken = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-
-        if (storedToken && storedUser) {
+        (async () => {
             try {
-                setToken(storedToken);
-                setUser(JSON.parse(storedUser));
-            } catch (error) {
-                console.error('Failed to parse stored user:', error);
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                const res = await API.get('/auth/me');
+                setUser(res.data.user);
+            } catch {
+                setUser(null);
+            } finally {
+                setLoading(false);
             }
-        }
-        setLoading(false);
+        })();
     }, []);
 
-    const login = (token, userData) => {
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(userData));
-        setToken(token);
+    const login = (userData) => {
         setUser(userData);
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setToken(null);
+    const updateUser = (partial) => {
+        setUser((prev) => (prev ? { ...prev, ...partial } : prev));
+    };
+
+    const logout = async () => {
+        try {
+            await API.post('/auth/logout');
+        } catch {
+            // best-effort — clear local state regardless
+        }
         setUser(null);
     };
 
-    const isAuthenticated = !!token && !!user;
+    const isAuthenticated = !!user;
 
     const hasRole = (requiredRole) => {
         return user && user.role === requiredRole;
@@ -52,11 +51,11 @@ export const AuthProvider = ({ children }) => {
     return (
         <AuthContext.Provider value={{
             user,
-            token,
             loading,
             isAuthenticated,
             login,
             logout,
+            updateUser,
             hasRole,
             hasAnyRole
         }}>

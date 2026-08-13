@@ -92,7 +92,13 @@ const AuditDetail = () => {
                                 <div>
                                     <p className="text-gray-500">Timestamp</p>
                                     <p className="font-semibold text-gray-900">
-                                        {new Date(log.created_at).toLocaleString()}
+                                        {new Date(log.created_at).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                            hour: 'numeric',
+                                            minute: '2-digit',
+                                        })}
                                     </p>
                                 </div>
                             </div>
@@ -135,7 +141,13 @@ const AuditDetail = () => {
                                         <p className="text-sm font-medium text-gray-900">{a.action.replace(/_/g, ' ')}</p>
                                         <p className="text-xs text-gray-500">{a.details}</p>
                                         <p className="text-xs text-gray-400 mt-0.5">
-                                            {new Date(a.created_at).toLocaleString()}
+                                            {new Date(a.created_at).toLocaleDateString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                                hour: 'numeric',
+                                                minute: '2-digit',
+                                            })}
                                         </p>
                                     </div>
                                 ))}

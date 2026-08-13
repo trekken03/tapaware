@@ -4,7 +4,7 @@ import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { ArrowLeft, Home, FileText, Droplets, Flag } from 'lucide-react'
+import { ArrowLeft, Home, FileText, Droplets, Flag, Plus } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/context/AuthContext'
@@ -87,10 +87,10 @@ const HouseholdDetail = () => {
     const handleDelete = async () => {
         try {
             await API.delete(`/households/${id}`)
-            toast.success('Household deleted successfully')
+            toast.success('Household archived successfully')
             navigate('/households')
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to delete household')
+            toast.error(error.response?.data?.message || 'Failed to archive household')
         }
     }
     return (
@@ -108,15 +108,15 @@ const HouseholdDetail = () => {
                     </Button>
                     {user?.role === 'admin' && (
                         <ConfirmDialog
-                            title={`Delete household #${household.household_number}?`}
-                            description="This will permanently remove all its reports and TDS history. This cannot be undone."
-                            actionText="Delete Household"
+                            title={`Archive household #${household.household_number}?`}
+                            description="This will archive the household along with its reports and TDS history. It can be restored later from the Archive."
+                            actionText="Archive Household"
                             actionVariant="destructive"
                             onConfirm={handleDelete}
                         >
                             <Button className="bg-white rounded-sm flex items-center gap-1 text-white bg-red-600 hover:bg-red-500 hover:cursor-pointer">
                                 <Trash2 size={14} />
-                                Delete Household
+                                Archive Household
                             </Button>
                         </ConfirmDialog>
                     )}
@@ -144,7 +144,7 @@ const HouseholdDetail = () => {
                                 <p className="text-gray-500">Date Added</p>
                                 <p className="font-semibold text-gray-900">
                                     {new Date(household.created_at).toLocaleDateString('en-US', {
-                                        year: 'numeric', month: 'long', day: 'numeric',
+                                        month: 'short', day: 'numeric', year: 'numeric',
                                     })}
                                 </p>
                             </div>
@@ -175,80 +175,101 @@ const HouseholdDetail = () => {
                         </CardContent>
                     </Card>
                 )}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                <Card className="mb-6">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <FileText size={20} className="text-blue-600" />
-                            Report history ({household.reports.length})
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {household.reports.length === 0 ? (
-                            <p className="text-gray-500 text-sm">No reports submitted for this household.</p>
-                        ) : (
-                            <div className="space-y-2">
-                                {household.reports.map((r) => {
-                                    const s = getReportStatusStyle(r.status)
-                                    return (
-                                        <div
-                                            key={r.id}
-                                            onClick={() => navigate(`/reports/${r.id}`)}
-                                            className="flex items-center justify-between gap-3 rounded-lg bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-all duration-200"
-                                        >
-                                            <div>
-                                                <p className="font-semibold text-gray-900 capitalize">{r.issue_type}</p>
-                                                <p className="text-xs text-gray-500">
-                                                    {r.reported_by} • {new Date(r.created_at).toLocaleDateString()}
-                                                </p>
+                    <Card className="mb-6 ">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <FileText size={20} className="text-blue-600" />
+                                Report history ({household.reports.length})
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {household.reports.length === 0 ? (
+                                <p className="text-gray-500 text-sm">No reports submitted for this household.</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {household.reports.map((r) => {
+                                        const s = getReportStatusStyle(r.status)
+                                        return (
+                                            <div
+                                                key={r.id}
+                                                onClick={() => navigate(`/reports/${r.id}`)}
+                                                className="flex items-center justify-between gap-3 rounded-lg bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-all duration-200"
+                                            >
+                                                <div>
+                                                    <p className="font-semibold text-gray-900 capitalize">{r.issue_type}</p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {r.reported_by} • {new Date(r.created_at).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric',
+                                                        })}
+                                                    </p>
+                                                </div>
+                                                <span className={`${s.bg} ${s.color} px-2 py-1  text-xs font-semibold`}>
+                                                    {s.label}
+                                                </span>
                                             </div>
-                                            <span className={`${s.bg} ${s.color} px-2 py-1  text-xs font-semibold`}>
-                                                {s.label}
-                                            </span>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                                        )
+                                    })}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Droplets size={20} className="text-blue-600" />
-                            TDS Reading history ({household.tds_readings.length})
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {household.tds_readings.length === 0 ? (
-                            <p className="text-gray-500 text-sm">No TDS readings recorded for this household.</p>
-                        ) : (
-                            <div className="space-y-2">
-                                {household.tds_readings.map((t) => {
-                                    const s = getTdsStatus(t.tds_value)
-                                    return (
-                                        <div
-                                            key={t.id}
-                                            onClick={() => navigate(`/tds/${t.id}`)}
-                                            className="flex items-center justify-between gap-3 rounded-lg bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-all duration-200"
-                                        >
-                                            <div>
-                                                <p className="font-semibold text-gray-900">{t.tds_value} ppm</p>
-                                                <p className="text-xs text-gray-500">
-                                                    {t.staff_name} • {new Date(t.recorded_at).toLocaleDateString()}
-                                                </p>
-                                            </div>
-                                            <span className={`${s.bg} ${s.color} px-2 py-1 text-xs font-semibold`}>
-                                                {s.label}
-                                            </span>
-                                        </div>
-                                    )
-                                })}
+
+                    <Card className="mb-6 w-full">
+                        <CardHeader>
+                            <div className="flex items-center justify-between gap-3">
+                                <CardTitle className="flex items-center gap-2">
+                                    <Droplets size={20} className="text-blue-600" />
+                                    TDS Reading history ({household.tds_readings.length})
+                                </CardTitle>
+                                <Button
+                                    size="sm"
+                                    className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-1"
+                                    onClick={() => navigate(`/tds/add?household_id=${id}`)}
+                                >
+                                    <Plus size={14} />
+                                    Add Reading
+                                </Button>
                             </div>
-                        )}
-                    </CardContent>
-                </Card>
+                        </CardHeader>
+                        <CardContent>
+                            {household.tds_readings.length === 0 ? (
+                                <p className="text-gray-500 text-sm">No TDS readings recorded for this household.</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {household.tds_readings.map((t) => {
+                                        const s = getTdsStatus(t.tds_value)
+                                        return (
+                                            <div
+                                                key={t.id}
+                                                onClick={() => navigate(`/tds/${t.id}`)}
+                                                className="flex items-center justify-between gap-3 rounded-lg bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-all duration-200"
+                                            >
+                                                <div>
+                                                    <p className="font-semibold text-gray-900">{t.tds_value} ppm</p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {t.staff_name} • {new Date(t.recorded_at).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric',
+                                                        })}
+                                                    </p>
+                                                </div>
+                                                <span className={`${s.bg} ${s.color} px-2 py-1 text-xs font-semibold`}>
+                                                    {s.label}
+                                                </span>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </Layout >
     )

@@ -27,10 +27,10 @@ const TdsDetail = () => {
     const handleDelete = async () => {
         try {
             await API.delete(`/tds/${id}`)
-            toast.success('Reading deleted successfully')
+            toast.success('Reading archived successfully')
             navigate('/tds')
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to delete reading')
+            toast.error(error.response?.data?.message || 'Failed to archive reading')
         }
     }
 
@@ -90,15 +90,15 @@ const TdsDetail = () => {
                     </Button>
                     {user?.role === 'admin' && (
                         <ConfirmDialog
-                            title="Delete this TDS reading?"
-                            description="This cannot be undone."
-                            actionText="Delete Reading"
+                            title="Archive this TDS reading?"
+                            description="It can be restored later from the Archive."
+                            actionText="Archive Reading"
                             actionVariant="destructive"
                             onConfirm={handleDelete}
                         >
                             <Button className="bg-white rounded-sm flex items-center gap-1 text-white bg-red-600 hover:bg-red-500 hover:cursor-pointer">
                                 <Trash2 size={14} />
-                                Delete Reading
+                                Archive Reading
                             </Button>
                         </ConfirmDialog>
                     )}
@@ -135,7 +135,7 @@ const TdsDetail = () => {
                                 <p className="text-gray-500">Date Recorded</p>
                                 <p className="font-semibold text-gray-900">
                                     {new Date(reading.recorded_at).toLocaleDateString('en-US', {
-                                        year: 'numeric', month: 'long', day: 'numeric',
+                                        month: 'short', day: 'numeric', year: 'numeric',
                                     })}
                                 </p>
                             </div>
@@ -170,7 +170,11 @@ const TdsDetail = () => {
                                             <div>
                                                 <p className="font-semibold text-gray-900">{h.tds_value} ppm</p>
                                                 <p className="text-xs text-gray-500">
-                                                    {h.staff_name} • {new Date(h.recorded_at).toLocaleDateString()}
+                                                    {h.staff_name} • {new Date(h.recorded_at).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric',
+                                                    })}
                                                 </p>
                                             </div>
                                             <span className={`${s.bg} ${s.color} px-2 py-1 text-xs font-semibold`}>

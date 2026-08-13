@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import LandingNavbar from '@/components/NavBar'
+import FooterLegalLinks from '@/components/legal/FooterLegalLinks'
 import WaterGauge, { getGaugeStatus } from '@/components/WaterGauge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -313,13 +314,14 @@ const Homepage = () => {
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div className="grid sm:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="name">Name (optional)</Label>
-                                            <Input id="name" name="name" value={form.name} onChange={handleChange} placeholder="Juan Dela Cruz" />
+                                            <Label htmlFor="name">Name</Label>
+                                            <Input id="name" name="name" value={form.name} onChange={handleChange} placeholder="Juan Dela Cruz" required />
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="purok">Purok</Label>
                                             <select
                                                 id="purok" name="purok" value={form.purok} onChange={handleChange}
+                                                required
                                                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm h-10 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                                             >
                                                 <option value="">Select purok...</option>
@@ -328,8 +330,8 @@ const Homepage = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="contact_info">Email address (optional)</Label>
-                                        <Input id="contact_info" name="contact_info" value={form.contact_info} onChange={handleChange} minLength="11" placeholder="juandelacruz@gmail.com" />
+                                        <Label htmlFor="contact_info">Email address</Label>
+                                        <Input id="contact_info" name="contact_info" type="email" value={form.contact_info} onChange={handleChange} placeholder="juandelacruz@gmail.com" required />
                                         <p className="text-xs text-gray-500 mt-1">
                                             Provide a valid email if you'd like the administrator to reply to your concern.
                                         </p>
@@ -369,6 +371,7 @@ const Homepage = () => {
                         <Droplets size={16} className="text-cyan-400" />
                         <span className="text-sm">TapAware — Barangay Cabalantian Water Quality Monitoring System</span>
                     </div>
+                    <FooterLegalLinks variant="dark" />
                     <p className="text-xs text-blue-300">© {new Date().getFullYear()} Barangay Cabalantian, Bacolor, Pampanga</p>
                 </div>
             </footer>

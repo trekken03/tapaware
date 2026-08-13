@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { Droplets, Home, Flag, ClockFading, AlertTriangle, FileText, TrendingUp } from 'lucide-react'
 import API from '@/services/api'
 import { useNavigate } from 'react-router-dom'
@@ -40,6 +41,14 @@ const StaffDashboard = () => {
         { label: 'Pending Reports', value: summary?.pending_reports || 0, icon: ClockFading, color: 'text-yellow-600', bg: 'bg-yellow-50', path: '/reports?status=pending' },
         { label: 'Average TDS (ppm)', value: summary?.average_tds || 0, icon: Droplets, color: 'text-purple-600', bg: 'bg-purple-50', path: '/analytics' },
     ]
+
+    const tdsColors = (tds) => {
+        const value = Number(tds)
+        if (!value) return ' text-gray-500'
+        if (value <= 500) return 'text-green-600'
+        if (value <= 1000) return ' text-yellow-600'
+        return ' text-red-600'
+    }
 
     if (loading) {
         return (
@@ -103,7 +112,7 @@ const StaffDashboard = () => {
                                         <div key={item.purok} className="flex items-center justify-between pb-3 last:border-b-0">
                                             <span className="text-sm font-medium text-gray-700">Purok {item.purok}</span>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-lg font-bold text-blue-600">{parseFloat(item.average_tds).toFixed(2)}</span>
+                                                <span className={`text-lg font-bold ${tdsColors(parseFloat(item.average_tds))}`}>{parseFloat(item.average_tds).toFixed(2)}</span>
                                                 <span className="text-xs text-gray-500">ppm</span>
                                             </div>
                                         </div>
@@ -158,65 +167,40 @@ const StaffDashboard = () => {
                         {flagged.length === 0 ? (
                             <p className="text-gray-500 text-sm">No flagged households at this time.</p>
                         ) : (
-                            <>
-                                <div className="hidden md:block overflow-x-auto">
-                                    <table className="w-full min-w-[700px]">
-                                        <thead>
-                                            <tr className="border-b">
-                                                {['Household No.', 'Owner', 'Purok', 'Issue Type', 'Times Reported', 'Status'].map(h => (
-                                                    <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                                                        {h}
-                                                    </th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {flagged.map((flag, index) => (
-                                                <tr key={flag.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                                    <td className="py-3 px-4 text-sm font-semibold">{flag.household_number}</td>
-                                                    <td className="py-3 px-4 text-sm">{flag.owner_name}</td>
-                                                    <td className="py-3 px-4 text-sm">Purok {flag.purok}</td>
-                                                    <td className="py-3 px-4 text-sm capitalize">{flag.issue_type}</td>
-                                                    <td className="py-3 px-4 text-sm">
-                                                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
-                                                            {flag.times_reported}x
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-3 px-4 text-sm">
-                                                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold capitalize">
-                                                            {flag.status}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div className="space-y-3 md:hidden">
-                                    {flagged.map((flag) => (
-                                        <div key={flag.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
-                                            <div className="flex items-center justify-between gap-2 mb-2">
-                                                <span className="text-sm font-semibold">#{flag.household_number}</span>
-                                                <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
+                            <Table className="md:min-w-[800px]">
+                                <TableHeader className="bg-blue-800">
+                                    <TableRow>
+                                        <TableHead>No.</TableHead>
+                                        <TableHead>Household</TableHead>
+                                        <TableHead>Owner</TableHead>
+                                        <TableHead>Purok</TableHead>
+                                        <TableHead>Issue Type</TableHead>
+                                        <TableHead>Times Reported</TableHead>
+                                        <TableHead>Status</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {flagged.map((flag, index) => (
+                                        <TableRow key={flag.id}>
+                                            <TableCell label="No.">{flagged.length - index}</TableCell>
+                                            <TableCell label="Household">#{flag.household_number}</TableCell>
+                                            <TableCell label="Owner" className="font-semibold">{flag.owner_name}</TableCell>
+                                            <TableCell label="Purok">Purok {flag.purok}</TableCell>
+                                            <TableCell label="Issue Type" className="capitalize">{flag.issue_type}</TableCell>
+                                            <TableCell label="Times Reported">
+                                                <span className="bg-red-100 text-red-700 inline-block px-2 py-1 text-xs font-semibold">
                                                     {flag.times_reported}x
                                                 </span>
-                                            </div>
-                                            <div className="space-y-1.5 text-sm text-gray-700">
-                                                <div><span className="font-semibold text-gray-900">Owner:</span> {flag.owner_name}</div>
-                                                <div><span className="font-semibold text-gray-900">Purok:</span> {flag.purok}</div>
-                                                <div><span className="font-semibold text-gray-900">Issue:</span> <span className="capitalize">{flag.issue_type}</span></div>
-                                                <div>
-                                                    <span className="font-semibold text-gray-900">Status:</span>{' '}
-                                                    <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-semibold capitalize">
-                                                        {flag.status}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                            </TableCell>
+                                            <TableCell label="Status">
+                                                <span className="bg-red-100 text-red-700 inline-block px-2 py-1 text-xs font-semibold capitalize">
+                                                    {flag.status}
+                                                </span>
+                                            </TableCell>
+                                        </TableRow>
                                     ))}
-                                </div>
-                            </>
+                                </TableBody>
+                            </Table>
                         )}
                     </CardContent>
                 </Card>

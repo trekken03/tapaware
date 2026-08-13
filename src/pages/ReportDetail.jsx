@@ -86,10 +86,10 @@ const ReportDetail = () => {
     const handleDelete = async () => {
         try {
             await API.delete(`/reports/${id}`)
-            toast.success('Report deleted successfully')
+            toast.success('Report archived successfully')
             navigate('/reports')
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to delete report')
+            toast.error(error.response?.data?.message || 'Failed to archive report')
         }
     }
     return (
@@ -107,16 +107,16 @@ const ReportDetail = () => {
                     </Button>
                     {(user?.role === 'admin' || (user?.role === 'resident' && report.user_id === user.id && report.status === 'pending')) && (
                         <ConfirmDialog
-                            title="Delete this report?"
-                            description="This cannot be undone."
-                            actionText="Delete Report"
+                            title="Archive this report?"
+                            description="It can be restored later from the Archive."
+                            actionText="Archive Report"
                             actionVariant="destructive"
                             onConfirm={handleDelete}
                         >
                             <Button className="bg-white rounded-sm flex items-center gap-1 text-white bg-red-600 hover:bg-red-500 hover:cursor-pointer"
                             >
                                 <Trash2 size={14} />
-                                Delete Report
+                                Archive Report
                             </Button>
                         </ConfirmDialog>
                     )}
@@ -153,7 +153,7 @@ const ReportDetail = () => {
                                 <p className="text-gray-500">Date Reported</p>
                                 <p className="font-semibold text-gray-900">
                                     {new Date(report.created_at).toLocaleDateString('en-US', {
-                                        year: 'numeric', month: 'long', day: 'numeric',
+                                        month: 'short', day: 'numeric', year: 'numeric',
                                     })}
                                 </p>
                             </div>
@@ -180,7 +180,7 @@ const ReportDetail = () => {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="w-full">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <FileText size={20} className="text-blue-600" />
@@ -203,7 +203,11 @@ const ReportDetail = () => {
                                             <div>
                                                 <p className="font-semibold text-gray-900 capitalize">{r.issue_type}</p>
                                                 <p className="text-xs text-gray-500">
-                                                    {new Date(r.created_at).toLocaleDateString()}
+                                                    {new Date(r.created_at).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric',
+                                                    })}
                                                 </p>
                                             </div>
                                             <span className={`${s.bg} ${s.color} px-2 py-1 text-xs font-semibold`}>

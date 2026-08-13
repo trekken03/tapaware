@@ -8,6 +8,7 @@ router.get('/summary', analyticsController.getSummary);
 router.get('/reports-by-issue', verifyToken, requireRole('admin', 'staff'), analyticsController.getReportByIssueType);
 router.get('/reports-by-household', verifyToken, requireRole('admin', 'staff'), analyticsController.getReportsByHouseholdCount);
 router.get('/reports-by-purok', verifyToken, requireRole('admin', 'staff'), analyticsController.getReportsByPurokCount);
+router.get('/reports-by-status', verifyToken, requireRole('admin', 'staff'), analyticsController.getReportsByStatus);
 router.get('/flagged', verifyToken, requireRole('admin', 'staff'), analyticsController.getFlaggedHouseholds);
 router.get('/tds-trend', verifyToken, requireRole('admin', 'staff'), analyticsController.getTdsTrend);
 router.get('/tds-by-purok', analyticsController.getTdsByPurok);

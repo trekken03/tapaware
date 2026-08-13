@@ -101,7 +101,7 @@ const ConcernDetail = () => {
                                 </h1>
                                 <p className="text-gray-500 text-sm">
                                     {new Date(concern.created_at).toLocaleDateString('en-US', {
-                                        year: 'numeric', month: 'long', day: 'numeric',
+                                        month: 'short', day: 'numeric', year: 'numeric',
                                     })}
                                 </p>
                             </div>
@@ -136,7 +136,11 @@ const ConcernDetail = () => {
                     <Card className="mb-6 border-l-4 border-blue-400">
                         <CardContent className="pt-6">
                             <p className="text-xs font-semibold text-blue-700 uppercase mb-2">
-                                Replied by {concern.replied_by} · {new Date(concern.replied_at).toLocaleDateString()}
+                                Replied by {concern.replied_by} · {new Date(concern.replied_at).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                })}
                             </p>
                             <p className="text-gray-900">{concern.reply_message}</p>
                         </CardContent>

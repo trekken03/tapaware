@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 
 const Profile = () => {
     const navigate = useNavigate()
-    const { user, login, token } = useAuth()
+    const { user, updateUser } = useAuth()
     const [showPassword, setShowPassword] = useState(false);
     const [showPassword1, setShowPassword1] = useState(false);
     const [showPassword2, setShowPassword2] = useState(false);
@@ -45,8 +45,7 @@ const Profile = () => {
 
         try {
             await API.put('/auth/profile', form)
-            const updatedUser = { ...user, ...form }
-            login(token, updatedUser)
+            updateUser(form)
             toast.success('Profile updated successfully!')
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to update profile')

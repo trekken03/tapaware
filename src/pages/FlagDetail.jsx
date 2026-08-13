@@ -111,7 +111,7 @@ const FlagDetail = () => {
                                 <p className="text-gray-500">Last Reported</p>
                                 <p className="font-semibold text-gray-900">
                                     {new Date(flag.last_reported_at).toLocaleDateString('en-US', {
-                                        year: 'numeric', month: 'long', day: 'numeric',
+                                        month: 'short', day: 'numeric', year: 'numeric',
                                     })}
                                 </p>
                             </div>
@@ -165,7 +165,11 @@ const FlagDetail = () => {
                                             </div>
                                             <p className="text-sm text-gray-600">{r.description || 'No description provided'}</p>
                                             <p className="text-xs text-gray-400 mt-1">
-                                                {new Date(r.created_at).toLocaleDateString()}
+                                                {new Date(r.created_at).toLocaleDateString('en-US', {
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    year: 'numeric',
+                                                })}
                                             </p>
                                         </div>
                                     )

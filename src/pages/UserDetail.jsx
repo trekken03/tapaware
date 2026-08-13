@@ -53,10 +53,10 @@ const UserDetail = () => {
     const handleDelete = async () => {
         try {
             await API.delete(`/admin/users/${id}`)
-            toast.success('User deleted successfully')
+            toast.success('User archived successfully')
             navigate('/admin')
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to delete user')
+            toast.error(error.response?.data?.message || 'Failed to archive user')
         }
     }
 
@@ -102,9 +102,9 @@ const UserDetail = () => {
                             Edit
                         </Button>
                         <ConfirmDialog
-                            title={`Delete ${user.name}?`}
-                            description="This cannot be undone."
-                            actionText="Delete"
+                            title={`Archive ${user.name}?`}
+                            description="Their account will be deactivated and can be restored later from the Archive."
+                            actionText="Archive"
                             actionVariant="destructive"
                             onConfirm={handleDelete}
                         >
@@ -114,7 +114,7 @@ const UserDetail = () => {
                                 className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
                             >
                                 <Trash2 size={14} />
-                                Delete
+                                Archive
                             </Button>
                         </ConfirmDialog>
                     </div>
@@ -145,7 +145,7 @@ const UserDetail = () => {
                                     <div className="flex items-center gap-1.5">
                                         <ClipboardList size={14} className="text-gray-400" />
                                         Joined {new Date(user.created_at).toLocaleDateString('en-US', {
-                                            year: 'numeric', month: 'long', day: 'numeric',
+                                            month: 'short', day: 'numeric', year: 'numeric',
                                         })}
                                     </div>
                                 </div>
@@ -200,7 +200,13 @@ const UserDetail = () => {
                                             >
                                                 <div>
                                                     <p className="font-semibold text-gray-900 capitalize">{r.issue_type}</p>
-                                                    <p className="text-xs text-gray-500">{new Date(r.created_at).toLocaleDateString()}</p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {new Date(r.created_at).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric',
+                                                        })}
+                                                    </p>
                                                 </div>
                                                 <span className={`${s.bg} ${s.color} px-2 py-1 rounded-full text-xs font-semibold`}>
                                                     {s.label}
@@ -240,7 +246,13 @@ const UserDetail = () => {
                                                     <p className="font-semibold text-gray-900">
                                                         Household #{t.household_number} — {t.tds_value} ppm
                                                     </p>
-                                                    <p className="text-xs text-gray-500">{new Date(t.recorded_at).toLocaleDateString()}</p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {new Date(t.recorded_at).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric',
+                                                        })}
+                                                    </p>
                                                 </div>
                                                 <span className={`${s.bg} ${s.color} px-2 py-1 rounded-full text-xs font-semibold`}>
                                                     {s.label}
@@ -272,7 +284,13 @@ const UserDetail = () => {
                                         <p className="text-sm font-medium text-gray-900">{a.action.replace(/_/g, ' ')}</p>
                                         <p className="text-xs text-gray-500">{a.details}</p>
                                         <p className="text-xs text-gray-400 mt-0.5">
-                                            {new Date(a.created_at).toLocaleString()}
+                                            {new Date(a.created_at).toLocaleDateString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                                hour: 'numeric',
+                                                minute: '2-digit',
+                                            })}
                                         </p>
                                     </div>
                                 ))}

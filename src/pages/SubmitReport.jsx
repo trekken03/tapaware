@@ -20,6 +20,7 @@ const SubmitReport = () => {
         household_id: user?.household_id || '',
         user_id: user?.id || '',
         issue_type: '',
+        other_issue: '',
         description: '',
         occurred_time: ''
     })
@@ -141,14 +142,35 @@ const SubmitReport = () => {
                                         required
                                         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
+
                                         <option value="">Select issue type...</option>
                                         <option value="odor">Odor</option>
                                         <option value="discoloration">Discoloration</option>
                                         <option value="low pressure">Low Pressure</option>
                                         <option value="cleanliness">Cleanliness</option>
                                         <option value="broken hardware">Broken Hardware</option>
+                                        <option value="other">Other</option>
                                     </select>
+                                    {form.issue_type === 'other' && (
+                                        <div className="space-y-2 mt-3">
+                                            <Label htmlFor="other_issue">
+                                                Please specify
+                                            </Label>
+
+                                            <Input
+                                                id="other_issue"
+                                                name="other_issue"
+                                                type="text"
+                                                value={form.other_issue}
+                                                onChange={handleChange}
+                                                placeholder="What is the issue?"
+                                                required
+                                                className="w-full"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
+
 
                                 <div className="space-y-2">
                                     <Label htmlFor="occurred_time">When did this happen?</Label>

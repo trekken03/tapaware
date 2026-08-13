@@ -3,6 +3,7 @@ import Layout from '@/components/Layout'
 import DateRangePicker from '@/components/DateRangePicker'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { BarChart3 } from 'lucide-react'
 import { Download } from 'lucide-react'
 import API from '@/services/api'
@@ -16,6 +17,9 @@ import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas-pro'
 
 const COLORS = ['#1e40af', '#dc2626', '#16a34a', '#d97706', '#7c3aed']
+
+const STATUS_COLORS = { pending: '#eab308', investigating: '#8b5cf6', resolved: '#16a34a' }
+const STATUS_LABELS = { pending: 'Pending', investigating: 'Investigating', resolved: 'Resolved' }
 
 // Logo lives in public/assets, so it's referenced by URL path (not imported
 // as a module). Cached after first load so repeated PDF exports don't
@@ -48,6 +52,7 @@ const getDefaultDates = () => {
 const Analytics = () => {
     const [byIssue, setByIssue] = useState([])
     const [byPurok, setByPurok] = useState([])
+    const [byStatus, setByStatus] = useState([])
     const [tdsTrend, setTdsTrend] = useState([])
     const [trendingIssues, setTrendingIssues] = useState([])
     const [trendingByTime, setTrendingByTime] = useState([])
@@ -61,6 +66,7 @@ const Analytics = () => {
     // exactly what's on screen instead of redrawing an approximation.
     const purokChartRef = useRef(null)
     const issueChartRef = useRef(null)
+    const statusChartRef = useRef(null)
     const tdsChartRef = useRef(null)
 
 
@@ -198,10 +204,10 @@ const Analytics = () => {
             pdf.setFont('helvetica', 'normal')
             pdf.setFontSize(9)
             pdf.setTextColor(107, 114, 128)
-            const periodLabel = `Reporting Period: ${new Date(dateRange.from).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} — ${new Date(dateRange.to).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+            const periodLabel = `Reporting Period: ${new Date(dateRange.from).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} — ${new Date(dateRange.to).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
             pdf.text(periodLabel, pageWidth / 2, y, { align: 'center' })
             y += 5
-            pdf.text(`Generated ${new Date().toLocaleString()}`, pageWidth / 2, y, { align: 'center' })
+            pdf.text(`Generated ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}`, pageWidth / 2, y, { align: 'center' })
             y += 6
             pdf.setDrawColor(229, 231, 235)
             pdf.line(margin, y, pageWidth - margin, y)
@@ -257,6 +263,20 @@ const Analytics = () => {
             })
             y += 4
 
+            // --- Reports by Status: chart + detail table together ---
+            if (byStatus.length > 0 && statusChartRef.current) {
+                y = await addChartSection(pdf, 'Reports by Status', statusChartRef.current, { margin, pageWidth, pageHeight, y })
+            }
+
+            const totalStatusReports = byStatus.reduce((sum, s) => sum + Number(s.count || 0), 0)
+            addTableHeader(['Status', 'Reports', 'Share'], [90, 40, 50])
+            byStatus.forEach((s) => {
+                const count = Number(s.count || 0)
+                const sharePct = totalStatusReports > 0 ? ((count / totalStatusReports) * 100).toFixed(1) : '0.0'
+                addRow([STATUS_LABELS[s.status] || s.status, count, `${sharePct}%`], [90, 40, 50])
+            })
+            y += 4
+
             // --- TDS Trend: chart + detail table together ---
             if (tdsTrend.length > 0 && tdsChartRef.current) {
                 y = await addChartSection(pdf, 'TDS Trend', tdsChartRef.current, { margin, pageWidth, pageHeight, y })
@@ -264,7 +284,11 @@ const Analytics = () => {
 
             addTableHeader(['Date', 'Average TDS', 'Readings'], [65, 60, 55])
             tdsTrend.forEach((reading) => {
-                const date = new Date(reading.date).toLocaleDateString()
+                const date = new Date(reading.date).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                })
                 addRow([
                     date,
                     `${Number(reading.average || 0).toFixed(2)} ppm`,
@@ -290,9 +314,10 @@ const Analytics = () => {
         setLoading(true)
         try {
             const params = { from: dateRange.from, to: dateRange.to }
-            const [issueRes, purokRes, trendRes, trendingRes, timeRes, tdsByPurokRes] = await Promise.all([
+            const [issueRes, purokRes, statusRes, trendRes, trendingRes, timeRes, tdsByPurokRes] = await Promise.all([
                 API.get('/analytics/reports-by-issue', { params }),
                 API.get('/analytics/reports-by-purok', { params }),
+                API.get('/analytics/reports-by-status', { params }),
                 API.get('/analytics/tds-trend', { params }),
                 API.get('/analytics/trending-issues', { params }),
                 API.get('/analytics/trending-by-time', { params }),
@@ -301,6 +326,7 @@ const Analytics = () => {
             ])
             setByIssue(issueRes.data)
             setByPurok(purokRes.data)
+            setByStatus(statusRes.data)
             setTdsTrend(trendRes.data)
             setTrendingIssues(trendingRes.data)
             setTrendingByTime(timeRes.data)
@@ -352,7 +378,7 @@ const Analytics = () => {
         return (
             <Layout>
                 <div className="flex items-center justify-center h-64">
-                    <p className="text-gray-500">Loading analytics...</p>
+                    <p className="text-gray-500">Loading visualization...</p>
                 </div>
             </Layout>
         )
@@ -365,7 +391,7 @@ const Analytics = () => {
                 {/* Header */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
+                        <h1 className="text-3xl font-bold text-gray-900">Visualization</h1>
                         <p className="text-gray-500 mt-1">Visual breakdown of water quality data</p>
                     </div>
                     <div className="flex flex-wrap items-end gap-3">
@@ -449,6 +475,50 @@ const Analytics = () => {
 
                     </div>
 
+                    {/* Reports by status */}
+                    <Card className="mb-6">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-base">
+                                <BarChart3 size={18} className="text-blue-600" />
+                                Reports by Status
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent ref={statusChartRef}>
+                            {byStatus.length === 0 ? (
+                                <p className="text-gray-500 text-sm text-center py-12">
+                                    No reports recorded yet.
+                                </p>
+                            ) : (
+                                <ResponsiveContainer width="100%" height={280}>
+                                    <PieChart>
+                                        <Pie
+                                            data={byStatus}
+                                            dataKey="count"
+                                            nameKey="status"
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius={90}
+                                            label={({ status, percent }) =>
+                                                `${STATUS_LABELS[status] || status} ${(percent * 100).toFixed(0)}%`
+                                            }
+                                        >
+                                            {byStatus.map((entry) => (
+                                                <Cell
+                                                    key={`cell-${entry.status}`}
+                                                    fill={STATUS_COLORS[entry.status] || '#9ca3af'}
+                                                />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip
+                                            formatter={(value, name, props) => [value, STATUS_LABELS[props.payload.status] || props.payload.status]}
+                                        />
+                                        <Legend formatter={(value) => STATUS_LABELS[value] || value} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            )}
+                        </CardContent>
+                    </Card>
+
                     {/* TDS Trend */}
                     <Card className="mb-6" ref={tdsChartRef}>
                         <CardContent>
@@ -464,7 +534,10 @@ const Analytics = () => {
                                             dataKey="date"
                                             fontSize={12}
                                             tick={{ fill: '#6b7280' }}
-                                            tickFormatter={(date) => new Date(date).toLocaleDateString()}
+                                            tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                            })}
                                         />
                                         <YAxis
                                             fontSize={12}
@@ -478,7 +551,11 @@ const Analytics = () => {
                                         />
                                         <Tooltip
                                             formatter={(value) => [`${value} ppm`, 'Avg TDS']}
-                                            labelFormatter={(date) => new Date(date).toLocaleDateString()}
+                                            labelFormatter={(date) => new Date(date).toLocaleDateString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                            })}
                                         />
                                         <Line
                                             type="monotone"
@@ -546,40 +623,44 @@ const Analytics = () => {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b">
-                                        {['#', 'Purok', 'Total Reports'].map(h => (
-                                            <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                                                {h}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {byPurok.map((p, index) => (
-                                        <tr key={index} className="bg-white">
-                                            <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
-                                            <td className="py-3 px-4 text-sm font-semibold">Purok {p.purok}</td>
-                                            <td className="py-3 px-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex-1 bg-gray-100 h-2 max-w-32">
-                                                        <div
-                                                            className="bg-blue-600 h-2"
-                                                            style={{
-                                                                width: `${Math.min((p.report_count / Math.max(...byPurok.map(x => x.report_count || 1))) * 100, 100)}%`
-                                                            }}
-                                                        />
+                            {byPurok.length === 0 ? (
+                                <p className="text-gray-500 text-sm text-center py-12">
+                                    No reports recorded yet.
+                                </p>
+                            ) : (
+                                <Table className="md:min-w-[480px]">
+                                    <TableHeader className="bg-blue-800">
+                                        <TableRow>
+                                            <TableHead>No.</TableHead>
+                                            <TableHead>Purok</TableHead>
+                                            <TableHead>Total Reports</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {byPurok.map((p, index) => (
+                                            <TableRow key={p.purok ?? index}>
+                                                <TableCell label="No.">{index + 1}</TableCell>
+                                                <TableCell label="Purok" className="font-semibold">Purok {p.purok}</TableCell>
+                                                <TableCell label="Total Reports">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex-1 bg-gray-100 h-2 max-w-32">
+                                                            <div
+                                                                className="bg-blue-600 h-2"
+                                                                style={{
+                                                                    width: `${Math.min((p.report_count / Math.max(...byPurok.map(x => x.report_count || 1))) * 100, 100)}%`
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <span className="text-sm font-semibold text-blue-600">
+                                                            {p.report_count}
+                                                        </span>
                                                     </div>
-                                                    <span className="text-sm font-semibold text-blue-600">
-                                                        {p.report_count}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            )}
                         </CardContent>
                     </Card>
 
@@ -600,33 +681,32 @@ const Analytics = () => {
                             No reports recorded yet.
                         </p>
                     ) : (
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b">
-                                    {['#', 'Purok', 'Top Issue', 'Times Reported'].map(h => (
-                                        <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                                            {h}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <Table className="md:min-w-[600px]">
+                            <TableHeader className="bg-blue-800">
+                                <TableRow>
+                                    <TableHead>No.</TableHead>
+                                    <TableHead>Purok</TableHead>
+                                    <TableHead>Top Issue</TableHead>
+                                    <TableHead>Times Reported</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
                                 {topIssuePerPurok.map((row, index) => (
-                                    <tr key={row.purok} className="bg-white">
-                                        <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
-                                        <td className="py-3 px-4 text-sm font-semibold">Purok {row.purok}</td>
-                                        <td className="py-3 px-4">
-                                            <span className="bg-blue-100 text-blue-700 px-2 py-1  text-xs font-semibold capitalize">
+                                    <TableRow key={row.purok}>
+                                        <TableCell label="No.">{index + 1}</TableCell>
+                                        <TableCell label="Purok" className="font-semibold">Purok {row.purok}</TableCell>
+                                        <TableCell label="Top Issue">
+                                            <span className="bg-blue-100 text-blue-700 inline-block px-2 py-1 text-xs font-semibold capitalize">
                                                 {row.issue_type}
                                             </span>
-                                        </td>
-                                        <td className="py-3 px-4 text-sm font-semibold text-blue-600">
+                                        </TableCell>
+                                        <TableCell label="Times Reported" className="font-semibold text-blue-600">
                                             {row.count}x
-                                        </td>
-                                    </tr>
+                                        </TableCell>
+                                    </TableRow>
                                 ))}
-                            </tbody>
-                        </table>
+                            </TableBody>
+                        </Table>
                     )}
                 </CardContent>
             </Card>
@@ -645,35 +725,34 @@ const Analytics = () => {
                             No reports recorded yet.
                         </p>
                     ) : (
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b">
-                                    {['#', 'Time of Day', 'Top Issue', 'Times Reported'].map(h => (
-                                        <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                                            {h}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <Table className="md:min-w-[600px]">
+                            <TableHeader className="bg-blue-800">
+                                <TableRow>
+                                    <TableHead>No.</TableHead>
+                                    <TableHead>Time of Day</TableHead>
+                                    <TableHead>Top Issue</TableHead>
+                                    <TableHead>Times Reported</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
                                 {topIssuePerTimeBucket.map((row, index) => (
-                                    <tr key={row.time_bucket} className="bg-white">
-                                        <td className="py-3 px-4 text-sm text-gray-500">{index + 1}</td>
-                                        <td className="py-3 px-4 text-sm font-semibold">
+                                    <TableRow key={row.time_bucket}>
+                                        <TableCell label="No.">{index + 1}</TableCell>
+                                        <TableCell label="Time of Day" className="font-semibold whitespace-nowrap">
                                             {timeBucketLabels[row.time_bucket]}
-                                        </td>
-                                        <td className="py-3 px-4">
-                                            <span className="bg-blue-100 text-blue-700 px-2 py-1 text-xs font-semibold capitalize">
+                                        </TableCell>
+                                        <TableCell label="Top Issue">
+                                            <span className="bg-blue-100 text-blue-700 inline-block px-2 py-1 text-xs font-semibold capitalize">
                                                 {row.issue_type}
                                             </span>
-                                        </td>
-                                        <td className="py-3 px-4 text-sm font-semibold text-blue-600">
+                                        </TableCell>
+                                        <TableCell label="Times Reported" className="font-semibold text-blue-600">
                                             {row.count}x
-                                        </td>
-                                    </tr>
+                                        </TableCell>
+                                    </TableRow>
                                 ))}
-                            </tbody>
-                        </table>
+                            </TableBody>
+                        </Table>
                     )}
                 </CardContent>
             </Card>

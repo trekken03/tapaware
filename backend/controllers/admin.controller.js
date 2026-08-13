@@ -5,7 +5,22 @@ exports.getAllUsers = async (req, res) => {
     try {
         const [rows] = await db.query(`Select u.id,u.name,u.email,u.role,u.household_id,
             h.household_number,h.purok,u.created_at from users u left join households h on u.household_id = h.id
+            where u.deleted_at is null
             order by u.created_at desc`);
+        res.json(rows);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.getArchivedUsers = async (req, res) => {
+    try {
+        const [rows] = await db.query(`Select u.id,u.name,u.email,u.role,u.household_id,u.deleted_at,
+            h.household_number,h.purok,u.created_at from users u left join households h on u.household_id = h.id
+            where u.deleted_at is not null
+            order by u.deleted_at desc`);
         res.json(rows);
     }
     catch (error) {
@@ -47,32 +62,111 @@ exports.deleteUser = async (req, res) => {
     const currentUser = req.user;
 
     try {
-        const [user] = await db.query(`Select * from users where id = ?`, [id]);
+        if (Number(id) === currentUser.id) {
+            return res.status(400).json({ message: 'You cannot archive your own account' });
+        }
+
+        const [user] = await db.query(`Select * from users where id = ? and deleted_at is null`, [id]);
 
         if (user.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        await db.query(`Delete from users where id = ?`, [id]);
+        await db.query(`Update users set deleted_at = NOW() where id = ?`, [id]);
 
         await auditLog({
             user_id: currentUser.id,
             user_name: currentUser.name,
             user_role: currentUser.role,
-            action: 'DELETE_USER',
+            action: 'ARCHIVE_USER',
             table_affected: 'users',
             record_id: id,
-            details: `Deleted user ${user[0].name} (${user[0].email})`,
+            details: `Archived user ${user[0].name} (${user[0].email})`,
             ip_address: req.ip
         });
-        res.json({ message: 'User deleted successfully' });
+        res.json({ message: 'User archived successfully' });
     }
     catch (error) {
-        if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.code === 'ER_ROW_IS_REFERENCED') {
-            return res.status(400).json({
-                message: 'Cannot delete this user — they have submitted reports or recorded TDS readings. Change their role instead, or delete those records first.'
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.restoreUser = async (req, res) => {
+    const { id } = req.params;
+    const currentUser = req.user;
+
+    try {
+        const [user] = await db.query(`Select * from users where id = ? and deleted_at is not null`, [id]);
+
+        if (user.length === 0) {
+            return res.status(404).json({ message: 'Archived user not found' });
+        }
+
+        await db.query(`Update users set deleted_at = NULL where id = ?`, [id]);
+
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'RESTORE_USER',
+            table_affected: 'users',
+            record_id: id,
+            details: `Restored user ${user[0].name} (${user[0].email})`,
+            ip_address: req.ip
+        });
+        res.json({ message: 'User restored successfully' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Hard delete — the row is removed from the database and cannot be restored.
+// Only allowed on users that are already archived. Reports (user_id) and TDS
+// readings (staff_id) reference users without ON DELETE, so a user who left any
+// of those behind is refused instead of taking their history down with them.
+exports.permanentDeleteUser = async (req, res) => {
+    const { id } = req.params;
+    const currentUser = req.user;
+
+    try {
+        if (Number(id) === currentUser.id) {
+            return res.status(400).json({ message: 'You cannot delete your own account' });
+        }
+
+        const [user] = await db.query(`Select * from users where id = ? and deleted_at is not null`, [id]);
+
+        if (user.length === 0) {
+            return res.status(404).json({ message: 'Archived user not found' });
+        }
+
+        const [[{ report_count }]] = await db.query('SELECT COUNT(*) as report_count FROM reports WHERE user_id = ?', [id]);
+        const [[{ reading_count }]] = await db.query('SELECT COUNT(*) as reading_count FROM tds_readings WHERE staff_id = ?', [id]);
+
+        if (report_count > 0 || reading_count > 0) {
+            return res.status(409).json({
+                message: `This user still has ${report_count} report(s) and ${reading_count} TDS reading(s) on record, so the account cannot be permanently deleted. It stays archived instead.`
             });
         }
+
+        await db.query('DELETE FROM users WHERE id = ?', [id]);
+
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'PERMANENT_DELETE_USER',
+            table_affected: 'users',
+            record_id: id,
+            details: `Permanently deleted user ${user[0].name} (${user[0].email})`,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'User permanently deleted' });
+    }
+    catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
     }
@@ -350,7 +444,7 @@ exports.getUserById = async (req, res) => {
             `SELECT u.id, u.name, u.email, u.role, u.household_id, u.created_at,
             h.household_number, h.purok, h.address
             FROM users u LEFT JOIN households h ON u.household_id = h.id
-            WHERE u.id = ?`,
+            WHERE u.id = ? AND u.deleted_at IS NULL`,
             [id]
         );
 

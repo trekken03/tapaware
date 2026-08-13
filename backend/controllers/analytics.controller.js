@@ -3,20 +3,20 @@ const db = require('../models/db');
 exports.getSummary = async (req, res) => {
     try {
         const [[totalReports]] = await db.query(
-            'SELECT COUNT(*) as count FROM reports'
+            'SELECT COUNT(*) as count FROM reports WHERE deleted_at IS NULL'
         );
         const [[totalHouseholds]] = await db.query(
-            'SELECT COUNT(*) as count FROM households'
+            'SELECT COUNT(*) as count FROM households WHERE deleted_at IS NULL'
         );
         const [[flaggedHousehold]] = await db.query(
             `SELECT COUNT(DISTINCT household_id) as count
             FROM recurring_flags WHERE status = 'active'`
         );
         const [[pendingReports]] = await db.query(
-            `SELECT COUNT(*) as count FROM reports WHERE status='pending'`
+            `SELECT COUNT(*) as count FROM reports WHERE status='pending' AND deleted_at IS NULL`
         );
         const [[avgTds]] = await db.query(
-            `SELECT AVG(tds_value) as average FROM tds_readings`
+            `SELECT AVG(tds_value) as average FROM tds_readings WHERE deleted_at IS NULL`
         );
 
         res.json({
@@ -37,11 +37,11 @@ exports.getSummary = async (req, res) => {
 exports.getReportByIssueType = async (req, res) => {
     const { from, to } = req.query;
     try {
-        let query = `SELECT issue_type, COUNT(*) as count FROM reports`;
+        let query = `SELECT issue_type, COUNT(*) as count FROM reports WHERE deleted_at IS NULL`;
         const params = [];
 
         if (from && to) {
-            query += ` WHERE created_at BETWEEN ? AND ?`;
+            query += ` AND created_at BETWEEN ? AND ?`;
             params.push(from, `${to} 23:59:59`);
         }
 
@@ -60,7 +60,8 @@ exports.getReportsByHouseholdCount = async (req, res) => {
         const [rows] = await db.query(
             `SELECT households.household_number,households.owner_name,
             COUNT(reports.id) as report_count
-            FROM households LEFT JOIN reports ON households.id = reports.household_id
+            FROM households LEFT JOIN reports ON households.id = reports.household_id AND reports.deleted_at IS NULL
+            WHERE households.deleted_at IS NULL
             GROUP BY households.id ORDER BY report_count DESC `
         );
         res.json(rows);
@@ -77,9 +78,9 @@ exports.getFlaggedHouseholds = async (req, res) => {
             `SELECT recurring_flags.*,
             households.household_number,
             households.owner_name,
-            households.purok 
+            households.purok
             FROM recurring_flags JOIN households ON recurring_flags.household_id = households.id
-            WHERE recurring_flags.status = 'active'
+            WHERE recurring_flags.status = 'active' AND households.deleted_at IS NULL
             ORDER BY recurring_flags.times_reported DESC`
         );
         res.json(rows);
@@ -95,11 +96,11 @@ exports.getTdsTrend = async (req, res) => {
     const { from, to } = req.query;
     try {
         let query = `SELECT DATE(recorded_at) as date, AVG(tds_value) as average, COUNT(*) as reading_count
-            FROM tds_readings`;
+            FROM tds_readings WHERE deleted_at IS NULL`;
         const params = [];
 
         if (from && to) {
-            query += ` WHERE recorded_at BETWEEN ? AND ?`;
+            query += ` AND recorded_at BETWEEN ? AND ?`;
             params.push(from, `${to} 23:59:59`);
             query += ` GROUP BY DATE(recorded_at) ORDER BY date ASC`;
         } else {
@@ -121,8 +122,8 @@ exports.getTdsByPurok = async (req, res) => {
         let query = `SELECT households.purok,
             AVG(tds_readings.tds_value) as average_tds,
             COUNT(tds_readings.id) as reading_count
-            FROM households 
-            LEFT JOIN tds_readings ON households.id = tds_readings.household_id`;
+            FROM households
+            LEFT JOIN tds_readings ON households.id = tds_readings.household_id AND tds_readings.deleted_at IS NULL`;
         const params = [];
 
         if (from && to) {
@@ -130,7 +131,7 @@ exports.getTdsByPurok = async (req, res) => {
             params.push(from, `${to} 23:59:59`);
         }
 
-        query += ` GROUP BY households.purok ORDER BY households.purok ASC`;
+        query += ` WHERE households.deleted_at IS NULL GROUP BY households.purok ORDER BY households.purok ASC`;
         const [rows] = await db.query(query, params);
         res.json(rows);
     }
@@ -161,14 +162,14 @@ exports.getResidentSummary = async (req, res) => {
 
         // Get resident's total reports
         const [[myReports]] = await db.query(
-            'SELECT COUNT(*) as count FROM reports WHERE household_id = ? AND user_id = ?',
+            'SELECT COUNT(*) as count FROM reports WHERE household_id = ? AND user_id = ? AND deleted_at IS NULL',
             [householdId, userId]
         );
 
         // Get resident's pending reports
         const [[pendingReports]] = await db.query(
-            `SELECT COUNT(*) as count FROM reports 
-            WHERE household_id = ? AND user_id = ? AND status = 'pending'`,
+            `SELECT COUNT(*) as count FROM reports
+            WHERE household_id = ? AND user_id = ? AND status = 'pending' AND deleted_at IS NULL`,
             [householdId, userId]
         );
 
@@ -186,15 +187,15 @@ exports.getReportsByPurokCount = async (req, res) => {
     const { from, to } = req.query;
     try {
         let query = `SELECT households.purok, COUNT(reports.id) as report_count
-            FROM households LEFT JOIN reports ON households.id = reports.household_id`;
+            FROM households LEFT JOIN reports ON households.id = reports.household_id AND reports.deleted_at IS NULL`;
         const params = [];
 
         if (from && to) {
-            query += ` WHERE reports.created_at BETWEEN ? AND ?`;
+            query += ` AND reports.created_at BETWEEN ? AND ?`;
             params.push(from, `${to} 23:59:59`);
         }
 
-        query += ` GROUP BY households.purok ORDER BY report_count DESC`;
+        query += ` WHERE households.deleted_at IS NULL GROUP BY households.purok ORDER BY report_count DESC`;
         const [rows] = await db.query(query, params);
         res.json(rows);
     }
@@ -207,15 +208,37 @@ exports.getTrendingIssuesByPurok = async (req, res) => {
     const { from, to } = req.query;
     try {
         let query = `SELECT households.purok, reports.issue_type, COUNT(*) as count
-            FROM reports JOIN households ON reports.household_id = households.id`;
+            FROM reports JOIN households ON reports.household_id = households.id
+            WHERE reports.deleted_at IS NULL`;
         const params = [];
 
         if (from && to) {
-            query += ` WHERE reports.created_at BETWEEN ? AND ?`;
+            query += ` AND reports.created_at BETWEEN ? AND ?`;
             params.push(from, `${to} 23:59:59`);
         }
 
         query += ` GROUP BY households.purok, reports.issue_type ORDER BY households.purok ASC, count DESC`;
+        const [rows] = await db.query(query, params);
+        res.json(rows);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.getReportsByStatus = async (req, res) => {
+    const { from, to } = req.query;
+    try {
+        let query = `SELECT status, COUNT(*) as count FROM reports WHERE deleted_at IS NULL`;
+        const params = [];
+
+        if (from && to) {
+            query += ` AND created_at BETWEEN ? AND ?`;
+            params.push(from, `${to} 23:59:59`);
+        }
+
+        query += ` GROUP BY status ORDER BY FIELD(status, 'pending','investigating','resolved')`;
         const [rows] = await db.query(query, params);
         res.json(rows);
     }
@@ -237,11 +260,12 @@ exports.getTrendingIssuesByTime = async (req, res) => {
                 END AS time_bucket,
                 issue_type,
                 COUNT(*) as count
-            FROM reports`;
+            FROM reports
+            WHERE deleted_at IS NULL`;
         const params = [];
 
         if (from && to) {
-            query += ` WHERE created_at BETWEEN ? AND ?`;
+            query += ` AND created_at BETWEEN ? AND ?`;
             params.push(from, `${to} 23:59:59`);
         }
 

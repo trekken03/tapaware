@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Pagination } from '@/components/ui/pagination'
 import {
-    Droplets, FileText, ClockFading, TrendingUp, Home, MapPin,
+    Droplets, FileText, ClockFading, Home, MapPin,
     Search, Plus, Hourglass, CircleCheck
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -39,6 +42,8 @@ const ResidentDashboard = () => {
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
+    const [currentPage, setCurrentPage] = useState(1)
+    const pageSize = 5
 
     useEffect(() => {
         fetchData()
@@ -75,6 +80,22 @@ const ResidentDashboard = () => {
             r.description?.toLowerCase().includes(searchLower)
         return matchesStatus && matchesSearch
     })
+
+    const totalPages = Math.max(1, Math.ceil(filteredReports.length / pageSize))
+    const paginatedReports = filteredReports.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    )
+
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [searchTerm, statusFilter])
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages)
+        }
+    }, [currentPage, totalPages])
 
     const latestTds = tdsHistory.length > 0 ? tdsHistory[0] : null
     const latestTdsStatus = latestTds ? getTdsStatus(latestTds.tds_value) : null
@@ -144,9 +165,9 @@ const ResidentDashboard = () => {
                                     </p>
                                     <p className="text-xs text-gray-500 mt-3 mb-3">
                                         Last recorded:{new Date(latestTds.recorded_at).toLocaleDateString('en-US', {
-                                            year: 'numeric',
-                                            month: 'long',
+                                            month: 'short',
                                             day: 'numeric',
+                                            year: 'numeric',
                                         })}
                                     </p>
                                     {user?.household_id && (
@@ -182,28 +203,41 @@ const ResidentDashboard = () => {
                             {tdsHistory.length === 0 ? (
                                 <p className="text-gray-500 text-sm">No TDS readings recorded yet.</p>
                             ) : (
-                                <div className="space-y-2 max-h-72 overflow-y-auto">
-                                    {tdsHistory.map((t) => {
-                                        const s = getTdsStatus(t.tds_value)
-                                        return (
-                                            <div key={t.id} className="flex items-center justify-between gap-3 rounded-lg bg-gray-100 p-3">
-                                                <div>
-                                                    <p className="font-semibold text-gray-900">{parseFloat(t.tds_value).toFixed(2)} ppm</p>
-                                                    <p className="text-xs text-gray-500">
-                                                        {t.staff_name} • {new Date(t.recorded_at).toLocaleDateString('en-US', {
-                                                            year: 'numeric',
-                                                            month: 'long',
+                                <Table containerClassName="max-h-72 overflow-y-auto" className="md:min-w-[440px]">
+                                    <TableHeader className="bg-blue-800 sticky top-0 z-10">
+                                        <TableRow>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>TDS</TableHead>
+                                            <TableHead>Recorded By</TableHead>
+                                            <TableHead className="text-center">Status</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {tdsHistory.map((t) => {
+                                            const s = getTdsStatus(t.tds_value)
+                                            return (
+                                                <TableRow key={t.id}>
+                                                    <TableCell label="Date" className="whitespace-nowrap">
+                                                        {new Date(t.recorded_at).toLocaleDateString('en-US', {
+                                                            month: 'short',
                                                             day: 'numeric',
+                                                            year: 'numeric',
                                                         })}
-                                                    </p>
-                                                </div>
-                                                <span className={`${s.bg} ${s.color} px-2 py-1 rounded-full text-xs font-semibold`}>
-                                                    {s.label}
-                                                </span>
-                                            </div>
-                                        )
-                                    })}
-                                </div>
+                                                    </TableCell>
+                                                    <TableCell label="TDS" className="font-semibold whitespace-nowrap">
+                                                        {parseFloat(t.tds_value).toFixed(2)} ppm
+                                                    </TableCell>
+                                                    <TableCell label="Recorded By">{t.staff_name}</TableCell>
+                                                    <TableCell label="Status" className="text-center">
+                                                        <span className={`${s.bg} ${s.color} inline-block w-[110px] px-2 py-1 text-xs font-semibold`}>
+                                                            {s.label}
+                                                        </span>
+                                                    </TableCell>
+                                                </TableRow>
+                                            )
+                                        })}
+                                    </TableBody>
+                                </Table>
                             )}
                         </CardContent>
                     </Card>
@@ -213,25 +247,39 @@ const ResidentDashboard = () => {
 
 
                 {/* My Reports */}
-                <Card className="mb-6">
+                <Card className="mb-6 bg-white/80">
                     <CardHeader>
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <CardTitle className="flex items-center gap-2">
-                                <FileText size={20} className="text-blue-600" />
-                                My Reports ({filteredReports.length})
-                            </CardTitle>
-                            <div className="flex items-center gap-3">
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        <div className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <CardTitle className="flex flex-wrap items-center gap-2">
+                                    <FileText size={20} className="text-blue-600" />
+                                    My Reports
+                                    <span className="text-sm font-normal text-gray-500">
+                                        {searchTerm
+                                            ? `Showing ${filteredReports.length} of ${reports.length}`
+                                            : `(${reports.length})`}
+                                    </span>
+                                </CardTitle>
+                                <Button
+                                    className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
+                                    onClick={() => navigate('/reports/add')}
                                 >
-                                    <option value="all">All</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="investigating">Investigating</option>
-                                    <option value="resolved">Resolved</option>
-                                </select>
-                                <InputGroup className="max-w-xs">
+                                    <Plus size={16} />
+                                    Submit Report
+                                </Button>
+                            </div>
+
+                            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+                                    <TabsList variant="line">
+                                        <TabsTrigger value="all">All</TabsTrigger>
+                                        <TabsTrigger value="pending">Pending</TabsTrigger>
+                                        <TabsTrigger value="investigating">Investigating</TabsTrigger>
+                                        <TabsTrigger value="resolved">Resolved</TabsTrigger>
+                                    </TabsList>
+                                </Tabs>
+
+                                <InputGroup className="w-full lg:max-w-xs">
                                     <InputGroupInput
                                         placeholder="Search..."
                                         value={searchTerm}
@@ -241,13 +289,6 @@ const ResidentDashboard = () => {
                                         <Search size={16} />
                                     </InputGroupAddon>
                                 </InputGroup>
-                                <Button
-                                    className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
-                                    onClick={() => navigate('/reports/add')}
-                                >
-                                    <Plus size={16} />
-                                    Submit Report
-                                </Button>
                             </div>
                         </div>
                     </CardHeader>
@@ -255,43 +296,63 @@ const ResidentDashboard = () => {
                         {filteredReports.length === 0 ? (
                             <div className="text-center py-12">
                                 <Home size={48} className="text-gray-300 mx-auto mb-4" />
-                                <p className="text-gray-500">You haven't submitted any reports yet.</p>
-                                <Button
-                                    onClick={() => navigate('/reports/add')}
-                                    className="mt-4 bg-blue-900 hover:bg-blue-700"
-                                >
-                                    Submit Your First Report
-                                </Button>
+                                <p className="text-gray-500">
+                                    {reports.length === 0
+                                        ? "You haven't submitted any reports yet."
+                                        : 'No reports match your filters.'}
+                                </p>
+                                {reports.length === 0 && (
+                                    <Button
+                                        onClick={() => navigate('/reports/add')}
+                                        className="mt-4 w-full sm:w-auto bg-blue-900 hover:bg-blue-700"
+                                    >
+                                        Submit Your First Report
+                                    </Button>
+                                )}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,290px))] justify-center gap-4">
-                                {filteredReports.map((r) => {
-                                    const s = getReportStatusStyle(r.status)
-                                    const Icon = s.icon
-                                    return (
-                                        <div
-                                            key={r.id}
-                                            onClick={() => navigate(`/reports/${r.id}`)}
-                                            className={`flex gap-4 rounded-lg border-t-3 ${s.border} border shadow-lg bg-gray-50 p-4 cursor-pointer transition-all duration-200 hover:-translate-y-2`}
-                                        >
-                                            <div className={`hidden sm:flex items-center justify-center w-14 h-14 rounded-full ${s.bg} shrink-0`}>
-                                                <Icon size={24} className={s.color} />
-                                            </div>
-                                            <div className="flex-1 flex flex-col">
-                                                <span className="text-lg font-semibold capitalize mb-1">{r.issue_type}</span>
-                                                <p className="text-sm text-gray-700">
-                                                    {new Date(r.created_at).toLocaleDateString('en-US', {
-                                                        year: 'numeric', month: 'long', day: 'numeric',
-                                                    })}
-                                                </p>
-                                                <span className={`${s.bg} ${s.color} mt-auto pt-2 text-xs font-semibold capitalize w-min`}>
-                                                    {r.status}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
+                            <>
+                                <Table className="md:min-w-[520px]">
+                                    <TableHeader className="bg-blue-800">
+                                        <TableRow>
+                                            <TableHead>No.</TableHead>
+                                            <TableHead>Issue</TableHead>
+                                            <TableHead>Reported</TableHead>
+                                            <TableHead className="text-center">Status</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {paginatedReports.map((r, index) => {
+                                            const s = getReportStatusStyle(r.status)
+                                            const rowNum = filteredReports.length - ((currentPage - 1) * pageSize + index)
+
+                                            return (
+                                                <TableRow
+                                                    key={r.id}
+                                                    className="cursor-pointer hover:bg-gray-50"
+                                                    onClick={() => navigate(`/reports/${r.id}`)}
+                                                >
+                                                    <TableCell label="No.">{rowNum}</TableCell>
+                                                    <TableCell label="Issue" className="font-semibold capitalize">{r.issue_type}</TableCell>
+                                                    <TableCell label="Reported" className="whitespace-nowrap">
+                                                        {new Date(r.created_at).toLocaleDateString('en-US', {
+                                                            month: 'short', day: 'numeric', year: 'numeric',
+                                                        })}
+                                                    </TableCell>
+                                                    <TableCell label="Status" className="text-center">
+                                                        <span className={`${s.bg} ${s.color} inline-block w-[133px] px-2 py-1 text-xs font-semibold capitalize`}>
+                                                            {r.status}
+                                                        </span>
+                                                    </TableCell>
+                                                </TableRow>
+                                            )
+                                        })}
+                                    </TableBody>
+                                </Table>
+                                <div className="mt-4 flex justify-end">
+                                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                                </div>
+                            </>
                         )}
                     </CardContent>
                 </Card>

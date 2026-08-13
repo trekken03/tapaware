@@ -37,10 +37,9 @@ const Login = () => {
 
         try {
             const res = await API.post('/auth/login', { email, password });
-            const role = res.data.user.role;
 
-            login(res.data.token, res.data.user);
-            navigate(role === "resident" ? "/dashboard" : "/dashboard");
+            login(res.data.user);
+            navigate("/dashboard");
             toast.success('Welcome back! ' + res.data.user.name + '!')
         } catch (err) {
             setError(err.response?.data?.message || 'Something went wrong')
