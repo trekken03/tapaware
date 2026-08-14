@@ -29,4 +29,13 @@ const csrfCookieOptions = {
     domain: cookieDomain,
 };
 
-module.exports = { authCookieOptions, csrfCookieOptions };
+// A cookie issued before COOKIE_DOMAIN existed is host-only, which makes it a
+// *different* cookie from the domain-scoped one rather than an older version of
+// it. Both are sent to the API, cookie-parser keeps whichever comes first, and
+// CSRF then compares that stale value against the fresh header — a 403 that
+// setting the new cookie alone will never clear. Expiring this variant whenever
+// we issue or clear the real one lets a plain re-login heal any browser that
+// still holds the old pair.
+const legacyCsrfCookieOptions = { ...csrfCookieOptions, domain: undefined };
+
+module.exports = { authCookieOptions, csrfCookieOptions, legacyCsrfCookieOptions };
