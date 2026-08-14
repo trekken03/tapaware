@@ -4,7 +4,14 @@ const generateToken = require('../utils/generateToken');
 const auditLog = require('../utils/auditLogger');
 const crypto = require('crypto');
 const sendEmail = require('../utils/emailSender');
-const { authCookieOptions, csrfCookieOptions, legacyCsrfCookieOptions } = require('../utils/cookieOptions');
+const {
+    authCookieOptions,
+    csrfCookieOptions,
+    legacyCsrfCookieOptions,
+    authCookieClearOptions,
+    csrfCookieClearOptions,
+    legacyCsrfCookieClearOptions,
+} = require('../utils/cookieOptions');
 
 
 exports.register = async (req, res) => {
@@ -228,7 +235,7 @@ exports.login = async (req, res) => {
 
         // Drop any host-only XSRF-TOKEN left over from before COOKIE_DOMAIN was
         // set, otherwise it shadows the one we are about to issue.
-        res.clearCookie('XSRF-TOKEN', legacyCsrfCookieOptions);
+        res.clearCookie('XSRF-TOKEN', legacyCsrfCookieClearOptions);
         res.cookie('token', token, authCookieOptions);
         res.cookie('XSRF-TOKEN', csrfToken, csrfCookieOptions);
 
@@ -257,9 +264,9 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
-    res.clearCookie('token', authCookieOptions);
-    res.clearCookie('XSRF-TOKEN', csrfCookieOptions);
-    res.clearCookie('XSRF-TOKEN', legacyCsrfCookieOptions);
+    res.clearCookie('token', authCookieClearOptions);
+    res.clearCookie('XSRF-TOKEN', csrfCookieClearOptions);
+    res.clearCookie('XSRF-TOKEN', legacyCsrfCookieClearOptions);
     res.json({ message: 'Logged out successfully' });
 };
 

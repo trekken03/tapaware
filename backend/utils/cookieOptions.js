@@ -38,4 +38,25 @@ const csrfCookieOptions = {
 // still holds the old pair.
 const legacyCsrfCookieOptions = { ...csrfCookieOptions, domain: undefined };
 
-module.exports = { authCookieOptions, csrfCookieOptions, legacyCsrfCookieOptions };
+// Clearing a cookie means telling the browser "expire this now." If maxAge is
+// still present on the options passed to res.clearCookie(), it overrides that
+// expiry — per the cookie spec, Max-Age always wins whenever both Max-Age and
+// Expires are set on the same Set-Cookie header. That silently turns a "delete"
+// into a "reissue with a blank value and a fresh 7-day lifespan," which is why
+// a stale cookie can survive its own clearCookie() call. These *ClearOptions
+// variants exist only for res.clearCookie() calls: same identity (domain/path/
+// sameSite/secure) as their counterpart above, but with maxAge stripped out.
+const stripMaxAge = ({ maxAge, ...rest }) => rest;
+
+const authCookieClearOptions = stripMaxAge(authCookieOptions);
+const csrfCookieClearOptions = stripMaxAge(csrfCookieOptions);
+const legacyCsrfCookieClearOptions = stripMaxAge(legacyCsrfCookieOptions);
+
+module.exports = {
+    authCookieOptions,
+    csrfCookieOptions,
+    legacyCsrfCookieOptions,
+    authCookieClearOptions,
+    csrfCookieClearOptions,
+    legacyCsrfCookieClearOptions,
+};
