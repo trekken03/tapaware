@@ -91,7 +91,7 @@ const Profile = () => {
 
     return (
         <Layout>
-            <div className="max-w-2xl mx-auto">
+            <div>
 
                 <Button
                     variant="outline"
@@ -102,20 +102,22 @@ const Profile = () => {
                     <ArrowLeft size={16} />
                     Back
                 </Button>
+                <h1 className="text-2xl font-bold text-gray-900 mb-6">Account Settings</h1>
 
                 {/* Header card */}
-                <Card className="mb-6 overflow-hidden">
 
-                    <CardContent className="pt-10">
-                        <div className="flex items-end gap-4 -mt-10">
-                            <div className="w-20 h-20 rounded-full bg-white border-4 border-white shadow-sm flex items-center justify-center shrink-0">
+                <Card className="mb-6 overflow-hidden w-full">
+
+                    <CardContent className="pt-10 bg-accent bg-white/10">
+                        <div className="flex items-end gap-4 -mt-10 justify-start items-center flex mb-5">
+                            <div className="w-30 h-30 rounded-full bg-white border-4 border-white shadow-sm flex items-center justify-center shrink-0">
                                 <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center">
                                     <User size={32} className="text-blue-700" />
                                 </div>
                             </div>
                             <div className="pb-1">
-                                <h1 className="text-xl font-bold text-gray-900">{user?.name}</h1>
-                                <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${roleBadgeStyle}`}>
+                                <h1 className="text-4xl font-bold text-gray-900">{user?.name}</h1>
+                                <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-mn font-semibold capitalize ${roleBadgeStyle}`}>
                                     {user?.role}
                                 </span>
                             </div>
@@ -135,163 +137,167 @@ const Profile = () => {
                                 )}
                             </div>
                         )}
+
+                        {/* Personal Information */}
+                        <div className="grid sm:grid-cols-2 gap-6">
+                            <Card className="mb-6 h-min">
+                                <CardContent className="pt-6">
+                                    <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                                        <User size={18} className="text-blue-600" />
+                                        Personal Information
+                                    </h2>
+
+                                    <form onSubmit={handleUpdateProfile} className="space-y-4">
+                                        <div className="grid sm:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="name">Full Name</Label>
+                                                <Input
+                                                    id="name"
+                                                    name="name"
+                                                    value={form.name}
+                                                    onChange={handleChange}
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="email">Email</Label>
+                                                <Input
+                                                    id="email"
+                                                    name="email"
+                                                    type="email"
+                                                    value={form.email}
+                                                    onChange={handleChange}
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {user?.role === 'resident' && (
+                                            <p className="text-xs text-black">
+                                                Household and purok are managed by barangay staff.{' '}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigate('/', { state: { scrollTo: 'contact' } })}
+                                                    className="underline hover:text-gray-600 hover:cursor-pointer"
+                                                >
+                                                    Contact an admin
+                                                </button>{' '}
+                                                to update these.
+                                            </p>
+                                        )}
+
+                                        <div className="pt-2 flex justify-end">
+                                            <Button
+                                                type="submit"
+                                                className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
+                                                disabled={loading}
+                                            >
+                                                <Save size={16} />
+                                                {loading ? 'Saving...' : 'Save Changes'}
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </CardContent>
+                            </Card>
+
+                            {/* Change Password */}
+                            <Card>
+                                <CardContent className="pt-6">
+                                    <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                                        <KeyRound size={18} className="text-blue-600" />
+                                        Change Password
+                                    </h2>
+
+                                    <form onSubmit={handleChangePassword} className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="currentPassword">Current Password</Label>
+                                            <div className="relative">
+                                                <Input
+                                                    id="currentPassword"
+                                                    name="currentPassword"
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    placeholder="Enter current password"
+                                                    value={passwordForm.currentPassword}
+                                                    maxLength="20"
+                                                    onChange={handlePasswordChange}
+                                                    required
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                                >
+                                                    {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="grid sm:grid-cols-1 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="newPassword">New Password</Label>
+                                                <div className="relative">
+                                                    <Input
+                                                        id="newPassword"
+                                                        name="newPassword"
+                                                        type={showPassword1 ? 'text' : 'password'}
+                                                        placeholder="At least 6 characters"
+                                                        value={passwordForm.newPassword}
+                                                        minLength="6"
+                                                        maxLength="20"
+                                                        onChange={handlePasswordChange}
+                                                        required
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPassword1(!showPassword1)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                                    >
+                                                        {showPassword1 ? <Eye size={18} /> : <EyeOff size={18} />}
+                                                    </button>
+                                                </div>
+
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                                                <div className="relative">
+                                                    <Input
+                                                        id="confirmPassword"
+                                                        name="confirmPassword"
+                                                        type={showPassword2 ? 'text' : 'password'}
+                                                        placeholder="Re-enter new password"
+                                                        minLength="6"
+                                                        maxLength="20"
+                                                        value={passwordForm.confirmPassword}
+                                                        onChange={handlePasswordChange}
+                                                        required
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPassword2(!showPassword2)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                                    >
+                                                        {showPassword2 ? <Eye size={18} /> : <EyeOff size={18} />}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="pt-2 flex justify-end">
+                                            <Button
+                                                type="submit"
+                                                className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
+                                                disabled={passwordLoading}
+                                            >
+                                                <KeyRound size={16} />
+                                                {passwordLoading ? 'Changing...' : 'Change Password'}
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </CardContent>
+                            </Card>
+                        </div>
+
                     </CardContent>
                 </Card>
 
-                {/* Personal Information */}
-                <Card className="mb-6">
-                    <CardContent className="pt-6">
-                        <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-4">
-                            <User size={18} className="text-blue-600" />
-                            Personal Information
-                        </h2>
-
-                        <form onSubmit={handleUpdateProfile} className="space-y-4">
-                            <div className="grid sm:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">Full Name</Label>
-                                    <Input
-                                        id="name"
-                                        name="name"
-                                        value={form.name}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        value={form.email}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            {user?.role === 'resident' && (
-                                <p className="text-xs text-black">
-                                    Household and purok are managed by barangay staff.{' '}
-                                    <button
-                                        type="button"
-                                        onClick={() => navigate('/', { state: { scrollTo: 'contact' } })}
-                                        className="underline hover:text-gray-600 hover:cursor-pointer"
-                                    >
-                                        Contact an admin
-                                    </button>{' '}
-                                    to update these.
-                                </p>
-                            )}
-
-                            <div className="pt-2 flex justify-end">
-                                <Button
-                                    type="submit"
-                                    className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
-                                    disabled={loading}
-                                >
-                                    <Save size={16} />
-                                    {loading ? 'Saving...' : 'Save Changes'}
-                                </Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
-
-                {/* Change Password */}
-                <Card>
-                    <CardContent className="pt-6">
-                        <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-4">
-                            <KeyRound size={18} className="text-blue-600" />
-                            Change Password
-                        </h2>
-
-                        <form onSubmit={handleChangePassword} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="currentPassword">Current Password</Label>
-                                <div className="relative">
-                                    <Input
-                                        id="currentPassword"
-                                        name="currentPassword"
-                                        type={showPassword ? 'text' : 'password'}
-                                        placeholder="Enter current password"
-                                        value={passwordForm.currentPassword}
-                                        maxLength="20"
-                                        onChange={handlePasswordChange}
-                                        required
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                    >
-                                        {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="grid sm:grid-cols-1 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="newPassword">New Password</Label>
-                                    <div className="relative">
-                                        <Input
-                                            id="newPassword"
-                                            name="newPassword"
-                                            type={showPassword1 ? 'text' : 'password'}
-                                            placeholder="At least 6 characters"
-                                            value={passwordForm.newPassword}
-                                            minLength="6"
-                                            maxLength="20"
-                                            onChange={handlePasswordChange}
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword1(!showPassword1)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                        >
-                                            {showPassword1 ? <Eye size={18} /> : <EyeOff size={18} />}
-                                        </button>
-                                    </div>
-
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                                    <div className="relative">
-                                        <Input
-                                            id="confirmPassword"
-                                            name="confirmPassword"
-                                            type={showPassword2 ? 'text' : 'password'}
-                                            placeholder="Re-enter new password"
-                                            minLength="6"
-                                            maxLength="20"
-                                            value={passwordForm.confirmPassword}
-                                            onChange={handlePasswordChange}
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword2(!showPassword2)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                        >
-                                            {showPassword2 ? <Eye size={18} /> : <EyeOff size={18} />}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="pt-2 flex justify-end">
-                                <Button
-                                    type="submit"
-                                    className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
-                                    disabled={passwordLoading}
-                                >
-                                    <KeyRound size={16} />
-                                    {passwordLoading ? 'Changing...' : 'Change Password'}
-                                </Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
 
             </div>
         </Layout>

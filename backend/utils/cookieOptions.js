@@ -2,6 +2,16 @@ const isProd = process.env.NODE_ENV === 'production';
 
 const TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days, matches generateToken's expiresIn
 
+// Set COOKIE_DOMAIN (e.g. ".tapaware.online") when the frontend and the API live
+// on different subdomains of one parent domain. Without it a cookie is host-only,
+// so a page on tapaware.online cannot read a cookie issued by api.tapaware.online
+// — which silently breaks CSRF, since the frontend has to read XSRF-TOKEN and echo
+// it back as a header. Leave it unset locally, where both sides share "localhost".
+const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
+
+// The auth cookie stays host-only on purpose: it is httpOnly and only ever needs
+// to travel to the API, so there is nothing to gain by widening it to every
+// subdomain.
 const authCookieOptions = {
     httpOnly: true,
     secure: isProd,
@@ -16,6 +26,7 @@ const csrfCookieOptions = {
     sameSite: isProd ? 'none' : 'lax',
     path: '/',
     maxAge: TOKEN_MAX_AGE,
+    domain: cookieDomain,
 };
 
 module.exports = { authCookieOptions, csrfCookieOptions };
