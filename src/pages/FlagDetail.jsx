@@ -77,7 +77,7 @@ const FlagDetail = () => {
 
     return (
         <Layout>
-            <div className="max-w-2xl mx-auto">
+            <div className="w-full mx-auto ">
                 <Button
                     variant="outline"
                     size="sm"
@@ -97,7 +97,7 @@ const FlagDetail = () => {
                                     Household #{flag.household_number} — {flag.owner_name}
                                 </p>
                             </div>
-                            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold">
+                            <span className="bg-red-100 text-red-700 inline-block px-3 py-1 text-sm font-semibold">
                                 {flag.times_reported}x reported
                             </span>
                         </div>
@@ -128,7 +128,7 @@ const FlagDetail = () => {
                             <select
                                 value={flag.status}
                                 onChange={(e) => handleStatusUpdate(e.target.value)}
-                                className="bg-red-100 text-red-700 border-0 rounded-full px-3 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
+                                className="bg-red-100 text-red-700 border-0 px-3 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
                             >
                                 <option value="active">Active</option>
                                 <option value="resolved">Resolved</option>
@@ -159,7 +159,7 @@ const FlagDetail = () => {
                                         >
                                             <div className="flex items-center justify-between gap-2 mb-1">
                                                 <p className="text-sm font-medium text-gray-900">{r.reported_by}</p>
-                                                <span className={`${s.bg} ${s.color} px-2 py-0.5 rounded-full text-xs font-semibold`}>
+                                                <span className={`${s.bg} ${s.color} inline-block px-2 py-0.5 text-xs font-semibold`}>
                                                     {s.label}
                                                 </span>
                                             </div>

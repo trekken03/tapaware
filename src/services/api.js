@@ -23,17 +23,24 @@ API.interceptors.request.use((config) => {
     return config;
 });
 
+const PUBLIC_PATHS = ['/', '/login', '/forgot-password', '/reset-password'];
+
 API.interceptors.response.use(
     (response) => response,
     (error) => {
         const status = error.response?.status;
+        const url = error.config?.url || '';
 
-        if (status === 401 && window.location.pathname !== '/login') {
+        // /auth/me is expected to 401 for anonymous visitors — AuthContext already
+        // handles that by setting user to null, so it must never trigger a redirect.
+        const isSessionCheck = url.includes('/auth/me');
+        const onPublicPath = PUBLIC_PATHS.includes(window.location.pathname);
+
+        if (status === 401 && !isSessionCheck && !onPublicPath) {
             window.location.href = '/login';
         }
 
         return Promise.reject(error);
     }
 );
-
 export default API;

@@ -234,7 +234,7 @@ const Archive = () => {
                                                             variant="outline"
                                                             size="sm"
                                                             disabled={restoringId === row.id || deletingId === row.id}
-                                                            className="flex items-center gap-1 text-blue-600 border-blue-200 hover:bg-blue-50 rounded-lg"
+                                                            className="flex items-center gap-1 text-blue-600 border-blue-200 hover:bg-blue-50"
                                                         >
                                                             <ArchiveRestore size={14} />
                                                             Restore
@@ -252,7 +252,7 @@ const Archive = () => {
                                                             variant="outline"
                                                             size="sm"
                                                             disabled={restoringId === row.id || deletingId === row.id}
-                                                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50 rounded-lg"
+                                                            className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
                                                         >
                                                             <Trash2 size={14} />
                                                             Delete Permanently

@@ -22,7 +22,10 @@ function ConfirmDialog({
 }) {
     return (
         <AlertDialog >
-            <AlertDialogTrigger className="rounded-full" asChild>{children}</AlertDialogTrigger>
+            {/* No styling here on purpose: asChild merges the trigger's classes onto
+                the button inside, so anything set here silently overrides that
+                button's own shape everywhere ConfirmDialog is used. */}
+            <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
             <AlertDialogContent size={size} >
                 <AlertDialogHeader>
                     <AlertDialogTitle>{title}</AlertDialogTitle>

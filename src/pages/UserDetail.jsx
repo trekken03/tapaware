@@ -85,7 +85,7 @@ const UserDetail = () => {
 
     return (
         <Layout>
-            <div className="max-w-3xl mx-auto">
+            <div className="w-full mx-auto">
                 <div className="flex items-center justify-between mb-4">
                     <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={() => navigate(-1)}>
                         <ArrowLeft size={14} />
@@ -124,6 +124,7 @@ const UserDetail = () => {
                 </div>
 
                 {/* Header */}
+
                 <Card className="mb-6">
                     <CardContent className="pt-6">
                         <div className="flex items-start gap-4">
@@ -175,129 +176,131 @@ const UserDetail = () => {
                         )}
                     </CardContent>
                 </Card>
+                <div className="grid sm:grid-cols-2 gap-6">
 
-                {/* Resident: report history */}
-                {user.role === 'resident' && (
-                    <Card className="mb-6">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-base">
-                                <FileText size={18} className="text-blue-600" />
-                                Report History ({user.reports.length})
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {user.reports.length === 0 ? (
-                                <p className="text-gray-500 text-sm">No reports submitted by this household.</p>
-                            ) : (
-                                <div className="space-y-2">
-                                    {user.reports.map((r) => {
-                                        const s = getReportStatusStyle(r.status)
-                                        return (
-                                            <div
-                                                key={r.id}
-                                                onClick={() => navigate(`/reports/${r.id}`)}
-                                                className="flex items-center justify-between gap-3 rounded-lg bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-colors"
-                                            >
-                                                <div>
-                                                    <p className="font-semibold text-gray-900 capitalize">{r.issue_type}</p>
-                                                    <p className="text-xs text-gray-500">
-                                                        {new Date(r.created_at).toLocaleDateString('en-US', {
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            year: 'numeric',
-                                                        })}
-                                                    </p>
+                    {/* Resident: report history */}
+                    {user.role === 'resident' && (
+                        <Card className="mb-6 h-min">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <FileText size={18} className="text-blue-600" />
+                                    Report History ({user.reports.length})
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {user.reports.length === 0 ? (
+                                    <p className="text-gray-500 text-sm">No reports submitted by this household.</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {user.reports.map((r) => {
+                                            const s = getReportStatusStyle(r.status)
+                                            return (
+                                                <div
+                                                    key={r.id}
+                                                    onClick={() => navigate(`/reports/${r.id}`)}
+                                                    className="flex items-center justify-between gap-3 rounded-lg bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-colors"
+                                                >
+                                                    <div>
+                                                        <p className="font-semibold text-gray-900 capitalize">{r.issue_type}</p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {new Date(r.created_at).toLocaleDateString('en-US', {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                year: 'numeric',
+                                                            })}
+                                                        </p>
+                                                    </div>
+                                                    <span className={`${s.bg} ${s.color} inline-block px-2 py-1 text-xs font-semibold`}>
+                                                        {s.label}
+                                                    </span>
                                                 </div>
-                                                <span className={`${s.bg} ${s.color} px-2 py-1 rounded-full text-xs font-semibold`}>
-                                                    {s.label}
-                                                </span>
-                                            </div>
-                                        )
-                                    })}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Staff/Admin: TDS readings recorded */}
-                {(user.role === 'staff' || user.role === 'admin') && (
-                    <Card className="mb-6">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-base">
-                                <Droplets size={18} className="text-blue-600" />
-                                Recent TDS Readings Recorded ({user.tds_readings.length})
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {user.tds_readings.length === 0 ? (
-                                <p className="text-gray-500 text-sm">No TDS readings recorded by this user yet.</p>
-                            ) : (
-                                <div className="space-y-2">
-                                    {user.tds_readings.map((t) => {
-                                        const s = getTdsStatus(t.tds_value)
-                                        return (
-                                            <div
-                                                key={t.id}
-                                                onClick={() => navigate(`/tds/${t.id}`)}
-                                                className="flex items-center justify-between gap-3 rounded-lg bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-colors"
-                                            >
-                                                <div>
-                                                    <p className="font-semibold text-gray-900">
-                                                        Household #{t.household_number} — {t.tds_value} ppm
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        {new Date(t.recorded_at).toLocaleDateString('en-US', {
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            year: 'numeric',
-                                                        })}
-                                                    </p>
-                                                </div>
-                                                <span className={`${s.bg} ${s.color} px-2 py-1 rounded-full text-xs font-semibold`}>
-                                                    {s.label}
-                                                </span>
-                                            </div>
-                                        )
-                                    })}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Recent activity */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-base">
-                            <ClipboardList size={18} className="text-blue-600" />
-                            Recent Activity
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {user.recent_activity.length === 0 ? (
-                            <p className="text-gray-500 text-sm">No recorded activity for this user yet.</p>
-                        ) : (
-                            <div className="space-y-2">
-                                {user.recent_activity.map((a) => (
-                                    <div key={a.id} className="border-l-2 border-blue-200 pl-3 py-1">
-                                        <p className="text-sm font-medium text-gray-900">{a.action.replace(/_/g, ' ')}</p>
-                                        <p className="text-xs text-gray-500">{a.details}</p>
-                                        <p className="text-xs text-gray-400 mt-0.5">
-                                            {new Date(a.created_at).toLocaleDateString('en-US', {
-                                                month: 'short',
-                                                day: 'numeric',
-                                                year: 'numeric',
-                                                hour: 'numeric',
-                                                minute: '2-digit',
-                                            })}
-                                        </p>
+                                            )
+                                        })}
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Staff/Admin: TDS readings recorded */}
+                    {(user.role === 'staff' || user.role === 'admin') && (
+                        <Card className="mb-6">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <Droplets size={18} className="text-blue-600" />
+                                    Recent TDS Readings Recorded ({user.tds_readings.length})
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {user.tds_readings.length === 0 ? (
+                                    <p className="text-gray-500 text-sm">No TDS readings recorded by this user yet.</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {user.tds_readings.map((t) => {
+                                            const s = getTdsStatus(t.tds_value)
+                                            return (
+                                                <div
+                                                    key={t.id}
+                                                    onClick={() => navigate(`/tds/${t.id}`)}
+                                                    className="flex items-center justify-between gap-3 rounded-lg bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-colors"
+                                                >
+                                                    <div>
+                                                        <p className="font-semibold text-gray-900">
+                                                            Household #{t.household_number} — {t.tds_value} ppm
+                                                        </p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {new Date(t.recorded_at).toLocaleDateString('en-US', {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                year: 'numeric',
+                                                            })}
+                                                        </p>
+                                                    </div>
+                                                    <span className={`${s.bg} ${s.color} inline-block px-2 py-1 text-xs font-semibold`}>
+                                                        {s.label}
+                                                    </span>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Recent activity */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-base">
+                                <ClipboardList size={18} className="text-blue-600" />
+                                Recent Activity
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {user.recent_activity.length === 0 ? (
+                                <p className="text-gray-500 text-sm">No recorded activity for this user yet.</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {user.recent_activity.map((a) => (
+                                        <div key={a.id} className="border-l-2 border-blue-200 pl-3 py-1">
+                                            <p className="text-sm font-medium text-gray-900">{a.action.replace(/_/g, ' ')}</p>
+                                            <p className="text-xs text-gray-500">{a.details}</p>
+                                            <p className="text-xs text-gray-400 mt-0.5">
+                                                {new Date(a.created_at).toLocaleDateString('en-US', {
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    year: 'numeric',
+                                                    hour: 'numeric',
+                                                    minute: '2-digit',
+                                                })}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </Layout>
     )

@@ -236,7 +236,7 @@ const AddUser = () => {
                                 >
                                     <Button
                                         type="button"
-                                        className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white rounded-lg"
+                                        className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white"
                                         disabled={loading || !isFormReady}
                                     >
                                         {loading ? 'Saving...' : 'Save User'}

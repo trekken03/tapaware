@@ -106,10 +106,11 @@ const Profile = () => {
 
                 {/* Header card */}
 
+
                 <Card className="mb-6 overflow-hidden w-full">
 
-                    <CardContent className="pt-10 bg-accent bg-white/10">
-                        <div className="flex items-end gap-4 -mt-10 justify-start items-center flex mb-5">
+                    <CardContent className="pt-10  bg-white/10">
+                        <div className=" gap-4 -mt-10 justify-center items-center flex mb-5">
                             <div className="w-30 h-30 rounded-full bg-white border-4 border-white shadow-sm flex items-center justify-center shrink-0">
                                 <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center">
                                     <User size={32} className="text-blue-700" />
@@ -117,20 +118,20 @@ const Profile = () => {
                             </div>
                             <div className="pb-1">
                                 <h1 className="text-4xl font-bold text-gray-900">{user?.name}</h1>
-                                <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-mn font-semibold capitalize ${roleBadgeStyle}`}>
+                                <span className={`inline-block mt-1 px-2.5 py-0.5 text-mn font-semibold capitalize ${roleBadgeStyle}`}>
                                     {user?.role}
                                 </span>
                             </div>
                         </div>
 
                         {user?.role === 'resident' && (
-                            <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-gray-100">
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <div className="flex flex-wrap gap-4 border-gray-100 justify-center items-center mb-4 border-b">
+                                <div className="flex items-center gap-2 text-lg text-gray-600">
                                     <Home size={15} className="text-gray-400" />
                                     {user?.household_number ? `Household #${user.household_number}` : 'No household linked'}
                                 </div>
                                 {user?.household_number && (
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <div className="flex items-center gap-2 text-lg text-gray-600">
                                         <MapPin size={15} className="text-gray-400" />
                                         Purok {user?.purok}
                                     </div>
@@ -140,7 +141,7 @@ const Profile = () => {
 
                         {/* Personal Information */}
                         <div className="grid sm:grid-cols-2 gap-6">
-                            <Card className="mb-6 h-min">
+                            <Card className="mb-6 h-min shadow-sm">
                                 <CardContent className="pt-6">
                                     <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-4">
                                         <User size={18} className="text-blue-600" />
@@ -201,8 +202,8 @@ const Profile = () => {
                             </Card>
 
                             {/* Change Password */}
-                            <Card>
-                                <CardContent className="pt-6">
+                            <Card className="mb-6 h-min shadow-sm">
+                                <CardContent className="pt-6 ">
                                     <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-4">
                                         <KeyRound size={18} className="text-blue-600" />
                                         Change Password

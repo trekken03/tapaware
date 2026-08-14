@@ -52,7 +52,7 @@ const AuditDetail = () => {
 
     return (
         <Layout>
-            <div className="max-w-2xl mx-auto">
+            <div className="w-full mx-auto">
                 <Button
                     variant="outline"
                     size="sm"

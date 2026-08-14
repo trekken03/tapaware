@@ -105,7 +105,7 @@ const ConcernDetail = () => {
                                     })}
                                 </p>
                             </div>
-                            <span className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${concern.status === 'new' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                            <span className={`inline-block px-3 py-1 text-sm font-semibold capitalize ${concern.status === 'new' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
                                 }`}>
                                 {concern.status}
                             </span>

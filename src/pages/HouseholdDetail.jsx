@@ -114,7 +114,7 @@ const HouseholdDetail = () => {
                             actionVariant="destructive"
                             onConfirm={handleDelete}
                         >
-                            <Button className="bg-white rounded-sm flex items-center gap-1 text-white bg-red-600 hover:bg-red-500 hover:cursor-pointer">
+                            <Button className="flex items-center gap-1 text-white bg-red-600 hover:bg-red-500 hover:cursor-pointer">
                                 <Trash2 size={14} />
                                 Archive Household
                             </Button>
