@@ -324,7 +324,7 @@ const ResidentDashboard = () => {
                                     <TableBody>
                                         {paginatedReports.map((r, index) => {
                                             const s = getReportStatusStyle(r.status)
-                                            const rowNum = filteredReports.length - ((currentPage - 1) * pageSize + index)
+                                            const rowNum = (currentPage - 1) * pageSize + index + 1
 
                                             return (
                                                 <TableRow

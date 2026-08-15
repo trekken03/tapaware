@@ -273,7 +273,7 @@ const Reports = () => {
                                     <TableBody>
                                         {paginatedReports.map((r, index) => {
                                             const statusStyle = getStatusStyle(r.status)
-                                            const rowNum = filteredReports.length - ((currentPage - 1) * pageSize + index)
+                                            const rowNum = (currentPage - 1) * pageSize + index + 1
 
                                             return (
 

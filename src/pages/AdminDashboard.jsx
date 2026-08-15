@@ -205,7 +205,7 @@ const AdminDashboard = () => {
                                             className="cursor-pointer hover:bg-gray-50"
                                             onClick={() => navigate(`/admin/flags/${flag.id}`)}
                                         >
-                                            <TableCell label="No.">{flagged.length - index}</TableCell>
+                                            <TableCell label="No.">{index + 1}</TableCell>
                                             <TableCell label="Household">#{flag.household_number}</TableCell>
                                             <TableCell label="Owner" className="font-semibold">{flag.owner_name}</TableCell>
                                             <TableCell label="Purok">Purok {flag.purok}</TableCell>

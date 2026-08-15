@@ -117,9 +117,7 @@ const AdminPanel = () => {
     const totalPages = Math.max(1, Math.ceil(rowsForTab.length / PAGE_SIZE))
     const pageStart = (currentPage - 1) * PAGE_SIZE
     const paginatedRows = rowsForTab.slice(pageStart, pageStart + PAGE_SIZE)
-    // Row numbers count down so the newest record keeps the highest number,
-    // matching the Reports and Households tables.
-    const rowNumber = (index) => rowsForTab.length - (pageStart + index)
+    const rowNumber = (index) => pageStart + index + 1
 
     useEffect(() => {
         setCurrentPage(1)

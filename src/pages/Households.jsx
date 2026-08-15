@@ -217,7 +217,7 @@ const Households = () => {
                                     <TableBody>
                                         {paginatedHouseholds.map((h, index) => {
                                             const status = getHouseholdStatusStyle(h.computed_status)
-                                            const rowNum = filteredHouseholds.length - ((currentPage - 1) * pageSize + index)
+                                            const rowNum = (currentPage - 1) * pageSize + index + 1
 
                                             return (
                                                 <TableRow
