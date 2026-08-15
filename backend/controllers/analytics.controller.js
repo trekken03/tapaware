@@ -119,9 +119,13 @@ exports.getTdsTrend = async (req, res) => {
 exports.getTdsByPurok = async (req, res) => {
     const { from, to } = req.query;
     try {
+        // This endpoint is public (the homepage renders it to anonymous visitors),
+        // so it deliberately exposes no reading counts — only the average and the
+        // date of the most recent reading. last_recorded is NULL for a purok with
+        // no readings, which is how callers tell "empty" apart from "has data".
         let query = `SELECT households.purok,
             AVG(tds_readings.tds_value) as average_tds,
-            COUNT(tds_readings.id) as reading_count
+            MAX(tds_readings.recorded_at) as last_recorded
             FROM households
             LEFT JOIN tds_readings ON households.id = tds_readings.household_id AND tds_readings.deleted_at IS NULL`;
         const params = [];

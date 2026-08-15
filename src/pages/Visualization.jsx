@@ -580,7 +580,7 @@ const Analytics = () => {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {tdsByPurok.every(p => p.reading_count == 0) ? (
+                            {tdsByPurok.every(p => !p.last_recorded) ? (
                                 <p className="text-gray-500 text-sm text-center py-12">
                                     No TDS readings recorded yet.
                                 </p>

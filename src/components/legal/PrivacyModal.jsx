@@ -18,25 +18,22 @@ const PrivacyModal = ({ trigger }) => {
         <DialogDescription asChild>
           <div className="space-y-3 text-sm text-foreground/80 text-left">
             <p>
-              TapAware collects only the information needed to operate the water
-              quality monitoring system for Barangay Cabalantian. For resident
-              accounts, this is limited to a name and email address for login, and a
-              household/purok identifier. For water quality monitoring, the system
-              records TDS readings, location (barangay, purok, and household or
-              water source), and optional observable conditions such as odor or
-              discoloration. TDS readings are linked to a household or location
-              identifier, not to a specific individual.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+              sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+              sunt in culpa qui officia deserunt mollit anim id est laborum.
             </p>
             <p>
-              In line with the Data Privacy Act of 2012, access to stored data is
-              restricted to authorized barangay staff and administrator accounts,
-              which are protected by login credentials. Personal information is used
-              only to operate and improve the system's monitoring and reporting
-              functions, and is not shared with unauthorized third parties.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+              sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+              sunt in culpa qui officia deserunt mollit anim id est laborum.
             </p>
             <p>
-              Data is retained only for as long as necessary to support ongoing water
-              quality monitoring, reporting, and decision-making for the barangay.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+              sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+              sunt in culpa qui officia deserunt mollit anim id est laborum.
             </p>
           </div>
         </DialogDescription>

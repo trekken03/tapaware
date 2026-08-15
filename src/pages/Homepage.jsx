@@ -16,6 +16,17 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
 
+// MySQL timestamps normally arrive as ISO strings, but a plain "YYYY-MM-DD HH:MM:SS"
+// is only parsed reliably once the space is swapped for a "T" — same guard Archive.jsx uses.
+const formatRecordedAt = (value) => {
+    const parsed = new Date(typeof value === 'string' ? value.replace(' ', 'T') : value)
+    if (isNaN(parsed)) return 'unknown date'
+    return parsed.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    })
+}
 
 const Homepage = () => {
     const [purokData, setPurokData] = useState([])
@@ -38,7 +49,7 @@ const Homepage = () => {
                 API.get('/analytics/tds-by-purok'),
                 API.get('/analytics/summary'),
             ])
-            setPurokData(purokRes.data.filter(p => p.reading_count > 0))
+            setPurokData(purokRes.data.filter(p => p.last_recorded))
             setSummary(summaryRes.data)
         } catch (error) {
             console.log('Error loading public water data:', error)
@@ -262,7 +273,7 @@ const Homepage = () => {
                                     <WaterGauge
                                         value={p.average_tds}
                                         label={`Purok ${p.purok}`}
-                                        sublabel={`${p.reading_count} reading${p.reading_count === 1 ? '' : 's'}`}
+                                        sublabel={`Last recorded on ${formatRecordedAt(p.last_recorded)}`}
                                     />
                                 </div>
                             ))}
