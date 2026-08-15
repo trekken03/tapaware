@@ -414,36 +414,60 @@ const Analytics = () => {
                     {/* Top row - Bar and Pie charts */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
-                        {/* Reports per purok */}
-                        <Card ref={purokChartRef}>
-                            <CardContent>
-                                <ResponsiveContainer width="100%" height={280}>
-                                    <BarChart data={byPurok} >
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                                        <XAxis
-                                            dataKey="purok"
-                                            fontSize={12}
-
-                                            tick={{ fill: '#6b7280' }}
-                                            tickFormatter={(v) => `Purok ${v}`}
-                                        />
-                                        <YAxis
-                                            fontSize={12}
-                                            tick={{ fill: '#6b7280' }}
-                                            allowDecimals={false}
-                                        />
-                                        <Tooltip
-                                            formatter={(value) => [value, 'Reports']}
-                                            labelFormatter={(label) => `Purok ${label}`}
-                                        />
-                                        <Bar dataKey="report_count" fill="#1e40af" radius={[4, 4, 0, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                        {/* Reports by status */}
+                        <Card className="mb-6 h-full">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <BarChart3 size={18} className="text-blue-600" />
+                                    Reports by Status
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent ref={statusChartRef}>
+                                {byStatus.length === 0 ? (
+                                    <p className="text-gray-500 text-sm text-center py-12">
+                                        No reports recorded yet.
+                                    </p>
+                                ) : (
+                                    <ResponsiveContainer width="100%" height={280}>
+                                        <PieChart>
+                                            <Pie
+                                                data={byStatus}
+                                                dataKey="count"
+                                                nameKey="status"
+                                                cx="50%"
+                                                cy="50%"
+                                                outerRadius={90}
+                                                label={({ status, percent }) =>
+                                                    `${STATUS_LABELS[status] || status} ${(percent * 100).toFixed(0)}%`
+                                                }
+                                            >
+                                                {byStatus.map((entry) => (
+                                                    <Cell
+                                                        key={`cell-${entry.status}`}
+                                                        fill={STATUS_COLORS[entry.status] || '#9ca3af'}
+                                                    />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip
+                                                formatter={(value, name, props) => [value, STATUS_LABELS[props.payload.status] || props.payload.status]}
+                                            />
+                                            <Legend formatter={(value) => STATUS_LABELS[value] || value} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                )}
                             </CardContent>
                         </Card>
 
+
+
                         {/* Reports by issue type */}
                         <Card ref={issueChartRef}>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <BarChart3 size={18} className="text-blue-600" />
+                                    Reports by Issue Type
+                                </CardTitle>
+                            </CardHeader>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={280}>
                                     <PieChart>
@@ -475,49 +499,87 @@ const Analytics = () => {
 
                     </div>
 
-                    {/* Reports by status */}
-                    <Card className="mb-6">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-base">
-                                <BarChart3 size={18} className="text-blue-600" />
-                                Reports by Status
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent ref={statusChartRef}>
-                            {byStatus.length === 0 ? (
-                                <p className="text-gray-500 text-sm text-center py-12">
-                                    No reports recorded yet.
-                                </p>
-                            ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+
+
+                        {/* Reports per purok */}
+                        <Card ref={purokChartRef}>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <BarChart3 size={18} className="text-blue-600" />
+                                    Reports per purok
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
                                 <ResponsiveContainer width="100%" height={280}>
-                                    <PieChart>
-                                        <Pie
-                                            data={byStatus}
-                                            dataKey="count"
-                                            nameKey="status"
-                                            cx="50%"
-                                            cy="50%"
-                                            outerRadius={90}
-                                            label={({ status, percent }) =>
-                                                `${STATUS_LABELS[status] || status} ${(percent * 100).toFixed(0)}%`
-                                            }
-                                        >
-                                            {byStatus.map((entry) => (
-                                                <Cell
-                                                    key={`cell-${entry.status}`}
-                                                    fill={STATUS_COLORS[entry.status] || '#9ca3af'}
-                                                />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip
-                                            formatter={(value, name, props) => [value, STATUS_LABELS[props.payload.status] || props.payload.status]}
+                                    <BarChart data={byPurok} >
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                        <XAxis
+                                            dataKey="purok"
+                                            fontSize={12}
+
+                                            tick={{ fill: '#6b7280' }}
+                                            tickFormatter={(v) => `Purok ${v}`}
                                         />
-                                        <Legend formatter={(value) => STATUS_LABELS[value] || value} />
-                                    </PieChart>
+                                        <YAxis
+                                            fontSize={12}
+                                            tick={{ fill: '#6b7280' }}
+                                            allowDecimals={false}
+                                        />
+                                        <Tooltip
+                                            formatter={(value) => [value, 'Reports']}
+                                            labelFormatter={(label) => `Purok ${label}`}
+                                        />
+                                        <Bar dataKey="report_count" fill="#1e40af" radius={[4, 4, 0, 0]} />
+                                    </BarChart>
                                 </ResponsiveContainer>
-                            )}
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
+                        {/* Average TDS by purok */}
+                        <Card >
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <BarChart3 size={18} className="text-blue-600" />
+                                    Average TDS by Purok
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {tdsByPurok.every(p => !p.last_recorded) ? (
+                                    <p className="text-gray-500 text-sm text-center py-12">
+                                        No TDS readings recorded yet.
+                                    </p>
+                                ) : (
+                                    <ResponsiveContainer width="100%" height={280}>
+                                        <BarChart data={tdsByPurok}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                            <XAxis
+                                                dataKey="purok"
+                                                fontSize={12}
+                                                tick={{ fill: '#6b7280' }}
+                                                tickFormatter={(v) => `Purok ${v}`}
+                                            />
+                                            <YAxis
+                                                fontSize={12}
+                                                tick={{ fill: '#6b7280' }}
+                                                label={{ value: 'TDS (ppm)', angle: -90, position: 'insideLeft', style: { fill: '#6b7280', fontSize: 12 } }}
+                                            />
+                                            <Tooltip
+                                                formatter={(value) => [`${Number(value).toFixed(2)} ppm`, 'Avg TDS']}
+                                                labelFormatter={(label) => `Purok ${label}`}
+                                            />
+                                            <Bar dataKey="average_tds" radius={[2, 2, 0, 0]}>
+                                                {tdsByPurok.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={getTDSColor(entry.average_tds)} />
+                                                ))}
+                                            </Bar>
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                    </div>
 
                     {/* TDS Trend */}
                     <Card className="mb-6" ref={tdsChartRef}>
@@ -571,48 +633,7 @@ const Analytics = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Average TDS by purok */}
-                    <Card className="mb-6">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-base">
-                                <BarChart3 size={18} className="text-blue-600" />
-                                Average TDS by Purok
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {tdsByPurok.every(p => !p.last_recorded) ? (
-                                <p className="text-gray-500 text-sm text-center py-12">
-                                    No TDS readings recorded yet.
-                                </p>
-                            ) : (
-                                <ResponsiveContainer width="100%" height={280}>
-                                    <BarChart data={tdsByPurok}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                                        <XAxis
-                                            dataKey="purok"
-                                            fontSize={12}
-                                            tick={{ fill: '#6b7280' }}
-                                            tickFormatter={(v) => `Purok ${v}`}
-                                        />
-                                        <YAxis
-                                            fontSize={12}
-                                            tick={{ fill: '#6b7280' }}
-                                            label={{ value: 'TDS (ppm)', angle: -90, position: 'insideLeft', style: { fill: '#6b7280', fontSize: 12 } }}
-                                        />
-                                        <Tooltip
-                                            formatter={(value) => [`${Number(value).toFixed(2)} ppm`, 'Avg TDS']}
-                                            labelFormatter={(label) => `Purok ${label}`}
-                                        />
-                                        <Bar dataKey="average_tds" radius={[2, 2, 0, 0]}>
-                                            {tdsByPurok.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={getTDSColor(entry.average_tds)} />
-                                            ))}
-                                        </Bar>
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            )}
-                        </CardContent>
-                    </Card>
+
 
                     {/* Report count table */}
                     <Card>
