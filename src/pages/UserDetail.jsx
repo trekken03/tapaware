@@ -224,7 +224,7 @@ const UserDetail = () => {
 
                     {/* Staff/Admin: TDS readings recorded */}
                     {(user.role === 'staff' || user.role === 'admin') && (
-                        <Card className="mb-6">
+                        <Card className="mb-6 h-min">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
                                     <Droplets size={18} className="text-blue-600" />
@@ -269,7 +269,7 @@ const UserDetail = () => {
                     )}
 
                     {/* Recent activity */}
-                    <Card>
+                    <Card className="mb-6 h-min">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-base">
                                 <ClipboardList size={18} className="text-blue-600" />

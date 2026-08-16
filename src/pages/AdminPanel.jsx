@@ -164,7 +164,7 @@ const AdminPanel = () => {
                 <Button
                     variant="outline"
                     size="sm"
-                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                    className="text-blue-600 border-blue-200  hover:bg-blue-50"
                     onClick={() => navigate(`/admin/edit-user/${u.id}`, { state: u })}
                 >
                     <Pencil size={14} className='mr-1' />

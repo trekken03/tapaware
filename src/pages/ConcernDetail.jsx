@@ -81,7 +81,7 @@ const ConcernDetail = () => {
 
     return (
         <Layout>
-            <div className="max-w-2xl mx-auto">
+            <div className="mx-auto w-full">
                 <Button
                     variant="outline"
                     size="sm"
@@ -131,51 +131,85 @@ const ConcernDetail = () => {
                         </div>
                     </CardContent>
                 </Card>
-
                 {concern.reply_message && (
-                    <Card className="mb-6 border-l-4 border-blue-400">
-                        <CardContent className="pt-6">
-                            <p className="text-xs font-semibold text-blue-700 uppercase mb-2">
-                                Replied by {concern.replied_by} · {new Date(concern.replied_at).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                })}
-                            </p>
-                            <p className="text-gray-900">{concern.reply_message}</p>
+                    <div className="grid sm:grid-cols-2 gap-6">
+                        {concern.reply_message && (
+                            <Card className="mb-6 border-l-4 border-blue-400 h-min">
+                                <CardContent className="pt-2">
+                                    <p className="text-xs font-semibold text-blue-700 uppercase mb-2">
+                                        Replied by {concern.replied_by} · {new Date(concern.replied_at).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                        })}
+                                    </p>
+                                    <p className="text-gray-900">{concern.reply_message}</p>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        <Card className="w-full">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <MessageSquare size={18} className="text-blue-600" />
+                                    {concern.reply_message ? 'Send another reply' : 'Reply to this concern'}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <form onSubmit={handleReply} className="space-y-4">
+                                    <textarea
+                                        value={replyMessage}
+                                        onChange={(e) => setReplyMessage(e.target.value)}
+                                        placeholder="Write your response..."
+                                        rows={5}
+                                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"
+                                    />
+                                    <div className="flex justify-end">
+                                        <Button
+                                            type="submit"
+                                            disabled={sending}
+                                            className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
+                                        >
+                                            <Send size={16} />
+                                            {sending ? 'Sending...' : 'Send Reply'}
+                                        </Button>
+                                    </div>
+                                </form>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
+                {!concern.reply_message && (
+                    <Card className="w-full">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-base">
+                                <MessageSquare size={18} className="text-blue-600" />
+                                {concern.reply_message ? 'Send another reply' : 'Reply to this concern'}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <form onSubmit={handleReply} className="space-y-4">
+                                <textarea
+                                    value={replyMessage}
+                                    onChange={(e) => setReplyMessage(e.target.value)}
+                                    placeholder="Write your response..."
+                                    rows={5}
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"
+                                />
+                                <div className="flex justify-end">
+                                    <Button
+                                        type="submit"
+                                        disabled={sending}
+                                        className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
+                                    >
+                                        <Send size={16} />
+                                        {sending ? 'Sending...' : 'Send Reply'}
+                                    </Button>
+                                </div>
+                            </form>
                         </CardContent>
                     </Card>
                 )}
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-base">
-                            <MessageSquare size={18} className="text-blue-600" />
-                            {concern.reply_message ? 'Send another reply' : 'Reply to this concern'}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleReply} className="space-y-4">
-                            <textarea
-                                value={replyMessage}
-                                onChange={(e) => setReplyMessage(e.target.value)}
-                                placeholder="Write your response..."
-                                rows={5}
-                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"
-                            />
-                            <div className="flex justify-end">
-                                <Button
-                                    type="submit"
-                                    disabled={sending}
-                                    className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
-                                >
-                                    <Send size={16} />
-                                    {sending ? 'Sending...' : 'Send Reply'}
-                                </Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
             </div>
         </Layout>
     )
