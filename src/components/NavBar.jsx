@@ -53,7 +53,7 @@ const LandingNavbar = () => {
 
     return (
         <nav
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-blue-900 shadow-lg  ${scrolled ? 'py-3' : 'py-3'
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-blue-900 shadow-lg ${scrolled ? 'py-3' : 'py-3'
                 }`}
         >
             <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between">
