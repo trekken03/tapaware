@@ -27,14 +27,23 @@ const AddUser = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+
         if (name === "name") {
             if (!/^[a-zA-Z\s]*$/.test(value)) {
                 return;
             }
-
         }
-        setForm({ ...form, [name]: value })
+
+        if (name === "household_number") {
+
+            if (!/^\d{0,3}$/.test(value)) {
+                return;
+            }
+        }
+
+        setForm({ ...form, [name]: value });
     }
+
 
     const isResident = form.role === 'resident'
     const isFormReady =
@@ -180,10 +189,14 @@ const AddUser = () => {
                                     <Input
                                         id="household_number"
                                         name="household_number"
+                                        type="number"
                                         placeholder="e.g. 101"
                                         value={form.household_number}
                                         onChange={handleChange}
                                         required={form.role === 'resident'}
+                                        max="999"
+                                        min="1"
+
                                     />
                                 </div>
                                 <div className="space-y-2">

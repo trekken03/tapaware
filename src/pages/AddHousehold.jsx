@@ -22,6 +22,13 @@ const AddHousehold = () => {
     })
 
     const handleChange = (e) => {
+
+        const { name, value } = e.target;
+        if (name === "household_number") {
+            if (!/^\d{0,3}$/.test(value)) {
+                return;
+            }
+        }
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
@@ -40,11 +47,6 @@ const AddHousehold = () => {
             toast.error(message)
         } finally {
             setLoading(false)
-        }
-        const purokValue = Number(form.purok);
-        if (purokValue < 1 || purokValue > 6) {
-            toast.error('Invalid purok number');
-            return
         }
     }
 
@@ -89,22 +91,26 @@ const AddHousehold = () => {
                                         placeholder="e.g. 21"
                                         value={form.household_number}
                                         onChange={handleChange}
+                                        max="999"
+                                        min="1"
                                         required
                                     />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="purok">Purok</Label>
-                                    <Input
+                                    <select
                                         id="purok"
-                                        type="number"
                                         name="purok"
-                                        placeholder="e.g. 3"
-                                        min={1}
-                                        max={6}
                                         value={form.purok}
                                         onChange={handleChange}
                                         required
-                                    />
+                                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="">Select purok...</option>
+                                        {[1, 2, 3, 4, 5, 6].map(p => (
+                                            <option key={p} value={p}>{p}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
                             <div className="space-y-2">

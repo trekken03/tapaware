@@ -28,6 +28,7 @@ const UserDetail = lazy(() => import('./pages/UserDetail'));
 const AuditDetail = lazy(() => import('./pages/AuditDetail'));
 const FlagDetail = lazy(() => import('./pages/FlagDetail'));
 const Archive = lazy(() => import('./pages/Archive'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 
 const App = () => {
@@ -65,7 +66,6 @@ const App = () => {
 
                     {/* Audit Trail - Admin only */}
                     <Route path="/audit-trail" element={<RoleBasedRoute allowedRoles={['admin']}><AuditTrail /></RoleBasedRoute>} />
-                    <Route path="/audit-trail" element={<RoleBasedRoute allowedRoles={['admin']}><AuditTrail /></RoleBasedRoute>} />
                     <Route path="/admin/users/:id" element={<RoleBasedRoute allowedRoles={['admin']}><UserDetail /></RoleBasedRoute>} />
                     <Route path="/profile" element={<RoleBasedRoute><Profile /></RoleBasedRoute>} />
 
@@ -79,6 +79,9 @@ const App = () => {
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/audit-trail/:id" element={<RoleBasedRoute allowedRoles={['admin']}><AuditDetail /></RoleBasedRoute>} />
                     <Route path="/admin/flags/:id" element={<RoleBasedRoute allowedRoles={['admin']}><FlagDetail /></RoleBasedRoute>} />
+
+                    {/* Unknown URLs - never leave a blank page */}
+                    <Route path="*" element={<NotFound />} />
 
                 </Routes>
                 <Toaster position="bottom-right" richColors />
