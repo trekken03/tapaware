@@ -126,6 +126,18 @@ const AddUser = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
+                                    <Label htmlFor="name">Full Name</Label>
+                                    <Input
+                                        id="name"
+                                        name="name"
+                                        placeholder="e.g. Juan Dela Cruz"
+                                        value={form.name}
+                                        onChange={handleChange}
+                                        required
+                                    />
+
+                                </div>
+                                <div className="space-y-2">
                                     <Label htmlFor="password">Password</Label>
                                     <div className="relative">
                                         <Input
@@ -150,18 +162,7 @@ const AddUser = () => {
                                     </div>
 
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">Full Name</Label>
-                                    <Input
-                                        id="name"
-                                        name="name"
-                                        placeholder="e.g. Juan Dela Cruz"
-                                        value={form.name}
-                                        onChange={handleChange}
-                                        required
-                                    />
 
-                                </div>
 
 
 

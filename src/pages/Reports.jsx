@@ -263,6 +263,7 @@ const Reports = () => {
                                         <TableRow >
                                             <TableHead>No.</TableHead>
                                             <TableHead>Issue</TableHead>
+                                            <TableHead>Owner Name</TableHead>
                                             {!isResident && <TableHead>Household</TableHead>}
                                             <TableHead>Purok</TableHead>
 
@@ -288,6 +289,9 @@ const Reports = () => {
 
                                                     <TableCell label="Issue" className="font-semibold capitalize">
                                                         {r.issue_type}
+                                                    </TableCell>
+                                                    <TableCell label="Owner Name" className="font-semibold capitalize">
+                                                        {r.owner_name}
                                                     </TableCell>
 
                                                     {!isResident && (

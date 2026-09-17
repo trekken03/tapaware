@@ -41,12 +41,24 @@ const loadLogoImage = () => {
     })
 }
 
-const getDefaultDates = () => {
+const DATE_RANGE_STORAGE_KEY = 'tapaware_visualization_date_range'
+
+const getLast30Days = () => {
     const to = new Date().toISOString().split('T')[0]
     const fromDate = new Date()
     fromDate.setDate(fromDate.getDate() - 30)
     const from = fromDate.toISOString().split('T')[0]
     return { from, to }
+}
+
+const getStoredOrDefaultDates = () => {
+    try {
+        const stored = localStorage.getItem(DATE_RANGE_STORAGE_KEY)
+        if (stored) return JSON.parse(stored)
+    } catch {
+        // corrupt or missing — fall through to default
+    }
+    return getLast30Days()
 }
 
 const Analytics = () => {
@@ -61,7 +73,7 @@ const Analytics = () => {
     const [loading, setLoading] = useState(true)
     const [isExporting, setIsExporting] = useState(false)
     const [exportError, setExportError] = useState('')
-    const [dateRange, setDateRange] = useState(getDefaultDates())
+    const [dateRange, setDateRange] = useState(getStoredOrDefaultDates)
     // Refs to the actual rendered chart cards, so the PDF can screenshot
     // exactly what's on screen instead of redrawing an approximation.
     const purokChartRef = useRef(null)
@@ -343,6 +355,10 @@ const Analytics = () => {
         fetchData()
     }, [dateRange])
 
+    useEffect(() => {
+        localStorage.setItem(DATE_RANGE_STORAGE_KEY, JSON.stringify(dateRange))
+    }, [dateRange])
+
 
 
     const topIssuePerPurok = trendingIssues.reduce((acc, row) => {
@@ -395,7 +411,14 @@ const Analytics = () => {
                         <p className="text-gray-500 mt-1">Visual breakdown of water quality data</p>
                     </div>
                     <div className="flex flex-wrap items-end gap-3">
+                        <Button
+                            className="bg-white text-black border-black hover:bg-gray-100 hover:cursor-pointer font-medium"
+                            onClick={() => setDateRange(getLast30Days())}
+                        >
+                            Last 30 days
+                        </Button>
                         <DateRangePicker dateRange={dateRange} setDateRange={setDateRange} />
+
                         <Button
                             onClick={handleDownloadPdf}
                             disabled={isExporting}

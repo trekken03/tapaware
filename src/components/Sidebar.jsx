@@ -1,36 +1,39 @@
 import { useState, useEffect } from 'react';
 import API from '@/services/api';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
 import {
     LayoutDashboard,
     Home,
-    Droplets,
     ShieldUser,
-    FileText,
     BarChart3,
     ClipboardList,
     LogOut,
     User,
-    Menu,
-    X,
-    ChevronDown,
     Trash2,
-    PanelLeftClose,
-    PanelLeftOpen,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import {
+    Sidebar as SidebarRoot,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuBadge,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarRail,
+    SidebarSeparator,
+    useSidebar,
+} from '@/components/ui/sidebar';
 
 const getNavItems = (role) => {
     const baseItems = [
         { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-
     ];
-
-
-
 
     const adminItems = [
         ...baseItems,
@@ -45,7 +48,6 @@ const getNavItems = (role) => {
     const staffItems = [
         ...baseItems,
         { path: '/reports', label: 'Reports', icon: ClipboardList },
-
         { path: '/households', label: 'Households', icon: Home },
         { path: '/analytics', label: 'Visualization', icon: BarChart3 },
     ];
@@ -63,16 +65,12 @@ const getNavItems = (role) => {
             return baseItems;
     }
 };
-const getInitialExpanded = () => {
-    return localStorage.getItem('sidebar_expanded') || null;
-};
 
-const Sidebar = ({ collapsed = false, onToggleCollapse = () => {} }) => {
+const Sidebar = (props) => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
     const location = useLocation();
-    const [isOpen, setIsOpen] = useState(false);
-    const [expandedItem, setExpandedItem] = useState(getInitialExpanded);
+    const { isMobile, setOpenMobile } = useSidebar();
     const navItems = getNavItems(user?.role);
 
     const [hasNewReports, setHasNewReports] = useState(false);
@@ -102,230 +100,147 @@ const Sidebar = ({ collapsed = false, onToggleCollapse = () => {} }) => {
         setHasNewReports(false);
     };
 
-    const handleExpandToggle = (path) => {
-        const newValue = expandedItem === path ? null : path;
-        setExpandedItem(newValue);
-        if (newValue) {
-            localStorage.setItem('sidebar_expanded', newValue);
-        } else {
-            localStorage.removeItem('sidebar_expanded');
-        }
+    // On mobile the sidebar is a sheet overlaying the page, so any navigation
+    // has to close it; on desktop it is a permanent rail and must stay put.
+    const closeOnMobile = () => {
+        if (isMobile) setOpenMobile(false);
+    };
+
+    const handleNavClick = (item) => {
+        if (item.path === '/reports') markReportsSeen();
+        closeOnMobile();
     };
 
     const handleLogout = () => {
         try {
-            localStorage.removeItem('sidebar_expanded');
             logout();
             navigate('/login');
-            toast.success('Logged out successfully')
+            toast.success('Logged out successfully');
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to logout')
+            toast.error(error.response?.data?.message || 'Failed to logout');
         }
-    }
-
+    };
 
     return (
-        <>
-            {/* Mobile top bar */}
-            <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-blue-950 flex items-center justify-between px-4 z-40">
-                <div className="flex items-center gap-2">
-                    <img
-                        src="/assets/logo.webp"
-
-                        alt="logo"
-                        className="w-8 h-8 object-contain rounded-full"
-                    />
-                    <h1 className="text-white font-bold text-lg leading-none">TapAware</h1>
-                </div>
-                <button onClick={() => setIsOpen(true)} className="text-white p-2">
-                    <Menu size={24} />
-                </button>
-            </div>
-
-            {/* Mobile overlay */}
-            {isOpen && (
-                <div
-                    className="lg:hidden fixed inset-0 bg-black/50 z-40"
-                    onClick={() => setIsOpen(false)}
-                />
-            )}
-
-            {/* Expand trigger (desktop only, shown when collapsed) */}
-            {collapsed && (
-                <button
-                    onClick={onToggleCollapse}
-                    title="Expand sidebar"
-                    className="hidden lg:flex fixed top-4 left-4 z-50 items-center justify-center w-9 h-9 rounded-lg bg-blue-950 text-white shadow-lg hover:bg-blue-900 transition-colors"
-                >
-                    <PanelLeftOpen size={18} />
-                </button>
-            )}
-
-            {/* Sidebar */}
-            <div
-                className={`w-64 h-screen max-h-screen overflow-y-auto bg-blue-950 flex flex-col fixed left-0 top-0 z-50 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'
-                    } ${collapsed ? 'lg:-translate-x-full' : 'lg:translate-x-0'}`}
-            >
-                {/* Close button (mobile only) */}
-                <button
-                    onClick={() => setIsOpen(false)}
-                    className="lg:hidden absolute top-4 right-4 text-white p-1"
-                >
-                    <X size={20} />
-                </button>
-
-                {/* Collapse button (desktop only) */}
-                <button
-                    onClick={onToggleCollapse}
-                    title="Collapse sidebar"
-                    className="hidden lg:flex absolute top-4 right-4 text-blue-300 hover:text-white p-1"
-                >
-                    <PanelLeftClose size={18} />
-                </button>
-
-                {/* Logo section */}
-                <div className="p-6 pb-4">
-                    <div onClick={() => navigate('/')} className="flex items-center gap-3 hover:cursor-pointer">
-                        <img
-                            src="/assets/logo.webp"
-
-                            alt="logo"
-                            className="w-10 h-10 object-contain rounded-full"
-                        />
-                        <div>
-                            <h1 className="text-white font-bold text-lg leading-none">TapAware</h1>
-                            <p className="text-blue-300 text-xs">Water Quality Monitoring System</p>
-                        </div>
-                    </div>
-                </div>
-
-                <Separator className="bg-blue-950" />
-
-                {/* Navigation */}
-                <nav className="flex-1 p-4 space-y-1 overflow-y-auto pb-6 thin-scrollbar">
-                    {navItems.map((item) => {
-                        const Icon = item.icon;
-                        const hasChildren = item.children && item.children.length > 0;
-                        const isOnThisPage = location.pathname === item.path;
-                        const isExpanded = expandedItem === item.path || isOnThisPage;
-
-                        if (hasChildren) {
-                            return (
-                                <div key={item.path}>
-                                    <div className="group flex items-center rounded-lg text-blue-200 hover:bg-blue-900 hover:text-white transition-all duration-200">
-                                        <NavLink
-                                            to={item.path}
-                                            onClick={() => {
-                                                setIsOpen(false)
-                                                if (item.path === '/reports') markReportsSeen()
-                                            }}
-                                            className={({ isActive }) =>
-                                                `flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${isActive && !isOnThisPage === false && location.search === ''
-                                                    ? 'text-white'
-                                                    : ''
-                                                }`
-                                            }
-                                        >
-                                            <Icon size={18} className="transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5" />
-                                            {item.label}
-                                            {item.path === '/reports' && hasNewReports && (
-                                                <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
-                                            )}
-                                        </NavLink>
-                                        <button
-                                            onClick={() => handleExpandToggle(item.path)}
-                                            className="px-3 py-2.5"
-                                        >
-                                            <ChevronDown
-                                                size={16}
-                                                className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-                                            />
-                                        </button>
-                                    </div>
-
-                                    {isExpanded && (
-                                        <div className="ml-8 mt-1 space-y-1">
-                                            {item.children.map((child) => (
-                                                <NavLink
-                                                    key={child.path}
-                                                    to={child.path}
-                                                    onClick={() => setIsOpen(false)}
-                                                    className={({ isActive }) =>
-                                                        `block px-3 py-2 rounded-lg text-sm transition-all duration-200 ${isActive
-                                                            ? 'bg-white/5 text-white hover:bg-white hover:text-black'
-                                                            : 'bg-white/5 text-white hover:bg-white hover:text-black'
-                                                        }`
-                                                    }
-                                                >
-                                                    {child.label}
-                                                </NavLink>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        }
-
-                        return (
-                            <NavLink
-                                key={item.path}
-                                to={item.path}
-                                onClick={() => setIsOpen(false)}
-                                className={({ isActive }) =>
-                                    ` group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
-                                        ? 'bg-blue-600 text-white'
-                                        : 'text-blue-200 hover:bg-blue-900 hover:text-white'
-                                    }`
-                                }
-                            >
-                                <Icon size={18} className="transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5" />
-                                {item.label}
-                            </NavLink>
-                        );
-                    })}
-                </nav>
-
-                <Separator className="bg-blue-800" />
-
-
-                {/* User section */}
-                <div className="p-4 pt-2 pb-6 border-t border-blue-800/50 mt-2">
-                    <div
-                        className="flex items-center gap-3 mb-3 cursor-pointer hover:opacity-50 transition-opacity"
-                        onClick={() => {
-                            navigate('/profile')
-                            setIsOpen(false)
-                        }}
-                    >
-                        <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center">
-                            <User size={16} className="text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-white text-sm font-medium truncate">
-                                {user?.name || 'User'}
-                            </p>
-                            <p className="text-blue-300 text-xs capitalize">
-                                {user?.role || 'resident'}
-                            </p>
-                        </div>
-                    </div>
-                    <ConfirmDialog
-                        title="Confirm logout"
-                        description="Are you sure you want to logout?"
-                        actionText="Logout"
-                        actionVariant="destructive"
-                        onConfirm={handleLogout}
-                    >
-                        <button
-                            className="group w-full flex items-center gap-2 px-3 py-2 rounded-lg text-blue-200 hover:bg-blue-900 hover:text-white text-sm transition-all duration-200"
+        <SidebarRoot collapsible="icon" {...props}>
+            <SidebarHeader className="p-2">
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            size="lg"
+                            tooltip="TapAware"
+                            onClick={() => {
+                                navigate('/');
+                                closeOnMobile();
+                            }}
+                            className="rounded-lg hover:cursor-pointer group-data-[collapsible=icon]:justify-center"
                         >
-                            <LogOut size={16} className="transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5" />
-                            Logout
-                        </button>
-                    </ConfirmDialog>
-                </div>
-            </div>
-        </>
+                            <img
+                                src="/assets/logo.webp"
+                                alt="logo"
+                                className="size-8 shrink-0 rounded-full object-contain"
+                            />
+                            {/* Hidden outright when collapsed: a grid box defaults to
+                                min-width:auto, so it will not shrink to zero in the
+                                icon rail and would shove the logo out of the button's
+                                overflow-hidden box. */}
+                            <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
+                                <span className="truncate font-bold text-white">TapAware</span>
+                                <span className="truncate text-xs text-sidebar-foreground/70">
+                                    Water Quality Monitoring System
+                                </span>
+                            </div>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarHeader>
+
+            <SidebarSeparator className="bg-sidebar-border/60" />
+
+            <SidebarContent className="thin-scrollbar">
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <SidebarMenu className="gap-1">
+                            {navItems.map((item) => {
+                                const Icon = item.icon;
+                                const isActive = location.pathname === item.path;
+
+                                return (
+                                    <SidebarMenuItem key={item.path}>
+                                        <SidebarMenuButton
+                                            asChild
+                                            isActive={isActive}
+                                            tooltip={item.label}
+                                            className="h-10 rounded-lg font-medium data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
+                                        >
+                                            <NavLink to={item.path} onClick={() => handleNavClick(item)}>
+                                                <Icon className="transition-transform duration-200 group-hover/menu-button:scale-110" />
+                                                <span>{item.label}</span>
+                                            </NavLink>
+                                        </SidebarMenuButton>
+                                        {item.path === '/reports' && hasNewReports && (
+                                            <SidebarMenuBadge className="top-1/2! -translate-y-1/2">
+                                                <span className="size-2 rounded-full bg-red-500" />
+                                            </SidebarMenuBadge>
+                                        )}
+                                    </SidebarMenuItem>
+                                );
+                            })}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+            </SidebarContent>
+
+            <SidebarSeparator className="bg-sidebar-border/60" />
+
+            <SidebarFooter className="p-2">
+                <SidebarMenu className="gap-1">
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            size="lg"
+                            tooltip={user?.name || 'User'}
+                            onClick={() => {
+                                navigate('/profile');
+                                closeOnMobile();
+                            }}
+                            className="rounded-lg hover:cursor-pointer group-data-[collapsible=icon]:justify-center"
+                        >
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-500">
+                                <User className="text-white" />
+                            </div>
+                            <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
+                                <span className="truncate text-sm font-medium text-white">
+                                    {user?.name || 'User'}
+                                </span>
+                                <span className="truncate text-xs text-sidebar-foreground/70 capitalize">
+                                    {user?.role || 'resident'}
+                                </span>
+                            </div>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+
+                    <SidebarMenuItem>
+                        <ConfirmDialog
+                            title="Confirm logout"
+                            description="Are you sure you want to logout?"
+                            actionText="Logout"
+                            actionVariant="destructive"
+                            onConfirm={handleLogout}
+                        >
+                            <SidebarMenuButton
+                                tooltip="Logout"
+                                className="h-10 rounded-lg hover:cursor-pointer"
+                            >
+                                <LogOut className="transition-transform duration-200 group-hover/menu-button:scale-110" />
+                                <span>Logout</span>
+                            </SidebarMenuButton>
+                        </ConfirmDialog>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarFooter>
+
+            <SidebarRail />
+        </SidebarRoot>
     );
 };
 

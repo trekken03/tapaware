@@ -33,7 +33,7 @@ const DateRangePicker = ({ dateRange, setDateRange }) => {
                 <PopoverTrigger asChild>
                     <Button
                         variant="default"
-                        className="justify-start text-left font-normal border-black bg-white h-8 px-3 hover:bg-gray-100 text-black hover:cursor-pointer"
+                        className="justify-start text-left font-medium border-black bg-white h-8 px-3 hover:bg-gray-100 text-black hover:cursor-pointer"
                     >
                         <CalendarIcon className="mr-2 h-4 w-4 text-black" />
                         <span className="text-sm text-2xl text-black ">
