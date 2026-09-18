@@ -236,7 +236,7 @@ const AdminPanel = () => {
                     </div>
 
                     {/* Desktop: existing tab row */}
-                    <div className="hidden sm:flex gap-1 border-b">
+                    <div className="hidden sm:flex min-w-0 overflow-x-auto border-b">
                         {[
                             { key: 'users', label: 'User Management', icon: Users },
                             { key: 'staff', label: 'Staff Management', icon: Pencil },
@@ -250,7 +250,7 @@ const AdminPanel = () => {
                                 <button
                                     key={tab.key}
                                     onClick={() => setSearchParams({ tab: tab.key })}
-                                    className={`flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.key
+                                    className={`flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.key
                                         ? 'border-blue-600 text-blue-600'
                                         : 'border-transparent text-gray-500 hover:text-gray-700'
                                         }`}
@@ -283,6 +283,8 @@ const AdminPanel = () => {
                                 </div>
                             ) : (
                                 <>
+
+
                                     <Table className="md:min-w-[900px]">
                                         <TableHeader className="bg-blue-800">
                                             <TableRow>
