@@ -47,7 +47,7 @@ const App = () => {
                     <Route path="/households/add" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><AddHousehold /></RoleBasedRoute>} />
 
                     {/* TDS Readings - Admin and Staff */}
-                    <Route path="/tds" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><TdsReadings /></RoleBasedRoute>} />
+                    {/* <Route path="/tds" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><TdsReadings /></RoleBasedRoute>} /> */}
                     <Route path="/tds/add" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><AddTdsReading /></RoleBasedRoute>} />
 
                     {/* Reports - All roles (but with different views based on role) */}

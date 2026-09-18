@@ -18,7 +18,6 @@ const SubmitReport = () => {
     const [householdInfo, setHouseholdInfo] = useState(null)
     const [form, setForm] = useState({
         household_id: user?.household_id || '',
-        user_id: user?.id || '',
         issue_type: '',
         other_issue: '',
         description: '',

@@ -28,7 +28,7 @@ const TdsDetail = () => {
         try {
             await API.delete(`/tds/${id}`)
             toast.success('Reading archived successfully')
-            navigate('/tds')
+            navigate(`/households/${id}`)
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to archive reading')
         }

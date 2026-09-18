@@ -18,7 +18,7 @@ exports.getAllHouseholds = async (req, res) => {
                 END AS computed_status
             FROM households h
             WHERE h.deleted_at IS NULL
-            ORDER BY h.created_at ASC
+            ORDER BY h.created_at DESC
         `);
         res.json(rows);
     }
@@ -46,6 +46,24 @@ exports.addHousehold = async (req, res) => {
     const { household_number, purok, owner_name, address } = req.body;
 
     try {
+        if (
+            household_number === undefined ||
+            household_number === null ||
+            household_number === '' ||
+            purok === undefined ||
+            purok === null ||
+            purok === '' ||
+            typeof owner_name !== 'string' ||
+            !owner_name.trim() ||
+            typeof address !== 'string' ||
+            !address.trim()
+        ) {
+            return res.status(400).json({
+                message: 'All household fields are required'
+            });
+        }
+
+
         const [existing] = await db.query('SELECT * FROM households WHERE household_number = ? and purok = ?', [household_number, purok]);
         if (existing.length > 0) {
             if (existing[0].deleted_at) {

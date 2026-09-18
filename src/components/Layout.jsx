@@ -63,7 +63,7 @@ const Layout = ({ children }) => {
         <TooltipProvider>
             <SidebarProvider defaultOpen={getDefaultSidebarOpen()}>
                 <Sidebar />
-                <SidebarInset className="min-h-svh bg-gray-100">
+                <SidebarInset className="min-h-svh min-w-0 bg-gray-100">
                     <Watermark />
 
                     {/* The toggle floats over the page rather than sitting in a bar:
