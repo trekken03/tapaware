@@ -4,11 +4,11 @@ const reportController = require('../controllers/report.controller')
 const { verifyToken } = require('../middleware/auth.middleware');
 const { requireRole } = require('../middleware/role.middleware')
 const { verifyCsrf } = require('../middleware/csrf.middleware');
-const validateFields = require('../middleware/validateFields')
+// const validateFields = require('../middleware/validateFields')
 
 router.get('/archived', verifyToken, requireRole('admin'), reportController.getArchivedReports);
 router.get('/', verifyToken, reportController.getAllReports);
-router.post('/', verifyToken, verifyCsrf, validateFields(['household_id', 'issue_type', 'description']), reportController.submitReport);
+router.post('/', verifyToken, verifyCsrf, reportController.submitReport);
 router.put('/:id/status', verifyToken, verifyCsrf, requireRole('staff', 'admin'), reportController.updateReportStatus);
 router.put('/:id/restore', verifyToken, verifyCsrf, requireRole('admin'), reportController.restoreReport);
 router.get('/household/:id', verifyToken, reportController.getReportsByHousehold);
