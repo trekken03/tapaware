@@ -8,7 +8,7 @@ const authRoutes = require('./routes/auth.routes');
 const householdRoutes = require('./routes/household.routes');
 const tdsRoutes = require('./routes/tds.routes');
 const reportRoutes = require('./routes/report.routes');
-const analyticsRoutes = require('./routes/analytics.routes');
+const visualizationRoutes = require('./routes/analytics.routes');
 const adminRoutes = require('./routes/admin.routes');
 const concernRoutes = require('./routes/concern.routes');
 
@@ -18,7 +18,7 @@ app.set('trust proxy', 1);
 
 const allowedOrigins = [
     process.env.FRONTEND_URL,
-    'http://localhost:5173',
+    'https://www.tapaware.online', //'http://localhost:5173'
 ].filter(Boolean);
 
 app.use(helmet());
@@ -47,7 +47,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/households', householdRoutes);
 app.use('/api/tds', tdsRoutes);
 app.use('/api/reports', reportRoutes);
-app.use('/api/analytics', analyticsRoutes);
+app.use('/api/visualization', visualizationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/concerns', concernRoutes);
 

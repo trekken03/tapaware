@@ -52,7 +52,7 @@ const ResidentDashboard = () => {
     const fetchData = async () => {
         try {
             const [summaryRes, tdsHistoryRes, reportsRes] = await Promise.all([
-                API.get('/analytics/resident/summary'),
+                API.get('/visualization/resident/summary'),
 
                 user?.household_id ? API.get(`/tds/household/${user.household_id}`) : Promise.resolve({ data: [] }),
                 user?.household_id ? API.get(`/reports/household/${user.household_id}`) : Promise.resolve({ data: [] })

@@ -229,7 +229,13 @@ exports.getReportById = async (req, res) => {
             [report.household_id, id]
         );
 
-        res.json({ ...report, household_reports: otherReports });
+        const [[activeFlag]] = await db.query(
+            `SELECT id, times_reported FROM recurring_flags
+            WHERE household_id = ? AND issue_type = ? AND status = 'active'`,
+            [report.household_id, report.issue_type]
+        );
+
+        res.json({ ...report, household_reports: otherReports, active_flag: activeFlag || null });
     }
     catch (error) {
         console.error(error);
@@ -258,8 +264,24 @@ exports.deleteReport = async (req, res) => {
         if (isOwner && report.status !== 'pending') {
             return res.status(400).json({ message: 'This report is already being processed and can no longer be deleted' });
         }
-
         await db.query('UPDATE reports SET deleted_at = NOW() WHERE id = ?', [id]);
+
+        // If this report was counted toward an active recurring flag, archiving it
+        // means the flag's evidence just shrank by one — decrement, and drop the
+        // flag back to resolved once it no longer meets the flagging threshold.
+        const [[activeFlag]] = await db.query(
+            `SELECT * FROM recurring_flags WHERE household_id = ? AND issue_type = ? AND status = 'active'`,
+            [report.household_id, report.issue_type]
+        );
+
+        if (activeFlag) {
+            const newCount = Math.max(activeFlag.times_reported - 1, 0);
+            const newStatus = newCount <= 2 ? 'resolved' : 'active';
+            await db.query(
+                `UPDATE recurring_flags SET times_reported = ?, status = ? WHERE id = ?`,
+                [newCount, newStatus, activeFlag.id]
+            );
+        }
 
         await auditLog({
             user_id: currentUser.id,

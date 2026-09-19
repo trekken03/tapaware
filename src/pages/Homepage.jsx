@@ -46,8 +46,8 @@ const Homepage = () => {
     const fetchData = async () => {
         try {
             const [purokRes, summaryRes] = await Promise.all([
-                API.get('/analytics/tds-by-purok'),
-                API.get('/analytics/summary'),
+                API.get('/visualization/tds-by-purok'),
+                API.get('/visualization/summary'),
             ])
             setPurokData(purokRes.data.filter(p => p.last_recorded))
             setSummary(summaryRes.data)

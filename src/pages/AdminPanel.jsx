@@ -40,7 +40,7 @@ const AdminPanel = () => {
         try {
             const [usersRes, flaggedRes, concernsRes] = await Promise.all([
                 API.get('/admin/users'),
-                API.get('/analytics/flagged'),
+                API.get('/visualization/flagged'),
                 API.get('/concerns')
             ])
             setUsers(usersRes.data)

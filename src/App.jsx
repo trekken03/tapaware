@@ -10,7 +10,7 @@ const TdsReadings = lazy(() => import('./pages/TdsReadings'));
 const AddTdsReading = lazy(() => import('./pages/AddTdsReading'));
 const Reports = lazy(() => import('./pages/Reports'));
 const SubmitReport = lazy(() => import('./pages/SubmitReport'));
-const Analytics = lazy(() => import('./pages/Visualization'));
+const Visualization = lazy(() => import('./pages/Visualization'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const AddUser = lazy(() => import('./pages/AddUser'));
 const AuditTrail = lazy(() => import('./pages/AuditTrail'));
@@ -55,7 +55,7 @@ const App = () => {
                     <Route path="/reports/add" element={<RoleBasedRoute allowedRoles={['resident']}><SubmitReport /></RoleBasedRoute>} />
 
                     {/* Analytics - Admin and Staff */}
-                    <Route path="/analytics" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><Analytics /></RoleBasedRoute>} />
+                    <Route path="/visualization" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><Visualization /></RoleBasedRoute>} />
 
                     {/* Admin Panel - Admin only */}
                     <Route path="/admin" element={<RoleBasedRoute allowedRoles={['admin']}><AdminPanel /></RoleBasedRoute>} />

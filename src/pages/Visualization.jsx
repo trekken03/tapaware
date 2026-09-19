@@ -61,7 +61,7 @@ const getStoredOrDefaultDates = () => {
     return getLast30Days()
 }
 
-const Analytics = () => {
+const Visualization = () => {
     const [byIssue, setByIssue] = useState([])
     const [byPurok, setByPurok] = useState([])
     const [byStatus, setByStatus] = useState([])
@@ -198,7 +198,7 @@ const Analytics = () => {
 
             pdf.setFont('helvetica', 'bold')
             pdf.setFontSize(16)
-            const titleWidth = pdf.getTextWidth('TapAware Analytics Report')
+            const titleWidth = pdf.getTextWidth('TapAware Visualization Report')
             const blockWidth = (logoLoaded ? logoSize + gap : 0) + titleWidth
             const blockStartX = (pageWidth - blockWidth) / 2
 
@@ -209,7 +209,7 @@ const Analytics = () => {
             }
 
             pdf.setTextColor(17, 24, 39)
-            pdf.text('TapAware Analytics Report', titleX, y + logoSize / 2 - 2)
+            pdf.text('TapAware Visualization Report', titleX, y + logoSize / 2 - 2)
 
             y += logoSize + 6
 
@@ -308,8 +308,8 @@ const Analytics = () => {
                 ], [65, 60, 55])
             })
 
-            pdf.save('tapaware-analytics.pdf')
-            toast.success('Analytics report exported successfully!')
+            pdf.save('tapaware-visualization.pdf')
+            toast.success('visualization report exported successfully!')
         } catch (error) {
             console.error('Error generating PDF:', error)
             const errorMsg = `PDF download failed: ${error?.message || 'Unknown error'}`
@@ -327,13 +327,13 @@ const Analytics = () => {
         try {
             const params = { from: dateRange.from, to: dateRange.to }
             const [issueRes, purokRes, statusRes, trendRes, trendingRes, timeRes, tdsByPurokRes] = await Promise.all([
-                API.get('/analytics/reports-by-issue', { params }),
-                API.get('/analytics/reports-by-purok', { params }),
-                API.get('/analytics/reports-by-status', { params }),
-                API.get('/analytics/tds-trend', { params }),
-                API.get('/analytics/trending-issues', { params }),
-                API.get('/analytics/trending-by-time', { params }),
-                API.get('/analytics/tds-by-purok', { params }),
+                API.get('/visualization/reports-by-issue', { params }),
+                API.get('/visualization/reports-by-purok', { params }),
+                API.get('/visualization/reports-by-status', { params }),
+                API.get('/visualization/tds-trend', { params }),
+                API.get('/visualization/trending-issues', { params }),
+                API.get('/visualization/trending-by-time', { params }),
+                API.get('/visualization/tds-by-purok', { params }),
 
             ])
             setByIssue(issueRes.data)
@@ -345,8 +345,8 @@ const Analytics = () => {
             setTdsByPurok(tdsByPurokRes.data)
 
         } catch (error) {
-            console.log('Error fetching analytics:', error)
-            toast.error('Failed to load analytics data')
+            console.log('Error fetching visualization:', error)
+            toast.error('Failed to load visualization data')
         } finally {
             setLoading(false)
         }
@@ -394,7 +394,7 @@ const Analytics = () => {
         return (
             <Layout>
                 <div className="flex items-center justify-center h-64">
-                    <p className="text-gray-500">Loading visualization...</p>
+                    <p className="text-gray-500">Loading Visualization...</p>
                 </div>
             </Layout>
         )
@@ -803,4 +803,4 @@ const Analytics = () => {
         </Layout>
     )
 }
-export default Analytics;
+export default Visualization;

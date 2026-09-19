@@ -39,7 +39,7 @@ const getNavItems = (role) => {
         ...baseItems,
         { path: '/reports', label: 'Reports', icon: ClipboardList },
         { path: '/households', label: 'Households', icon: Home },
-        { path: '/analytics', label: 'Visualization', icon: BarChart3 },
+        { path: '/visualization', label: 'Visualization', icon: BarChart3 },
         { path: '/audit-trail', label: 'Audit Trail', icon: ClipboardList },
         { path: '/admin', label: 'Admin Panel', icon: ShieldUser },
         { path: '/archive', label: 'Archive', icon: Trash2 },
@@ -49,7 +49,7 @@ const getNavItems = (role) => {
         ...baseItems,
         { path: '/reports', label: 'Reports', icon: ClipboardList },
         { path: '/households', label: 'Households', icon: Home },
-        { path: '/analytics', label: 'Visualization', icon: BarChart3 },
+        { path: '/visualization', label: 'Visualization', icon: BarChart3 },
     ];
 
     const residentItems = baseItems;

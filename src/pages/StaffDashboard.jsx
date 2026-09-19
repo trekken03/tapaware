@@ -20,9 +20,9 @@ const StaffDashboard = () => {
     const fetchData = async () => {
         try {
             const [summaryRes, flaggedRes, tdsPurokRes] = await Promise.all([
-                API.get('/analytics/summary'),
-                API.get('/analytics/flagged'),
-                API.get('/analytics/tds-by-purok')
+                API.get('/visualization/summary'),
+                API.get('/visualization/flagged'),
+                API.get('/visualization/tds-by-purok')
             ])
             setSummary(summaryRes.data)
             setFlagged(flaggedRes.data)
@@ -39,7 +39,7 @@ const StaffDashboard = () => {
         { label: 'Total Households', value: summary?.total_households || 0, icon: Home, color: 'text-green-600', bg: 'bg-green-50', path: '/households' },
         { label: 'Flagged Households', value: summary?.flagged_households || 0, icon: Flag, color: 'text-red-600', bg: 'bg-red-50' },
         { label: 'Pending Reports', value: summary?.pending_reports || 0, icon: ClockFading, color: 'text-yellow-600', bg: 'bg-yellow-50', path: '/reports?status=pending' },
-        { label: 'Average TDS (ppm)', value: summary?.average_tds || 0, icon: Droplets, color: 'text-purple-600', bg: 'bg-purple-50', path: '/analytics' },
+        { label: 'Average TDS (ppm)', value: summary?.average_tds || 0, icon: Droplets, color: 'text-purple-600', bg: 'bg-purple-50', path: '/visualization' },
     ]
 
     const tdsColors = (tds) => {
