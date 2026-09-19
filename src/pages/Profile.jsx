@@ -62,7 +62,7 @@ const Profile = () => {
             return
         }
 
-        if (passwordForm.newPassword.length < 6) {
+        if (passwordForm.newPassword.length < 8) {
             toast.error('Password must be at least 6 characters')
             return
         }

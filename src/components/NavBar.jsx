@@ -3,6 +3,8 @@ import { Droplets, Menu, X, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { toast } from 'sonner'
 
 const navLinks = [
     { id: 'home', label: 'Home' },
@@ -46,10 +48,14 @@ const LandingNavbar = () => {
     }, [location])
 
     const handleLogout = () => {
-        logout()
-        setIsOpen(false)
-        navigate('/login')
-    }
+        try {
+            logout();
+            navigate('/login');
+            toast.success('Logged out successfully');
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to logout');
+        }
+    };
 
     return (
         <nav
@@ -96,13 +102,22 @@ const LandingNavbar = () => {
                             >
                                 Dashboard
                             </Button>
-                            <Button
-                                onClick={handleLogout}
-                                className="bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 hover:cursor-pointer"
+                            <ConfirmDialog
+                                title="Confirm logout"
+                                description="Are you sure you want to logout?"
+                                actionText="Logout"
+                                actionVariant="destructive"
+                                onConfirm={handleLogout}
                             >
-                                <LogOut size={16} />
-                                Logout
-                            </Button>
+                                <Button
+
+                                    className="bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 hover:cursor-pointer"
+                                >
+                                    <LogOut size={16} />
+                                    Logout
+                                </Button>
+                            </ConfirmDialog>
+
                         </>
                     )}
 
@@ -114,13 +129,21 @@ const LandingNavbar = () => {
                             >
                                 Dashboard
                             </Button>
-                            <Button
-                                onClick={handleLogout}
-                                className="bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 hover:cursor-pointer"
+                            <ConfirmDialog
+                                title="Confirm logout"
+                                description="Are you sure you want to logout?"
+                                actionText="Logout"
+                                actionVariant="destructive"
+                                onConfirm={handleLogout}
                             >
-                                <LogOut size={16} />
-                                Logout
-                            </Button>
+                                <Button
+
+                                    className="bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 hover:cursor-pointer"
+                                >
+                                    <LogOut size={16} />
+                                    Logout
+                                </Button>
+                            </ConfirmDialog>
                         </>
                     )}
 
@@ -173,10 +196,22 @@ const LandingNavbar = () => {
                                 >
                                     Dashboard
                                 </button>
-                                <Button onClick={handleLogout} className="mt-2 bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 justify-center">
-                                    <LogOut size={16} />
-                                    Logout
-                                </Button>
+                                <ConfirmDialog
+                                    title="Confirm logout"
+                                    description="Are you sure you want to logout?"
+                                    actionText="Logout"
+                                    actionVariant="destructive"
+                                    onConfirm={handleLogout}
+                                >
+                                    <Button
+
+                                        className="mt-2 bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 justify-center"
+                                    >
+                                        <LogOut size={16} />
+                                        Logout
+                                    </Button>
+                                </ConfirmDialog>
+
                             </>
                         )}
 
@@ -188,10 +223,21 @@ const LandingNavbar = () => {
                                 >
                                     Dashboard
                                 </button>
-                                <Button onClick={handleLogout} className="mt-2 bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 justify-center">
-                                    <LogOut size={16} />
-                                    Logout
-                                </Button>
+                                <ConfirmDialog
+                                    title="Confirm logout"
+                                    description="Are you sure you want to logout?"
+                                    actionText="Logout"
+                                    actionVariant="destructive"
+                                    onConfirm={handleLogout}
+                                >
+                                    <Button
+
+                                        className="mt-2 bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 justify-center"
+                                    >
+                                        <LogOut size={16} />
+                                        Logout
+                                    </Button>
+                                </ConfirmDialog>
                             </>
                         )}
 

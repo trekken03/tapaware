@@ -307,7 +307,7 @@ const Homepage = () => {
                                 <div className="w-9 h-9 rounded-full bg-cyan-50 flex items-center justify-center shrink-0">
                                     <Mail size={16} className="text-cyan-600" />
                                 </div>
-                                <span className="text-sm">cabalantian.tapaware@gmail.com</span>
+                                <span className="text-sm">admintapaware@gmail.com</span>
                             </div>
 
                             <div className="flex items-center justify-center gap-3 text-gray-700">
