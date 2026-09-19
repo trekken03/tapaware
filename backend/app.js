@@ -8,7 +8,7 @@ const authRoutes = require('./routes/auth.routes');
 const householdRoutes = require('./routes/household.routes');
 const tdsRoutes = require('./routes/tds.routes');
 const reportRoutes = require('./routes/report.routes');
-const visualizationRoutes = require('./routes/analytics.routes');
+const visualizationRoutes = require('./routes/visualization.routes');
 const adminRoutes = require('./routes/admin.routes');
 const concernRoutes = require('./routes/concern.routes');
 
