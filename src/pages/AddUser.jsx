@@ -58,6 +58,11 @@ const AddUser = () => {
         setLoading(true)
 
         try {
+            if (form.password.length < 8) {
+                toast.error('Password too short! must be at least 8 characters long!')
+                return
+
+            }
 
             const submitData = {
                 name: form.name,
@@ -146,7 +151,7 @@ const AddUser = () => {
                                             type={showPassword ? 'text' : 'password'}
                                             placeholder="Enter password"
                                             value={form.password}
-                                            minLength="6"
+
                                             maxLength="20"
                                             className="pr-10"
                                             onChange={handleChange}
