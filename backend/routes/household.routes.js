@@ -9,7 +9,7 @@ const { verifyCsrf } = require('../middleware/csrf.middleware');
 
 router.get('/archived', verifyToken, requireRole('admin'), householdController.getArchivedHouseholds);
 router.get('/', householdController.getAllHouseholds);
-router.post('/', householdController.addHousehold);
+router.post('/', verifyToken, householdController.addHousehold);
 router.get('/:id', householdController.getHouseholdById);
 router.delete('/:id/permanent', verifyToken, verifyCsrf, requireRole('admin'), householdController.permanentDeleteHousehold);
 router.delete('/:id', verifyToken, verifyCsrf, requireRole('admin'), householdController.deleteHousehold);

@@ -24,6 +24,11 @@ const AddHousehold = () => {
     const handleChange = (e) => {
 
         const { name, value } = e.target;
+        if (name === "owner_name") {
+            if (!/^[a-zA-Z\s]*$/.test(value)) {
+                return;
+            }
+        }
         if (name === "household_number") {
             if (!/^\d{0,3}$/.test(value)) {
                 return;
@@ -104,7 +109,7 @@ const AddHousehold = () => {
                                         value={form.purok}
                                         onChange={handleChange}
                                         required
-                                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         <option value="">Select purok...</option>
                                         {[1, 2, 3, 4, 5, 6].map(p => (

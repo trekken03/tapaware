@@ -31,7 +31,25 @@ const EditUser = () => {
     })
 
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value })
+
+        const { name, value } = e.target;
+
+        if (name === "name") {
+            if (!/^[a-zA-Z\s]*$/.test(value)) {
+                return;
+            }
+        }
+
+        if (name === "household_number") {
+
+            if (!/^\d{0,3}$/.test(value)) {
+                return;
+            }
+        }
+        setForm({
+            ...form, [name]: value
+        })
+
     }
 
     const householdChanged = existingUser?.household_number &&
@@ -173,6 +191,7 @@ const EditUser = () => {
                                         id="household_number"
                                         name="household_number"
                                         type="number"
+                                        max="999"
                                         value={form.household_number}
                                         onChange={handleChange}
                                         required
@@ -180,17 +199,20 @@ const EditUser = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="purok">Purok</Label>
-                                    <Input
+                                    <select
                                         id="purok"
                                         name="purok"
-                                        type="number"
-                                        min="1"
-                                        max="6"
-                                        step="1"
                                         value={form.purok}
                                         onChange={handleChange}
                                         required
-                                    />
+                                        className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="">Select purok...</option>
+                                        {[1, 2, 3, 4, 5, 6].map(p => (
+                                            <option key={p} value={p}>{p}</option>
+                                        ))}
+                                    </select>
+
                                 </div>
                             </div>
 
