@@ -126,9 +126,7 @@ const ReportDetail = () => {
                                     Household #{report.household_number} - Purok {report.purok}
                                 </p>
                             </div>
-                            <span className={`${status.bg} ${status.color} px-3 py-1  text-sm font-semibold`}>
-                                {status.label}
-                            </span>
+
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
@@ -159,17 +157,32 @@ const ReportDetail = () => {
                         </div>
 
                         {!isResident && (
-                            <div className="mt-6">
+                            <div className="mt-6 ">
+
                                 <p className="text-gray-500 text-sm mb-2">Update Status</p>
-                                <select
-                                    value={report.status}
-                                    onChange={(e) => handleStatusUpdate(e.target.value)}
-                                    className={`${status.bg} ${status.color} border-0  px-3 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
-                                >
-                                    <option value="pending">Pending</option>
-                                    <option value="investigating">Investigating</option>
-                                    <option value="resolved">Resolved</option>
-                                </select>
+                                {report.status !== 'resolved' ? (
+
+                                    <select
+                                        value={report.status}
+                                        onChange={(e) => handleStatusUpdate(e.target.value)}
+                                        className={`${status.bg} ${status.color} border-0  px-3 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
+                                    >
+                                        {report.status === 'pending' && (
+                                            <>
+
+                                                <option value="pending">Pending</option>
+                                                <option value="investigating">Investigating</option>
+                                                <option value="resolved">Resolved</option>
+                                            </>
+                                        )}
+                                        {report.status === 'investigating' && (
+                                            <>
+                                                <option value="investigating">Investigating</option>
+                                                <option value="resolved">Resolved</option>
+                                            </>
+                                        )}
+                                    </select>
+                                ) : (<span className={`${status.bg} ${status.color} border-0  px-3 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}>Resolved</span>)}
                             </div>
                         )}
                     </CardContent>
