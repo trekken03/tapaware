@@ -308,7 +308,7 @@ const Visualization = () => {
                 ], [65, 60, 55])
             })
 
-            pdf.save('tapaware-visualization.pdf')
+            pdf.save(`tapaware-visualization From ${dateRange.from} To ${dateRange.to}.pdf`)
             toast.success('visualization report exported successfully!')
         } catch (error) {
             console.error('Error generating PDF:', error)

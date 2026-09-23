@@ -61,19 +61,19 @@ create table reports(
     index idx_reports_issue (issue_type)
 );
 
-create table recurring_flags(
-    id int auto_increment primary key,
-    household_id int not null,
-    issue_type enum('odor','discoloration','low pressure','cleanliness','broken hardware'),
-    times_reported int not null default 0,
-    created_at timestamp default current_timestamp,
-    last_reported_at timestamp not null default current_timestamp,
-    status enum('active','resolved') not null default 'active',
-    foreign key(household_id) references households(id) on delete cascade,
-    unique key unique_active_flag (household_id, issue_type, status),
-    index idx_recurring_status (status)
+CREATE TABLE recurring_flags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    household_id INT NOT NULL,
+    issue_type ENUM('odor','discoloration','low pressure','cleanliness','broken hardware') NOT NULL,
+    times_reported INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_reported_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('active','resolved') NOT NULL DEFAULT 'active',
+    UNIQUE KEY unique_flag_household_issue (household_id, issue_type),
+    KEY idx_recurring_status (status),
+    CONSTRAINT fk_recurring_flags_household
+    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE
 );
-
 create table audit_trail(
     id int auto_increment primary key,
     user_id int,

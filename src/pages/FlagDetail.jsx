@@ -16,6 +16,8 @@ const getReportStatusStyle = (status) => {
     }
 }
 
+
+
 const FlagDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
@@ -88,7 +90,7 @@ const FlagDetail = () => {
                     Back
                 </Button>
 
-                <Card className="mb-6 border-l-4 border-red-400">
+                <Card className={`mb-6 border-l-4 ${flag.status === 'active' ? 'border-red-400' : 'border-green-400'}`}>
                     <CardContent className="pt-6">
                         <div className="flex items-start justify-between gap-3 mb-4">
                             <div>
@@ -125,14 +127,25 @@ const FlagDetail = () => {
 
                         <div>
                             <p className="text-gray-500 text-sm mb-2">Flag Status</p>
-                            <select
-                                value={flag.status}
-                                onChange={(e) => handleStatusUpdate(e.target.value)}
-                                className="bg-red-100 text-red-700 border-0 px-3 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
-                            >
-                                <option value="active">Active</option>
-                                <option value="resolved">Resolved</option>
-                            </select>
+                            {flag.status !== 'resolved' ? (
+
+
+                                <select
+                                    value={flag.status}
+                                    onChange={(e) => handleStatusUpdate(e.target.value)}
+                                    className="bg-red-100 text-red-700 border-0 px-3 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
+                                >
+                                    {flag.status === 'active' && (
+                                        <>
+
+                                            <option value="active">Active</option>
+                                            <option value="resolved">Resolved</option>
+                                        </>
+                                    )}
+                                </select>
+                            ) : (
+                                <span className="bg-green-100 text-green-700 border-0 px-3 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none">Resolved</span>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

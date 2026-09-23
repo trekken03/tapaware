@@ -136,7 +136,10 @@ exports.getHouseholdById = async (req, res) => {
         );
 
         const [flags] = await db.query(
-            `SELECT * FROM recurring_flags WHERE household_id = ? ORDER BY last_reported_at DESC`,
+            `SELECT *
+     FROM recurring_flags
+     WHERE household_id = ? AND status = 'active'
+     ORDER BY last_reported_at DESC`,
             [id]
         );
 

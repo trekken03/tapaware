@@ -74,28 +74,34 @@ exports.submitReport = async (req, res) => {
             details: `Report submitted for household: ${household_id}, issue: ${issue_type}`,
             ip_address: req.ip
         });
-        const [existing] = await db.query(
-            `SELECT * FROM recurring_flags WHERE household_id =? AND issue_type = ? AND status='active'`,
+        const [existingFlag] = await db.query(
+            `SELECT * FROM recurring_flags
+     WHERE household_id = ? AND issue_type = ?`,
             [household_id, issue_type]
         );
-        if (existing.length > 0) {
+
+        if (existingFlag.length > 0) {
             await db.query(
                 `UPDATE recurring_flags
-                SET times_reported = times_reported + 1,last_reported_at=NOW()
-                WHERE household_id=? AND issue_type=? AND status ='active'`,
+         SET times_reported = times_reported + 1,
+             last_reported_at = NOW(),
+             status = 'active'
+         WHERE household_id = ? AND issue_type = ?`,
                 [household_id, issue_type]
             );
-        }
-        else {
+        } else {
             const [countRows] = await db.query(
-                `SELECT COUNT(*) as count FROM reports
-                WHERE household_id = ? AND issue_type =? AND deleted_at IS NULL`,
+                `SELECT COUNT(*) as count
+         FROM reports
+         WHERE household_id = ? AND issue_type = ? AND deleted_at IS NULL`,
                 [household_id, issue_type]
             );
+
             if (countRows[0].count >= 3) {
                 await db.query(
-                    `INSERT INTO recurring_flags(household_id,issue_type,times_reported,last_reported_at)
-                    VALUES(?,?,?,NOW())`, [household_id, issue_type, countRows[0].count]
+                    `INSERT INTO recurring_flags (household_id, issue_type, times_reported, last_reported_at, status)
+             VALUES (?, ?, ?, NOW(), 'active')`,
+                    [household_id, issue_type, countRows[0].count]
                 );
             }
         }
@@ -366,3 +372,4 @@ exports.permanentDeleteReport = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+

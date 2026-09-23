@@ -87,7 +87,7 @@ const ReportDetail = () => {
         try {
             await API.delete(`/reports/${id}`)
             toast.success('Report archived successfully')
-            navigate('/reports')
+            navigate(-1)
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to archive report')
         }

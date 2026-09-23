@@ -414,13 +414,47 @@ exports.updateFlagStatus = async (req, res) => {
     const { status } = req.body;
     const currentUser = req.user;
 
+    if (!status || !['active', 'resolved'].includes(status)) {
+        return res.status(400).json({ message: 'Valid status is required' });
+    }
+
     try {
-        await db.query(`Update recurring_flags set status = ? where id = ?`, [status, id]);
+        const [result] = await db.query(
+            `UPDATE recurring_flags
+             SET status = ?
+             WHERE id = ?`,
+            [status, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Flag not found' });
+        }
+
+        if (status === 'resolved') {
+            const [[flag]] = await db.query(
+                `SELECT household_id, issue_type
+                 FROM recurring_flags
+                 WHERE id = ?`,
+                [id]
+            );
+
+            if (flag) {
+                await db.query(
+                    `UPDATE reports
+                     SET status = 'resolved'
+                     WHERE household_id = ?
+                       AND issue_type = ?
+                       AND deleted_at IS NULL
+                       AND status != 'resolved'`,
+                    [flag.household_id, flag.issue_type]
+                );
+            }
+        }
 
         await auditLog({
-            user_id: currentUser.id,
-            user_name: currentUser.name,
-            user_role: currentUser.role,
+            user_id: currentUser?.id ?? null,
+            user_name: currentUser?.name ?? 'Unknown',
+            user_role: currentUser?.role ?? 'admin',
             action: 'UPDATE_FLAG_STATUS',
             table_affected: 'recurring_flags',
             record_id: id,
@@ -428,11 +462,10 @@ exports.updateFlagStatus = async (req, res) => {
             ip_address: req.ip
         });
 
-        res.json({ message: 'Flag status updated successfully' });
-    }
-    catch (error) {
+        return res.json({ message: 'Flag status updated successfully' });
+    } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        return res.status(500).json({ message: 'Server error' });
     }
 };
 

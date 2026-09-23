@@ -162,12 +162,12 @@ const HouseholdDetail = () => {
                         </CardHeader>
                         <CardContent className="space-y-2">
                             {household.flags.map((f) => (
-                                <div key={f.id} className="flex items-center justify-between rounded-lg bg-red-50 border-l-4 border-red-400 p-3">
+                                <div key={f.id} className={`flex items-center justify-between rounded-lg border-l-4 ${f.status === 'resolved' ? 'bg-gray-50  border-green-400' : 'bg-red-50  border-red-400'} p-3`}>
                                     <div>
                                         <p className="font-semibold text-gray-900 capitalize">{f.issue_type}</p>
                                         <p className="text-xs text-gray-500">Reported {f.times_reported} times</p>
                                     </div>
-                                    <span className={`px-2 py-1 text-xs font-semibold ${f.status === 'active' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}`}>
+                                    <span className={`px-2 py-1 text-xs font-semibold ${f.status === 'active' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                                         {f.status}
                                     </span>
                                 </div>
