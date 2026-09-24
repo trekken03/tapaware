@@ -174,7 +174,7 @@ const AdminDashboard = () => {
                     </Card>
                 </div>
 
-                {/* Flagged households table
+                {/* Flagged households table */}
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -202,8 +202,7 @@ const AdminDashboard = () => {
                                     {flagged.map((flag, index) => (
                                         <TableRow
                                             key={flag.id}
-                                            className="cursor-pointer hover:bg-gray-50"
-                                            onClick={() => navigate(`/admin/flags/${flag.id}`)}
+
                                         >
                                             <TableCell label="No.">{index + 1}</TableCell>
                                             <TableCell label="Household">#{flag.household_number}</TableCell>
@@ -226,7 +225,7 @@ const AdminDashboard = () => {
                             </Table>
                         )}
                     </CardContent>
-                </Card> */}
+                </Card>
 
 
             </div>

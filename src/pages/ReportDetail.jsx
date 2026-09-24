@@ -88,7 +88,7 @@ const ReportDetail = () => {
     const handleDelete = async () => {
         try {
             await API.delete(`/reports/${id}`)
-            toast.success('Report archived successfully')
+            toast.success(`${isResident ? 'Report deleted successfully' : 'Report archived successfully'}`)
             navigate(`${isResident ? '/dashboard' : -1}`)
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to archive report')
@@ -122,7 +122,7 @@ const ReportDetail = () => {
                     {(user?.role === 'admin' || (user?.role === 'resident' && report.user_id === user.id && report.status === 'pending'))
                         &&
                         (
-                            <ConfirmDialog title={isResident ? 'Delete this report?' : 'Archive this report?'} description={report.active_flag ? `This report is part of an active ${report.issue_type} flag for this household, currently reported ${report.active_flag.times_reported}x. ${isResident ? 'Deleting' : 'Archiving'} it will reduce that count.` : 'It can be restored later from the Archive.'} actionText="Archive Report" actionVariant="destructive" onConfirm={handleDelete} >
+                            <ConfirmDialog title={isResident ? 'Delete this report?' : 'Archive this report?'} description={report.active_flag ? `This report is part of an active ${report.issue_type} flag for this household, currently reported ${report.active_flag.times_reported}x. ${isResident ? 'Deleting' : 'Archiving'} it will reduce that count.` : `${isResident ? 'Sure you want to delete this report?' : 'It can be restored later from the Archive.'}`} actionText={isResident ? 'Delete Report' : 'Archive Report'} actionVariant="destructive" onConfirm={handleDelete} >
                                 <Button className="flex items-center gap-1 text-white bg-red-600 hover:bg-red-500 hover:cursor-pointer" >
                                     <Trash2 size={14} /> {isResident ? 'Delete Report' : 'Archive Report'}
                                 </Button>
