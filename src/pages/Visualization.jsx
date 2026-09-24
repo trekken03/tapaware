@@ -43,12 +43,21 @@ const loadLogoImage = () => {
 
 const DATE_RANGE_STORAGE_KEY = 'tapaware_visualization_date_range'
 
+const toLocalISODate = (date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+}
+
 const getLast30Days = () => {
-    const to = new Date().toISOString().split('T')[0]
+    const toDate = new Date()
     const fromDate = new Date()
     fromDate.setDate(fromDate.getDate() - 30)
-    const from = fromDate.toISOString().split('T')[0]
-    return { from, to }
+    return {
+        from: toLocalISODate(fromDate),
+        to: toLocalISODate(toDate)
+    }
 }
 
 const getStoredOrDefaultDates = () => {

@@ -122,7 +122,7 @@ const ReportDetail = () => {
                     {(user?.role === 'admin' || (user?.role === 'resident' && report.user_id === user.id && report.status === 'pending'))
                         &&
                         (
-                            <ConfirmDialog title="Archive this report?" description={report.active_flag ? `This report is part of an active ${report.issue_type} flag for this household, currently reported ${report.active_flag.times_reported}x. Archiving it will reduce that count.` : 'It can be restored later from the Archive.'} actionText="Archive Report" actionVariant="destructive" onConfirm={handleDelete} >
+                            <ConfirmDialog title={isResident ? 'Delete this report?' : 'Archive this report?'} description={report.active_flag ? `This report is part of an active ${report.issue_type} flag for this household, currently reported ${report.active_flag.times_reported}x. ${isResident ? 'Deleting' : 'Archiving'} it will reduce that count.` : 'It can be restored later from the Archive.'} actionText="Archive Report" actionVariant="destructive" onConfirm={handleDelete} >
                                 <Button className="flex items-center gap-1 text-white bg-red-600 hover:bg-red-500 hover:cursor-pointer" >
                                     <Trash2 size={14} /> {isResident ? 'Delete Report' : 'Archive Report'}
                                 </Button>
