@@ -56,9 +56,18 @@ exports.submitReport = async (req, res) => {
     const { household_id, user_id, issue_type, other_issue, description, occurred_time } = req.body;
 
     const normalizedIssueType = issue_type === 'other' ? 'other' : issue_type;
-    const customIssueNote = normalizedIssueType === 'other' && other_issue ? `Other issue: ${other_issue}` : null;
-    const finalDescription = [description, customIssueNote].filter(Boolean).join('\n\n') || null;
-    const issueLabel = normalizedIssueType === 'other' && other_issue ? `Other: ${other_issue}` : normalizedIssueType;
+
+    const cleanOtherIssue =
+        normalizedIssueType === 'other' && other_issue
+            ? other_issue.trim()
+            : null;
+
+    const finalDescription = description?.trim() || null;
+
+    const issueLabel =
+        normalizedIssueType === 'other' && cleanOtherIssue
+            ? `Other: ${cleanOtherIssue}`
+            : normalizedIssueType;
 
     const now = new Date();
     const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -66,8 +75,17 @@ exports.submitReport = async (req, res) => {
 
     try {
         const [result] = await db.query(
-            'INSERT INTO reports(household_id,user_id,issue_type,description,occurred_at)VALUES(?,?,?,?,?)',
-            [household_id, user_id, normalizedIssueType, finalDescription, finalOccurredTime]
+            `INSERT INTO reports
+        (household_id, user_id, issue_type, other_issue, description, occurred_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                household_id,
+                user_id,
+                normalizedIssueType,
+                cleanOtherIssue,
+                finalDescription,
+                finalOccurredTime
+            ]
         );
         await auditLog({
             user_id: req.user ? req.user.id : null,

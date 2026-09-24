@@ -48,6 +48,7 @@ create table reports(
     household_id int not null,
     user_id int not null,
     issue_type enum('odor','discoloration','low pressure','cleanliness','broken hardware','other') not null,
+    other_issue varchar(255) null,
     description text,
     status enum('pending','investigating','resolved') not null default 'pending',
     created_at timestamp default current_timestamp,
@@ -60,6 +61,7 @@ create table reports(
     index idx_reports_status (status),
     index idx_reports_issue (issue_type)
 );
+
 
 CREATE TABLE recurring_flags (
     id INT AUTO_INCREMENT PRIMARY KEY,

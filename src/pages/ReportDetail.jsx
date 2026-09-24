@@ -144,7 +144,15 @@ const ReportDetail = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                             <div>
                                 <p className="text-gray-500">Issue Type</p>
-                                <p className="font-semibold text-gray-900 capitalize">{report.issue_type}</p>
+                                <p className="font-semibold text-gray-900 capitalize">
+                                    {report.issue_type}
+
+                                    {report.issue_type === 'other' && report.other_issue && (
+                                        <span className="ml-1">
+                                            — {report.other_issue}
+                                        </span>
+                                    )}
+                                </p>
                             </div>
                             <div>
                                 <p className="text-gray-500">Reported By</p>
