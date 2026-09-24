@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,6 +27,7 @@ const getStatusStyle = (status) => {
 const ReportDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
+    const location = useLocation()
     const { user } = useAuth()
     const [report, setReport] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -81,6 +82,7 @@ const ReportDetail = () => {
         )
     }
 
+
     const status = getStatusStyle(report.status)
     const isResident = user?.role === 'resident'
     const handleDelete = async () => {
@@ -93,6 +95,15 @@ const ReportDetail = () => {
         }
     }
 
+    const handleBack = () => {
+        console.log('location.state:', location.state)
+
+        if (location.state?.from === 'flags') {
+            navigate(`/admin/flags/${location.state.flagId}`)
+        } else {
+            navigate(`/households/${report.household_id}`)
+        }
+    }
 
     return (
         <Layout>
@@ -102,7 +113,7 @@ const ReportDetail = () => {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-1"
-                        onClick={() => navigate(-1)}
+                        onClick={handleBack}
                     >
                         <ArrowLeft size={14} />
                         Back

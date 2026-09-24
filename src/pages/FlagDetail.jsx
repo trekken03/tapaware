@@ -40,6 +40,8 @@ const FlagDetail = () => {
         }
     }
 
+
+
     const handleStatusUpdate = async (newStatus) => {
         try {
             await API.put(`/admin/flags/${id}/status`, { status: newStatus })
@@ -167,7 +169,12 @@ const FlagDetail = () => {
                                     return (
                                         <div
                                             key={r.id}
-                                            onClick={() => navigate(`/reports/${r.id}`)}
+                                            onClick={() => navigate(`/reports/${r.id}`, {
+                                                state: {
+                                                    from: 'flags',
+                                                    flagId: flag.id
+                                                }
+                                            })}
                                             className="rounded-lg bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-colors"
                                         >
                                             <div className="flex items-center justify-between gap-2 mb-1">

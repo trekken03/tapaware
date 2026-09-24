@@ -136,7 +136,7 @@ const AddHousehold = () => {
                                     name="address"
                                     placeholder="e.g. Don Jose St"
                                     value={form.address}
-                                    maxLength='150'
+                                    maxLength='80'
                                     onChange={handleChange}
                                     required
                                 />
