@@ -53,7 +53,12 @@ const getTimeBucket = (timeString) => {
 };
 
 exports.submitReport = async (req, res) => {
-    const { household_id, user_id, issue_type, description, occurred_time } = req.body;
+    const { household_id, user_id, issue_type, other_issue, description, occurred_time } = req.body;
+
+    const normalizedIssueType = issue_type === 'other' ? 'other' : issue_type;
+    const customIssueNote = normalizedIssueType === 'other' && other_issue ? `Other issue: ${other_issue}` : null;
+    const finalDescription = [description, customIssueNote].filter(Boolean).join('\n\n') || null;
+    const issueLabel = normalizedIssueType === 'other' && other_issue ? `Other: ${other_issue}` : normalizedIssueType;
 
     const now = new Date();
     const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -62,7 +67,7 @@ exports.submitReport = async (req, res) => {
     try {
         const [result] = await db.query(
             'INSERT INTO reports(household_id,user_id,issue_type,description,occurred_at)VALUES(?,?,?,?,?)',
-            [household_id, user_id, issue_type, description || null, finalOccurredTime]
+            [household_id, user_id, normalizedIssueType, finalDescription, finalOccurredTime]
         );
         await auditLog({
             user_id: req.user ? req.user.id : null,
@@ -71,13 +76,13 @@ exports.submitReport = async (req, res) => {
             action: 'SUBMIT_REPORT',
             table_affected: 'reports',
             record_id: result.insertId,
-            details: `Report submitted for household: ${household_id}, issue: ${issue_type}`,
+            details: `Report submitted for household: ${household_id}, issue: ${issueLabel}`,
             ip_address: req.ip
         });
         const [existingFlag] = await db.query(
             `SELECT * FROM recurring_flags
      WHERE household_id = ? AND issue_type = ?`,
-            [household_id, issue_type]
+            [household_id, normalizedIssueType]
         );
 
         if (existingFlag.length > 0) {
@@ -87,21 +92,21 @@ exports.submitReport = async (req, res) => {
              last_reported_at = NOW(),
              status = 'active'
          WHERE household_id = ? AND issue_type = ?`,
-                [household_id, issue_type]
+                [household_id, normalizedIssueType]
             );
         } else {
             const [countRows] = await db.query(
                 `SELECT COUNT(*) as count
          FROM reports
          WHERE household_id = ? AND issue_type = ? AND deleted_at IS NULL`,
-                [household_id, issue_type]
+                [household_id, normalizedIssueType]
             );
 
             if (countRows[0].count >= 3) {
                 await db.query(
                     `INSERT INTO recurring_flags (household_id, issue_type, times_reported, last_reported_at, status)
              VALUES (?, ?, ?, NOW(), 'active')`,
-                    [household_id, issue_type, countRows[0].count]
+                    [household_id, normalizedIssueType, countRows[0].count]
                 );
             }
         }
@@ -111,7 +116,7 @@ exports.submitReport = async (req, res) => {
 
         const [existingPattern] = await db.query(
             'SELECT * FROM time_patterns WHERE purok = ? AND issue_type = ? AND time_bucket = ?',
-            [household.purok, issue_type, timeBucket]
+            [household.purok, normalizedIssueType, timeBucket]
         );
 
         if (existingPattern.length > 0) {
@@ -122,7 +127,7 @@ exports.submitReport = async (req, res) => {
         } else {
             await db.query(
                 'INSERT INTO time_patterns(purok, issue_type, time_bucket, times_reported, last_reported_at) VALUES (?,?,?,1,NOW())',
-                [household.purok, issue_type, timeBucket]
+                [household.purok, normalizedIssueType, timeBucket]
             );
         }
 
@@ -133,12 +138,12 @@ exports.submitReport = async (req, res) => {
             try {
                 await sendEmail({
                     to: adminEmail,
-                    subject: `New Water Quality Report — ${issue_type}`,
+                    subject: `New Water Quality Report — ${issueLabel}`,
                     html: `
         <h2>New Report Submitted</h2>
         <p>A new water quality report has been submitted.</p>
-        <p><strong>Issue Type:</strong> ${issue_type}</p>
-        <p><strong>Description:</strong> ${description || 'No description provided'}</p>
+        <p><strong>Issue Type:</strong> ${issueLabel}</p>
+        <p><strong>Description:</strong> ${finalDescription || 'No description provided'}</p>
         <p><strong>Household ID:</strong> ${household_id}</p>
         <p>Log in to TapAware to view full details and update its status.</p>
     `

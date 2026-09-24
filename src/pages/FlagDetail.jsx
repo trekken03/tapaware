@@ -86,7 +86,7 @@ const FlagDetail = () => {
                     variant="outline"
                     size="sm"
                     className="mb-4 flex items-center gap-1"
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate('/admin?tab=flagged')}
                 >
                     <ArrowLeft size={14} />
                     Back

@@ -89,7 +89,7 @@ const ReportDetail = () => {
         try {
             await API.delete(`/reports/${id}`)
             toast.success('Report archived successfully')
-            navigate(-1)
+            navigate(`${isResident ? '/dashboard' : -1}`)
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to archive report')
         }
@@ -100,8 +100,9 @@ const ReportDetail = () => {
 
         if (location.state?.from === 'flags') {
             navigate(`/admin/flags/${location.state.flagId}`)
+
         } else {
-            navigate(`/households/${report.household_id}`)
+            navigate(`${isResident ? '/dashboard' : `/households/${report.household_id}`}`)
         }
     }
 
@@ -123,7 +124,7 @@ const ReportDetail = () => {
                         (
                             <ConfirmDialog title="Archive this report?" description={report.active_flag ? `This report is part of an active ${report.issue_type} flag for this household, currently reported ${report.active_flag.times_reported}x. Archiving it will reduce that count.` : 'It can be restored later from the Archive.'} actionText="Archive Report" actionVariant="destructive" onConfirm={handleDelete} >
                                 <Button className="flex items-center gap-1 text-white bg-red-600 hover:bg-red-500 hover:cursor-pointer" >
-                                    <Trash2 size={14} /> Archive Report
+                                    <Trash2 size={14} /> {isResident ? 'Delete Report' : 'Archive Report'}
                                 </Button>
                             </ConfirmDialog>)}
                 </div>

@@ -174,7 +174,7 @@ const AdminDashboard = () => {
                     </Card>
                 </div>
 
-                {/* Flagged households table */}
+                {/* Flagged households table
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -226,7 +226,7 @@ const AdminDashboard = () => {
                             </Table>
                         )}
                     </CardContent>
-                </Card>
+                </Card> */}
 
 
             </div>

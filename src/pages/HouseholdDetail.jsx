@@ -41,11 +41,30 @@ const HouseholdDetail = () => {
     const navigate = useNavigate()
     const [household, setHousehold] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [reportPage, setReportPage] = useState(1)
     const { user } = useAuth()
+
+    const reportsPerPage = 5
 
     useEffect(() => {
         fetchHousehold()
     }, [id])
+
+    useEffect(() => {
+        setReportPage(1)
+    }, [id])
+
+    const totalReportPages = Math.max(1, Math.ceil((household?.reports?.length || 0) / reportsPerPage))
+    const paginatedReports = household?.reports?.slice(
+        (reportPage - 1) * reportsPerPage,
+        reportPage * reportsPerPage
+    ) || []
+
+    useEffect(() => {
+        if (reportPage > totalReportPages) {
+            setReportPage(totalReportPages)
+        }
+    }, [reportPage, totalReportPages])
 
     const fetchHousehold = async () => {
         try {
@@ -153,7 +172,7 @@ const HouseholdDetail = () => {
                 </Card>
 
                 {household.flags.length > 0 && (
-                    <Card className="mb-6">
+                    <Card className="mb-6" >
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Flag size={20} className="text-red-600" />
@@ -162,7 +181,8 @@ const HouseholdDetail = () => {
                         </CardHeader>
                         <CardContent className="space-y-2">
                             {household.flags.map((f) => (
-                                <div key={f.id} className={`flex items-center justify-between rounded-lg border-l-4 ${f.status === 'resolved' ? 'bg-gray-50  border-green-400' : 'bg-red-50  border-red-400'} p-3`}>
+                                <div key={f.id} className={`flex items-center hover:cursor-pointer justify-between rounded-lg border-l-4 ${f.status === 'resolved' ? 'bg-gray-50  border-green-400' : 'bg-red-50  border-red-400'} p-3`}
+                                    onClick={() => navigate(`/admin/flags/${f.id}`)}>
                                     <div>
                                         <p className="font-semibold text-gray-900 capitalize">{f.issue_type}</p>
                                         <p className="text-xs text-gray-500">Reported {f.times_reported} times</p>
@@ -188,32 +208,60 @@ const HouseholdDetail = () => {
                             {household.reports.length === 0 ? (
                                 <p className="text-gray-500 text-sm">No reports submitted for this household.</p>
                             ) : (
-                                <div className="space-y-2">
-                                    {household.reports.map((r) => {
-                                        const s = getReportStatusStyle(r.status)
-                                        return (
-                                            <div
-                                                key={r.id}
-                                                onClick={() => navigate(`/reports/${r.id}`)}
-                                                className="flex items-center justify-between gap-3 rounded-lg bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-all duration-200"
-                                            >
-                                                <div>
-                                                    <p className="font-semibold text-gray-900 capitalize">{r.issue_type}</p>
-                                                    <p className="text-xs text-gray-500">
-                                                        {r.reported_by} • {new Date(r.created_at).toLocaleDateString('en-US', {
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            year: 'numeric',
-                                                        })}
-                                                    </p>
+                                <>
+                                    <div className="space-y-2">
+                                        {paginatedReports.map((r) => {
+                                            const s = getReportStatusStyle(r.status)
+                                            return (
+                                                <div
+                                                    key={r.id}
+                                                    onClick={() => navigate(`/reports/${r.id}`)}
+                                                    className="flex items-center justify-between gap-3 rounded-lg bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-all duration-200"
+                                                >
+                                                    <div>
+                                                        <p className="font-semibold text-gray-900 capitalize">{r.issue_type}</p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {r.reported_by} • {new Date(r.created_at).toLocaleDateString('en-US', {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                year: 'numeric',
+                                                            })}
+                                                        </p>
+                                                    </div>
+                                                    <span className={`${s.bg} ${s.color} px-2 py-1 text-xs font-semibold`}>
+                                                        {s.label}
+                                                    </span>
                                                 </div>
-                                                <span className={`${s.bg} ${s.color} px-2 py-1  text-xs font-semibold`}>
-                                                    {s.label}
-                                                </span>
-                                            </div>
-                                        )
-                                    })}
-                                </div>
+                                            )
+                                        })}
+                                    </div>
+
+                                    <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-gray-200">
+                                        <p className="text-xs text-gray-500">
+                                            Page {reportPage} of {totalReportPages}
+                                        </p>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setReportPage((page) => Math.max(1, page - 1))}
+                                                disabled={reportPage === 1}
+                                            >
+                                                Previous
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setReportPage((page) => Math.min(totalReportPages, page + 1))}
+                                                disabled={reportPage === totalReportPages}
+                                            >
+                                                Next
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </>
                             )}
                         </CardContent>
                     </Card>

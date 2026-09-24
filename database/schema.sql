@@ -64,7 +64,7 @@ create table reports(
 CREATE TABLE recurring_flags (
     id INT AUTO_INCREMENT PRIMARY KEY,
     household_id INT NOT NULL,
-    issue_type ENUM('odor','discoloration','low pressure','cleanliness','broken hardware') NOT NULL,
+    issue_type ENUM('odor','discoloration','low pressure','cleanliness','broken hardware','other') NOT NULL,
     times_reported INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_reported_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -119,7 +119,7 @@ create table concerns(
 CREATE TABLE time_patterns(
     id int auto_increment primary key,
     purok varchar(100) not null,
-    issue_type enum('odor','discoloration','low pressure','cleanliness','broken hardware') not null,
+    issue_type enum('odor','discoloration','low pressure','cleanliness','broken hardware','other') not null,
     time_bucket enum('morning','afternoon','evening','night') not null,
     times_reported int not null default 0,
     last_reported_at timestamp not null default current_timestamp,
