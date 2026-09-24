@@ -79,56 +79,64 @@ exports.submitReport = async (req, res) => {
             details: `Report submitted for household: ${household_id}, issue: ${issueLabel}`,
             ip_address: req.ip
         });
-        const [existingFlag] = await db.query(
-            `SELECT * FROM recurring_flags
+        try {
+            const [existingFlag] = await db.query(
+                `SELECT * FROM recurring_flags
      WHERE household_id = ? AND issue_type = ?`,
-            [household_id, normalizedIssueType]
-        );
+                [household_id, normalizedIssueType]
+            );
 
-        if (existingFlag.length > 0) {
-            await db.query(
-                `UPDATE recurring_flags
+            if (existingFlag.length > 0) {
+                await db.query(
+                    `UPDATE recurring_flags
          SET times_reported = times_reported + 1,
              last_reported_at = NOW(),
              status = 'active'
          WHERE household_id = ? AND issue_type = ?`,
-                [household_id, normalizedIssueType]
-            );
-        } else {
-            const [countRows] = await db.query(
-                `SELECT COUNT(*) as count
+                    [household_id, normalizedIssueType]
+                );
+            } else {
+                const [countRows] = await db.query(
+                    `SELECT COUNT(*) as count
          FROM reports
          WHERE household_id = ? AND issue_type = ? AND deleted_at IS NULL`,
-                [household_id, normalizedIssueType]
-            );
-
-            if (countRows[0].count >= 3) {
-                await db.query(
-                    `INSERT INTO recurring_flags (household_id, issue_type, times_reported, last_reported_at, status)
-             VALUES (?, ?, ?, NOW(), 'active')`,
-                    [household_id, normalizedIssueType, countRows[0].count]
+                    [household_id, normalizedIssueType]
                 );
+
+                if (countRows[0].count >= 3) {
+                    await db.query(
+                        `INSERT INTO recurring_flags (household_id, issue_type, times_reported, last_reported_at, status)
+             VALUES (?, ?, ?, NOW(), 'active')`,
+                        [household_id, normalizedIssueType, countRows[0].count]
+                    );
+                }
             }
+        } catch (flagError) {
+            console.warn('Recurring flag update skipped for this report:', flagError.message);
         }
 
-        const [[household]] = await db.query('SELECT purok FROM households WHERE id = ?', [household_id]);
-        const timeBucket = getTimeBucket(finalOccurredTime);
+        try {
+            const [[household]] = await db.query('SELECT purok FROM households WHERE id = ?', [household_id]);
+            const timeBucket = getTimeBucket(finalOccurredTime);
 
-        const [existingPattern] = await db.query(
-            'SELECT * FROM time_patterns WHERE purok = ? AND issue_type = ? AND time_bucket = ?',
-            [household.purok, normalizedIssueType, timeBucket]
-        );
-
-        if (existingPattern.length > 0) {
-            await db.query(
-                'UPDATE time_patterns SET times_reported = times_reported + 1, last_reported_at = NOW() WHERE id = ?',
-                [existingPattern[0].id]
-            );
-        } else {
-            await db.query(
-                'INSERT INTO time_patterns(purok, issue_type, time_bucket, times_reported, last_reported_at) VALUES (?,?,?,1,NOW())',
+            const [existingPattern] = await db.query(
+                'SELECT * FROM time_patterns WHERE purok = ? AND issue_type = ? AND time_bucket = ?',
                 [household.purok, normalizedIssueType, timeBucket]
             );
+
+            if (existingPattern.length > 0) {
+                await db.query(
+                    'UPDATE time_patterns SET times_reported = times_reported + 1, last_reported_at = NOW() WHERE id = ?',
+                    [existingPattern[0].id]
+                );
+            } else {
+                await db.query(
+                    'INSERT INTO time_patterns(purok, issue_type, time_bucket, times_reported, last_reported_at) VALUES (?,?,?,1,NOW())',
+                    [household.purok, normalizedIssueType, timeBucket]
+                );
+            }
+        } catch (patternError) {
+            console.warn('Time pattern update skipped for this report:', patternError.message);
         }
 
         res.status(201).json({ message: 'Report submitted successfully' });
