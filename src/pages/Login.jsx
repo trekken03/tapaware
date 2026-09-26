@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -21,12 +21,20 @@ import LandingNavbar from "@/components/NavBar";
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, isAuthenticated } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/dashboard', { replace: true });
+
+        }
+
+    }, [isAuthenticated, navigate]);
 
 
 
@@ -48,7 +56,11 @@ const Login = () => {
         }
     }
 
+
+
     return (
+
+
 
         <div className="relative min-h-screen bg-gray-50 flex items-center justify-center p-4">
             <LandingNavbar />

@@ -193,11 +193,31 @@ exports.updateReportStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
+    if (!status || !['pending', 'in_progress', 'resolved'].includes(status)) {
+        return res.status(400).json({ message: 'Valid status is required' });
+    }
+
     try {
+
+        const [[report]] = await db.query(`select household_id, issue_type 
+            from reports where id = ? and deleted_at is null`, [id]);
+
+        if (!report) {
+            return res.status(404).json({ message: 'Report not found' });
+        }
+
         await db.query(
-            `UPDATE reports SET status = ? WHERE id=?`,
+            `UPDATE reports SET status = ? WHERE id= ?`,
             [status, id]
         );
+        if (status === 'resolved') {
+            await db.query(`update reports set status = 'resolved'
+             where household_id = ? and issue_type = ? and deleted_at is null and status != 'resolved'`, [report.household_id, report.issue_type]);
+
+        }
+
+
+
         await auditLog({
             user_id: req.user ? req.user.id : null,
             user_name: req.user ? req.user.name : 'Unknown',
