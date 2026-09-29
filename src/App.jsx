@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
 import LoadingScreen from '@/components/ui/LoadingScreen';
 const Login = lazy(() => import('./pages/Login'));
@@ -80,7 +80,7 @@ const App = () => {
                     <Route path="/audit-trail/:id" element={<RoleBasedRoute allowedRoles={['admin']}><AuditDetail /></RoleBasedRoute>} />
                     <Route path="/admin/flags/:id" element={<RoleBasedRoute allowedRoles={['admin']}><FlagDetail /></RoleBasedRoute>} />
 
-                    {/* Unknown URLs - never leave a blank page */}
+
                     <Route path="*" element={<NotFound />} />
 
                 </Routes>

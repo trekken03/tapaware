@@ -9,6 +9,10 @@ const validateFields = require('../middleware/validateFields')
 
 router.post('/', concernLimiter, validateFields(['name', 'contact_info', 'purok', 'message']), concernController.submitConcern);
 router.get('/', verifyToken, requireRole('admin', 'staff'), concernController.getAllConcerns);
+router.get('/archived', verifyToken, requireRole('admin'), concernController.getArchivedConcerns);
+router.put('/:id/archive', verifyToken, verifyCsrf, requireRole('admin'), concernController.archiveConcern);
+router.put('/:id/restore', verifyToken, verifyCsrf, requireRole('admin'), concernController.restoreConcern);
+router.delete('/:id/permanent', verifyToken, verifyCsrf, requireRole('admin'), concernController.permanentlyDeleteConcern);
 router.get('/:id', verifyToken, requireRole('admin', 'staff'), concernController.getConcernById);
 router.put('/:id/reply', verifyToken, verifyCsrf, requireRole('admin', 'staff'), concernController.replyToConcern);
 

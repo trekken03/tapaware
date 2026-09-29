@@ -512,7 +512,7 @@ const Visualization = () => {
                                             cy="50%"
                                             outerRadius={90}
                                             label={({ issue_type, percent }) =>
-                                                `${issue_type} ${(percent * 100).toFixed(0)}%`
+                                                `${issue_type.charAt(0).toUpperCase() + issue_type.slice(1)} ${(percent * 100).toFixed(0)}%`
                                             }
                                         >
                                             {byIssue.map((entry, index) => (
@@ -523,7 +523,7 @@ const Visualization = () => {
                                             ))}
                                         </Pie>
                                         <Tooltip formatter={(value) => [value, 'Reports']} />
-                                        <Legend />
+                                        <Legend formatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)} />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </CardContent>

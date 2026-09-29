@@ -27,8 +27,120 @@ exports.submitConcern = async (req, res) => {
 
 exports.getAllConcerns = async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM concerns ORDER BY created_at DESC limit 100');
+        const [rows] = await db.query('SELECT * FROM concerns WHERE deleted_at IS NULL ORDER BY created_at DESC limit 100');
         res.json(rows);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.getArchivedConcerns = async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            'SELECT * FROM concerns WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC'
+        );
+        res.json(rows);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.archiveConcern = async (req, res) => {
+    const { id } = req.params;
+    const currentUser = req.user;
+
+    try {
+        const [existing] = await db.query(
+            'SELECT * FROM concerns WHERE id = ? AND deleted_at IS NULL',
+            [id]
+        );
+        if (existing.length === 0) {
+            return res.status(404).json({ message: 'Concern not found' });
+        }
+
+        await db.query('UPDATE concerns SET deleted_at = NOW() WHERE id = ?', [id]);
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'ARCHIVE_CONCERN',
+            table_affected: 'concerns',
+            record_id: id,
+            details: `Archived concern #${id}`,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'Concern archived successfully' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.restoreConcern = async (req, res) => {
+    const { id } = req.params;
+    const currentUser = req.user;
+
+    try {
+        const [existing] = await db.query(
+            'SELECT * FROM concerns WHERE id = ? AND deleted_at IS NOT NULL',
+            [id]
+        );
+        if (existing.length === 0) {
+            return res.status(404).json({ message: 'Archived concern not found' });
+        }
+
+        await db.query('UPDATE concerns SET deleted_at = NULL WHERE id = ?', [id]);
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'RESTORE_CONCERN',
+            table_affected: 'concerns',
+            record_id: id,
+            details: `Restored concern #${id}`,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'Concern restored successfully' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.permanentlyDeleteConcern = async (req, res) => {
+    const { id } = req.params;
+    const currentUser = req.user;
+
+    try {
+        const [existing] = await db.query(
+            'SELECT * FROM concerns WHERE id = ? AND deleted_at IS NOT NULL',
+            [id]
+        );
+        if (existing.length === 0) {
+            return res.status(404).json({ message: 'Archived concern not found' });
+        }
+
+        await db.query('DELETE FROM concerns WHERE id = ?', [id]);
+        await auditLog({
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_role: currentUser.role,
+            action: 'PERMANENTLY_DELETE_CONCERN',
+            table_affected: 'concerns',
+            record_id: id,
+            details: `Permanently deleted concern #${id}`,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'Concern permanently deleted' });
     }
     catch (error) {
         console.error(error);
@@ -40,7 +152,10 @@ exports.getConcernById = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const [[concern]] = await db.query('SELECT * FROM concerns WHERE id = ?', [id]);
+        const [[concern]] = await db.query(
+            'SELECT * FROM concerns WHERE id = ? AND deleted_at IS NULL',
+            [id]
+        );
 
         if (!concern) {
             return res.status(404).json({ message: 'Concern not found' });
@@ -64,7 +179,10 @@ exports.replyToConcern = async (req, res) => {
     }
 
     try {
-        const [[concern]] = await db.query('SELECT * FROM concerns WHERE id = ?', [id]);
+        const [[concern]] = await db.query(
+            'SELECT * FROM concerns WHERE id = ? AND deleted_at IS NULL',
+            [id]
+        );
         if (!concern) {
             return res.status(404).json({ message: 'Concern not found' });
         }

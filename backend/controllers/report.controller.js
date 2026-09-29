@@ -193,7 +193,7 @@ exports.updateReportStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!status || !['pending', 'in_progress', 'resolved'].includes(status)) {
+    if (!status || !['pending', 'investigating', 'resolved'].includes(status)) {
         return res.status(400).json({ message: 'Valid status is required' });
     }
 
@@ -213,6 +213,11 @@ exports.updateReportStatus = async (req, res) => {
         if (status === 'resolved') {
             await db.query(`update reports set status = 'resolved'
              where household_id = ? and issue_type = ? and deleted_at is null and status != 'resolved'`, [report.household_id, report.issue_type]);
+
+        }
+        if (status === 'investigating') {
+            await db.query(`update reports set status = 'investigating'
+             where household_id = ? and issue_type = ? and deleted_at is null and status != 'investigating'`, [report.household_id, report.issue_type]);
 
         }
 

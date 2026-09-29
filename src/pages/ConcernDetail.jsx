@@ -3,13 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, MessageSquare, Send, Mail, MapPin, User } from 'lucide-react'
+import { ArrowLeft, MessageSquare, Send, Mail, MapPin, Archive as ArchiveIcon } from 'lucide-react'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { toast } from 'sonner'
 
 const ConcernDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
+    const { user } = useAuth()
     const [concern, setConcern] = useState(null)
     const [loading, setLoading] = useState(true)
     const [replyMessage, setReplyMessage] = useState('')
@@ -54,6 +57,16 @@ const ConcernDetail = () => {
         }
     }
 
+    const handleArchive = async () => {
+        try {
+            await API.put(`/concerns/${id}/archive`)
+            toast.success('Concern archived successfully')
+            navigate('/admin?tab=concerns')
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to archive concern')
+        }
+    }
+
     if (loading) {
         return (
             <Layout>
@@ -82,15 +95,31 @@ const ConcernDetail = () => {
     return (
         <Layout>
             <div className="mx-auto w-full">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="mb-4 flex items-center gap-1"
-                    onClick={() => navigate(-1)}
-                >
-                    <ArrowLeft size={14} />
-                    Back to Admin Panel
-                </Button>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1"
+                        onClick={() => navigate(-1)}
+                    >
+                        <ArrowLeft size={14} />
+                        Back to Admin Panel
+                    </Button>
+                    {user?.role === 'admin' && (
+                        <ConfirmDialog
+                            title="Archive this concern?"
+                            description="It will be removed from active concerns and can be restored from the Archive page."
+                            actionText="Archive Concern"
+                            actionVariant="destructive"
+                            onConfirm={handleArchive}
+                        >
+                            <Button variant="outline" size="sm" className="flex items-center gap-1 text-red-600">
+                                <ArchiveIcon size={14} />
+                                Archive
+                            </Button>
+                        </ConfirmDialog>
+                    )}
+                </div>
 
                 <Card className="mb-6">
                     <CardContent className="pt-6">

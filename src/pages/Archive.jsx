@@ -28,6 +28,14 @@ const TABS = [
         deleteWarning: 'This report will be erased from the database. This cannot be undone.',
     },
     {
+        value: 'concerns',
+        label: 'Concerns',
+        endpoint: '/concerns/archived',
+        restore: (id) => `/concerns/${id}/restore`,
+        remove: (id) => `/concerns/${id}/permanent`,
+        deleteWarning: 'This concern will be erased from the database. This cannot be undone.',
+    },
+    {
         value: 'tds',
         label: 'TDS Readings',
         endpoint: '/tds/archived',
@@ -163,6 +171,14 @@ const Archive = () => {
                                                 <TableHead>Reported By</TableHead>
                                             </>
                                         )}
+                                        {activeTab === 'concerns' && (
+                                            <>
+                                                <TableHead>Name</TableHead>
+                                                <TableHead>Purok</TableHead>
+                                                <TableHead>Concern</TableHead>
+                                                <TableHead>Status</TableHead>
+                                            </>
+                                        )}
                                         {activeTab === 'tds' && (
                                             <>
                                                 <TableHead>Household</TableHead>
@@ -203,6 +219,14 @@ const Archive = () => {
                                                     <TableCell label="Issue Type" className="capitalize">{row.issue_type}</TableCell>
                                                     <TableCell label="Status" className="capitalize">{row.status}</TableCell>
                                                     <TableCell label="Reported By">{row.reported_by}</TableCell>
+                                                </>
+                                            )}
+                                            {activeTab === 'concerns' && (
+                                                <>
+                                                    <TableCell label="Name" className="font-semibold">{row.name || 'Anonymous'}</TableCell>
+                                                    <TableCell label="Purok">{row.purok ? `Purok ${row.purok}` : '—'}</TableCell>
+                                                    <TableCell label="Concern" className="max-w-[280px] truncate">{row.message}</TableCell>
+                                                    <TableCell label="Status" className="capitalize">{row.status}</TableCell>
                                                 </>
                                             )}
                                             {activeTab === 'tds' && (

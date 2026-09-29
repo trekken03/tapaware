@@ -114,6 +114,7 @@ create table concerns(
     replied_by varchar(250),
     replied_at timestamp null,
     created_at timestamp default current_timestamp,
+    deleted_at timestamp null default null,
     index idx_concerns_status (status)
 );
 
