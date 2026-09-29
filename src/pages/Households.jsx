@@ -223,7 +223,9 @@ const Households = () => {
                                                 <TableRow
                                                     key={h.id}
                                                     className="cursor-pointer hover:bg-gray-50"
-                                                    onClick={() => navigate(`/households/${h.id}`)}
+                                                    onClick={() => navigate(`/households/${h.id}`, {
+                                                        state: { from: 'households' }
+                                                    })}
                                                 >
                                                     <TableCell label="No.">{rowNum}</TableCell>
                                                     <TableCell label="Owner" className="font-semibold">{h.owner_name}</TableCell>

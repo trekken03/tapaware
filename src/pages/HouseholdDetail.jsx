@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -39,6 +39,7 @@ const getTdsStatus = (value) => {
 const HouseholdDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
+    const location = useLocation()
     const [household, setHousehold] = useState(null)
     const [loading, setLoading] = useState(true)
     const [reportPage, setReportPage] = useState(1)
@@ -77,16 +78,13 @@ const HouseholdDetail = () => {
             setLoading(false)
         }
     }
-    const handleBack = (req) => {
-        const currentUser = req.user;
-        const isAdmin = currentUser.role === 'admin';
+    const handleBack = () => {
+        if (location.state?.from === 'flags' && location.state.flagId) {
+            navigate(`/admin/flags/${location.state.flagId}`)
+            return
+        }
 
-        if (isAdmin) {
-            navigate('/admin?tab=flagged')
-        }
-        else {
-            navigate('/households')
-        }
+        navigate('/households')
     }
 
     if (loading) {

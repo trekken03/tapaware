@@ -27,7 +27,8 @@ const EditUser = () => {
         name: existingUser?.name || '',
         email: existingUser?.email || '',
         household_number: existingUser?.household_number || '',
-        purok: existingUser?.purok || ''
+        purok: existingUser?.purok || '',
+        address: existingUser?.address || ''
     })
 
     const handleChange = (e) => {
@@ -104,7 +105,8 @@ const EditUser = () => {
         form.name !== (existingUser?.name || '') ||
         form.email !== (existingUser?.email || '') ||
         form.household_number?.toString() !== (existingUser?.household_number?.toString() || '') ||
-        form.purok?.toString() !== (existingUser?.purok?.toString() || '')
+        form.purok?.toString() !== (existingUser?.purok?.toString() || '') ||
+        form.address !== (existingUser?.address || '')
 
     return (
         <Layout>
@@ -215,6 +217,19 @@ const EditUser = () => {
 
                                 </div>
                             </div>
+
+                            {existingUser?.role === 'resident' && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="address">Address</Label>
+                                    <Input
+                                        id="address"
+                                        name="address"
+                                        value={form.address}
+                                        onChange={handleChange}
+                                        maxLength={250}
+                                    />
+                                </div>
+                            )}
 
                             {householdChanged && (
                                 <div className="rounded-lg border border-blue-400 bg-blue-200 p-4 space-y-3">

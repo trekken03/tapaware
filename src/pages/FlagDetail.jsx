@@ -203,7 +203,9 @@ const FlagDetail = () => {
                     <Button
                         variant="outline"
                         className="flex items-center gap-2"
-                        onClick={() => navigate(`/households/${flag.household_id}`)}
+                        onClick={() => navigate(`/households/${flag.household_id}`, {
+                            state: { from: 'flags', flagId: flag.id }
+                        })}
                     >
                         <Home size={16} />
                         View Full Household

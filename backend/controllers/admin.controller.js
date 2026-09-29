@@ -4,7 +4,7 @@ const auditLog = require('../utils/auditLogger');
 exports.getAllUsers = async (req, res) => {
     try {
         const [rows] = await db.query(`Select u.id,u.name,u.email,u.role,u.household_id,
-            h.household_number,h.purok,u.created_at from users u left join households h on u.household_id = h.id
+            h.household_number,h.purok,h.address,u.created_at from users u left join households h on u.household_id = h.id
             where u.deleted_at is null
             order by u.created_at desc`);
         res.json(rows);
@@ -277,8 +277,14 @@ exports.updateUserInfo = async (req, res) => {
 };
 exports.updateUserInfo = async (req, res) => {
     const { id } = req.params;
-    const { name, email, household_number, purok, transfer_data } = req.body;
+    const { name, email, household_number, purok, transfer_data, address } = req.body;
     const currentUser = req.user;
+    const addressProvided = Object.prototype.hasOwnProperty.call(req.body, 'address');
+    const normalizedAddress = typeof address === 'string' ? address.trim() : '';
+
+    if (addressProvided && (typeof address !== 'string' || normalizedAddress.length > 250)) {
+        return res.status(400).json({ message: 'Address must be 250 characters or fewer' });
+    }
 
     try {
         const [existing] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
@@ -332,8 +338,8 @@ exports.updateUserInfo = async (req, res) => {
 
         if (existing[0].role === 'resident' && finalHouseholdId) {
             await db.query(
-                'UPDATE households SET owner_name = ? WHERE id = ?',
-                [name, finalHouseholdId]
+                'UPDATE households SET owner_name = ?, address = COALESCE(?, address) WHERE id = ?',
+                [name, addressProvided ? normalizedAddress : null, finalHouseholdId]
             );
         }
 

@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 const getReportStatusStyle = (status) => {
     switch (status) {
         case 'pending': return { label: 'Pending', color: 'text-yellow-700', bg: 'bg-yellow-100' }
-        case 'investigating': return { label: 'Investigating', color: 'text-blue-700', bg: 'bg-blue-100' }
+        case 'investigating': return { label: 'Investigating', color: 'text-violet-700', bg: 'bg-violet-100' }
         case 'resolved': return { label: 'Resolved', color: 'text-green-700', bg: 'bg-green-100' }
         default: return { label: status, color: 'text-gray-700', bg: 'bg-gray-100' }
     }
