@@ -231,7 +231,7 @@ const Households = () => {
                                                     <TableCell label="Owner" className="font-semibold">{h.owner_name}</TableCell>
                                                     <TableCell label="Household">#{h.household_number}</TableCell>
                                                     <TableCell label="Purok">Purok {h.purok}</TableCell>
-                                                    <TableCell label="Address" className="max-w-[200px] truncate">{h.address}</TableCell>
+                                                    <TableCell label="Address" className="max-w-[200px] truncate">{h.address?.trim() || '-'}</TableCell>
                                                     <TableCell label="Date Added">
                                                         {new Date(h.created_at).toLocaleDateString('en-US', {
                                                             month: 'short',
