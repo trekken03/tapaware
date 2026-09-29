@@ -240,7 +240,7 @@ const Profile = () => {
                                                         id="newPassword"
                                                         name="newPassword"
                                                         type={showPassword1 ? 'text' : 'password'}
-                                                        placeholder="At least 6 characters"
+                                                        placeholder="At least 8 characters"
                                                         value={passwordForm.newPassword}
                                                         minLength="6"
                                                         maxLength="20"
