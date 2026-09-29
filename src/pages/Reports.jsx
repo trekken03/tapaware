@@ -281,7 +281,7 @@ const Reports = () => {
                                                 <TableRow
                                                     key={r.id}
                                                     className="cursor-pointer hover:bg-gray-50"
-                                                    onClick={() => navigate(`/reports/${r.id}`)}
+                                                    onClick={() => navigate(`/reports/${r.id}`, { state: { from: 'reports' } })}
                                                 >
                                                     <TableCell label="No.">
                                                         {rowNum}

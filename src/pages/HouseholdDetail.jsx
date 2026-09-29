@@ -24,7 +24,7 @@ const getHouseholdStatusStyle = (status) => {
 const getReportStatusStyle = (status) => {
     switch (status) {
         case 'pending': return { label: 'Pending', color: 'text-yellow-700', bg: 'bg-yellow-100' }
-        case 'investigating': return { label: 'Investigating', color: 'text-blue-700', bg: 'bg-blue-100' }
+        case 'investigating': return { label: 'Investigating', color: 'text-violet-700', bg: 'bg-violet-100' }
         case 'resolved': return { label: 'Resolved', color: 'text-green-700', bg: 'bg-green-100' }
         default: return { label: status, color: 'text-gray-700', bg: 'bg-gray-100' }
     }
@@ -77,6 +77,17 @@ const HouseholdDetail = () => {
             setLoading(false)
         }
     }
+    const handleBack = (req) => {
+        const currentUser = req.user;
+        const isAdmin = currentUser.role === 'admin';
+
+        if (isAdmin) {
+            navigate('/admin?tab=flagged')
+        }
+        else {
+            navigate('/households')
+        }
+    }
 
     if (loading) {
         return (
@@ -120,7 +131,7 @@ const HouseholdDetail = () => {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-1"
-                        onClick={() => navigate('/households')}
+                        onClick={handleBack}
                     >
                         <ArrowLeft size={14} />
                         Back
@@ -188,7 +199,7 @@ const HouseholdDetail = () => {
                                         <p className="text-xs text-gray-500">Reported {f.times_reported} times</p>
                                     </div>
                                     <span className={`px-2 py-1 text-xs font-semibold ${f.status === 'active' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                                        {f.status}
+                                        {f.status.charAt(0).toUpperCase() + f.status.slice(1)}
                                     </span>
                                 </div>
                             ))}

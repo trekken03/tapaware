@@ -195,7 +195,8 @@ exports.login = async (req, res) => {
         const [rows] = await db.query(
             `SELECT users.*,
             households.household_number,
-            households.purok
+            households.purok,
+            households.address
             FROM users
             LEFT JOIN households ON users.household_id = households.id
             WHERE users.email = ?`,
@@ -248,7 +249,8 @@ exports.login = async (req, res) => {
                 role: user.role,
                 household_id: user.household_id,
                 household_number: user.household_number,
-                purok: user.purok
+                purok: user.purok,
+                address: user.address
             }
         });
 
@@ -275,7 +277,8 @@ exports.getMe = async (req, res) => {
         const [rows] = await db.query(
             `SELECT users.*,
             households.household_number,
-            households.purok
+            households.purok,
+            households.address
             FROM users
             LEFT JOIN households ON users.household_id = households.id
             WHERE users.id = ?`,
@@ -296,7 +299,8 @@ exports.getMe = async (req, res) => {
                 role: user.role,
                 household_id: user.household_id,
                 household_number: user.household_number,
-                purok: user.purok
+                purok: user.purok,
+                address: user.address
             }
         });
     }
@@ -332,10 +336,20 @@ exports.updateProfile = async (req, res) => {
     const { name, email } = req.body;
     const userId = req.user.id;
 
+
+    const normalizedEmail =
+        typeof email === 'string' ? email.trim().toLowerCase() : '';
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+        return res.status(400).json({ message: 'Please provide a valid email address' });
+    }
+
+
+
     try {
         const [existing] = await db.query(
             'SELECT * FROM users WHERE email = ? AND id != ?',
-            [email, userId]
+            [normalizedEmail, userId]
         );
 
         if (existing.length > 0) {
@@ -349,7 +363,7 @@ exports.updateProfile = async (req, res) => {
 
         await db.query(
             'UPDATE users SET name = ?, email = ? WHERE id = ?',
-            [name, email, userId]
+            [name, normalizedEmail, userId]
         );
 
         if (currentUserRow.role === 'resident' && currentUserRow.household_id) {
@@ -370,7 +384,7 @@ exports.updateProfile = async (req, res) => {
             ip_address: req.ip
         });
 
-        res.json({ message: 'Profile updated successfully', user: { name, email } });
+        res.json({ message: 'Profile updated successfully', user: { name, email: normalizedEmail } });
     }
     catch (error) {
         console.error(error);

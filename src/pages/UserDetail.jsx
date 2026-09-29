@@ -197,7 +197,7 @@ const UserDetail = () => {
                                             return (
                                                 <div
                                                     key={r.id}
-                                                    onClick={() => navigate(`/reports/${r.id}`)}
+                                                    onClick={() => navigate(`/reports/${r.id}`, { state: { from: 'admin', userId: user.id } })}
                                                     className="flex items-center justify-between gap-3 rounded-lg bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-colors"
                                                 >
                                                     <div>

@@ -4,17 +4,19 @@ const sendEmail = require('../utils/emailSender');
 
 exports.getAllReports = async (req, res) => {
     try {
-        const [rows] = await db.query(
-            `SELECT reports.*,
+        const isResident = req.user?.role === 'resident';
+        let query = `SELECT reports.*,
             households.household_number,
             households.owner_name,
             households.purok,
             users.name as reported_by
             FROM reports JOIN households ON reports.household_id =households.id
-            JOIN users ON reports.user_id= users.id
+            JOIN users ON reports.user_id = users.id
             WHERE reports.deleted_at IS NULL
-            ORDER BY reports.created_at DESC`
-        );
+            ${isResident ? 'AND reports.user_id = ?' : ''}
+            ORDER BY reports.created_at DESC`;
+        const params = isResident ? [req.user.id] : [];
+        const [rows] = await db.query(query, params);
         res.json(rows);
     }
     catch (error) {
@@ -217,7 +219,8 @@ exports.updateReportStatus = async (req, res) => {
         }
         if (status === 'investigating') {
             await db.query(`update reports set status = 'investigating'
-             where household_id = ? and issue_type = ? and deleted_at is null and status != 'investigating'`, [report.household_id, report.issue_type]);
+               where household_id = ? and issue_type = ? and deleted_at is null
+               and status != 'resolved' and status != 'investigating'`, [report.household_id, report.issue_type]);
 
         }
 
@@ -246,13 +249,14 @@ exports.getReportsByHousehold = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const [rows] = await db.query(
-            `SELECT reports.*, users.name as reported_by
+        const isResident = req.user?.role === 'resident';
+        let query = `SELECT reports.*, users.name as reported_by
             FROM reports JOIN users ON reports.user_id=users.id
-            WHERE reports.household_id=? AND reports.deleted_at IS NULL
-            ORDER BY reports.created_at DESC`,
-            [id]
-        );
+            WHERE reports.household_id = ? AND reports.deleted_at IS NULL
+            ${isResident ? 'AND reports.user_id = ?' : ''}
+            ORDER BY reports.created_at DESC`;
+        const params = isResident ? [id, req.user.id] : [id];
+        const [rows] = await db.query(query, params);
         res.json(rows);
     }
     catch (error) {
@@ -282,14 +286,20 @@ exports.getReportById = async (req, res) => {
             return res.status(404).json({ message: 'Report not found' });
         }
 
-        const [otherReports] = await db.query(
-            `SELECT reports.*, users.name as reported_by
+        if (req.user?.role === 'resident' && Number(report.user_id) !== Number(req.user.id)) {
+            return res.status(404).json({ message: 'Report not found' });
+        }
+
+        const isResident = req.user?.role === 'resident';
+        let otherReportsQuery = `SELECT reports.*, users.name as reported_by
             FROM reports JOIN users ON reports.user_id = users.id
             WHERE reports.household_id = ? AND reports.id != ? AND reports.deleted_at IS NULL
+            ${isResident ? 'AND reports.user_id = ?' : ''}
             ORDER BY reports.created_at DESC
-            LIMIT 5`,
-            [report.household_id, id]
-        );
+            LIMIT 5`;
+        const otherReportsParams = [report.household_id, id];
+        if (isResident) otherReportsParams.push(req.user.id);
+        const [otherReports] = await db.query(otherReportsQuery, otherReportsParams);
 
         const [[activeFlag]] = await db.query(
             `SELECT id, times_reported FROM recurring_flags

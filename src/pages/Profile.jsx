@@ -23,6 +23,7 @@ const Profile = () => {
     const [form, setForm] = useState({
         name: user?.name || '',
         email: user?.email || '',
+
     })
 
     const [passwordForm, setPasswordForm] = useState({
@@ -175,7 +176,7 @@ const Profile = () => {
 
                                         {user?.role === 'resident' && (
                                             <p className="text-xs text-black">
-                                                Household and purok are managed by barangay staff.{' '}
+                                                Household number and purok are managed by barangay staff.{' '}
                                                 <button
                                                     type="button"
                                                     onClick={() => navigate('/', { state: { scrollTo: 'contact' } })}
@@ -186,6 +187,8 @@ const Profile = () => {
                                                 to update these.
                                             </p>
                                         )}
+
+
 
                                         <div className="pt-2 flex justify-end">
                                             <Button

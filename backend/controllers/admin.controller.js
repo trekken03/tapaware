@@ -490,7 +490,7 @@ exports.getUserById = async (req, res) => {
 
         if (user.role === 'resident' && user.household_id) {
             [reports] = await db.query(
-                'SELECT * FROM reports WHERE household_id = ? ORDER BY created_at DESC',
+                'SELECT * FROM reports WHERE household_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
                 [user.household_id]
             );
         }
@@ -563,7 +563,7 @@ exports.getFlagById = async (req, res) => {
         const [contributingReports] = await db.query(
             `SELECT reports.*, users.name as reported_by
             FROM reports JOIN users ON reports.user_id = users.id
-            WHERE reports.household_id = ? AND reports.issue_type = ?
+            WHERE reports.household_id = ? AND reports.issue_type = ? and reports.deleted_at is null
             ORDER BY reports.created_at DESC`,
             [flag.household_id, flag.issue_type]
         );

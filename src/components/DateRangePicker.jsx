@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { format } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -22,48 +23,82 @@ const toISODate = (date) => {
 }
 
 const DateRangePicker = ({ dateRange, setDateRange }) => {
-    const selectedDate = {
-        from: parseLocalDate(dateRange.from),
-        to: parseLocalDate(dateRange.to),
+    const [fromOpen, setFromOpen] = useState(false)
+    const [toOpen, setToOpen] = useState(false)
+    const fromDate = parseLocalDate(dateRange.from)
+    const toDate = parseLocalDate(dateRange.to)
+
+    const handleFromSelect = (date) => {
+        if (!date) return
+        const from = toISODate(date)
+        setDateRange({
+            from,
+            to: toDate < date ? from : dateRange.to,
+        })
+        setFromOpen(false)
     }
 
-    const handleSelect = (range) => {
-        if (!range) return
-        setDateRange({
-            from: range.from ? toISODate(range.from) : dateRange.from,
-            to: range.to ? toISODate(range.to) : dateRange.to,
-        })
+    const handleToSelect = (date) => {
+        if (!date) return
+        setDateRange({ ...dateRange, to: toISODate(date) })
+        setToOpen(false)
     }
 
     return (
-        <div>
-            <label className="text-xs font-semibold text-black uppercase block mb-1">
-                Date Range
-            </label>
-            <Popover >
-                <PopoverTrigger asChild>
-                    <Button
-                        variant="default"
-                        className="justify-start text-left font-medium border-black bg-white h-8 px-3 hover:bg-gray-100 text-black hover:cursor-pointer"
-                    >
-                        <CalendarIcon className="mr-2 h-4 w-4 text-black" />
-                        <span className="text-sm text-2xl text-black ">
-                            {format(selectedDate.from, 'MMM d, yyyy')} – {format(selectedDate.to, 'MMM d, yyyy')}
-                        </span>
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                        className="text-black border-black"
-                        mode="range"
-                        selected={selectedDate}
-                        onSelect={handleSelect}
-                        numberOfMonths={2}
-                        disabled={{ after: new Date() }}
-                        defaultMonth={selectedDate.from}
-                    />
-                </PopoverContent>
-            </Popover>
+        <div className="flex flex-wrap items-end gap-3">
+            <div>
+                <label className="text-xs font-semibold text-black uppercase block mb-1">
+                    From
+                </label>
+                <Popover open={fromOpen} onOpenChange={setFromOpen}>
+                    <PopoverTrigger asChild>
+                        <Button
+
+                            className="w-[150px] justify-start text-left font-medium border-black h-8 px-3  text-black bg-white hover:bg-gray-100"
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4 text-black" />
+                            {format(fromDate, 'MMM d, yyyy')}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                            className="text-black border-black"
+                            mode="single"
+                            selected={fromDate}
+                            onSelect={handleFromSelect}
+                            disabled={{ after: new Date() }}
+                            defaultMonth={fromDate}
+                        />
+                    </PopoverContent>
+                </Popover>
+            </div>
+
+            <div>
+                <label className="text-xs font-semibold text-black uppercase block mb-1">
+                    To
+                </label>
+                <Popover open={toOpen} onOpenChange={setToOpen}>
+                    <PopoverTrigger asChild>
+                        <Button
+
+                            className="w-[150px] justify-start text-left font-medium border-black bg-white h-8 px-3 hover:bg-gray-100 text-black"
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4 text-black" />
+                            {format(toDate, 'MMM d, yyyy')}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                            className="text-black border-black"
+                            mode="single"
+                            selected={toDate}
+                            onSelect={handleToSelect}
+                            disabled={{ before: fromDate, after: new Date() }}
+                            defaultMonth={toDate}
+                        />
+                    </PopoverContent>
+                </Popover>
+            </div>
         </div>
     )
 }

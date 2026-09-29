@@ -302,7 +302,7 @@ const AdminPanel = () => {
                                                 <TableRow
                                                     key={u.id}
                                                     className="cursor-pointer hover:bg-gray-50"
-                                                    onClick={() => navigate(`/admin/users/${u.id}`)}
+                                                    onClick={() => navigate(`/admin/users/${u.id}`, { state: { from: 'admin' } })}
                                                 >
                                                     <TableCell label="No.">{rowNumber(index)}</TableCell>
                                                     <TableCell label="Name" className="font-semibold">{u.name}</TableCell>
@@ -494,7 +494,7 @@ const AdminPanel = () => {
                                                 <TableRow
                                                     key={f.id}
                                                     className="cursor-pointer hover:bg-gray-50"
-                                                    onClick={() => navigate(`/admin/flags/${f.id}`)}
+                                                    onClick={() => navigate(`/admin/flags/${f.id}`, { state: { from: 'flags' } })}
                                                 >
                                                     <TableCell label="No.">{rowNumber(index)}</TableCell>
                                                     <TableCell label="Household">#{f.household_number}</TableCell>

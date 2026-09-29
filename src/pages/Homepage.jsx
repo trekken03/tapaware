@@ -256,7 +256,7 @@ const Homepage = () => {
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
                     <div className="flex items-center gap-2 mb-2">
                         <Droplets className="text-cyan-600" size={18} />
-                        <span className="text-1xl font-semibold uppercase tracking-widest text-cyan-600">Live readings</span>
+                        <span className="text-1xl font-semibold uppercase tracking-widest text-cyan-600">Latest readings</span>
                     </div>
                     <h2 className="text-3xl font-black tracking-tight text-[#0a1a33] mb-10">
                         Water quality by purok

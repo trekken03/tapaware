@@ -89,7 +89,7 @@ const ReportDetail = () => {
         try {
             await API.delete(`/reports/${id}`)
             toast.success(`${isResident ? 'Report deleted successfully' : 'Report archived successfully'}`)
-            navigate(`${isResident ? '/dashboard' : -1}`)
+            navigate(`${isResident ? '/dashboard' : '/reports'}`)
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to archive report')
         }
@@ -101,7 +101,18 @@ const ReportDetail = () => {
         if (location.state?.from === 'flags') {
             navigate(`/admin/flags/${location.state.flagId}`)
 
-        } else {
+        }
+        else if (location.state?.from === 'reports') {
+            navigate(-1)
+
+        }
+        else if (location.state?.from === 'admin') {
+            navigate('/admin')
+
+        }
+
+
+        else {
             navigate(`${isResident ? '/dashboard' : `/households/${report.household_id}`}`)
         }
     }
@@ -225,7 +236,7 @@ const ReportDetail = () => {
                                     return (
                                         <div
                                             key={r.id}
-                                            onClick={() => navigate(`/reports/${r.id}`)}
+                                            onClick={() => navigate(`/reports/${r.id}`, { state: location.state })}
                                             className={`flex items-center justify-between gap-3 rounded-lg border-l-4 ${s.border} bg-gray-100 p-3 cursor-pointer hover:bg-gray-200 transition-all duration-200`}
                                         >
                                             <div>
