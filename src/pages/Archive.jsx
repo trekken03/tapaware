@@ -133,7 +133,14 @@ const Archive = () => {
                     <CardHeader>
                         <div className="flex flex-col gap-4">
                             <CardTitle>Archived Records</CardTitle>
-                            <Tabs value={activeTab} onValueChange={(value) => setSearchParams({ tab: value })}>
+                            <Tabs
+                                value={activeTab}
+                                onValueChange={(value) => {
+                                    setRows([])
+                                    setLoading(true)
+                                    setSearchParams({ tab: value })
+                                }}
+                            >
                                 <TabsList variant="line">
                                     {TABS.map(t => (
                                         <TabsTrigger key={t.value} value={t.value}>{t.label}</TabsTrigger>
@@ -209,7 +216,7 @@ const Archive = () => {
                                                     <TableCell label="Household">#{row.household_number}</TableCell>
                                                     <TableCell label="Owner" className="font-semibold">{row.owner_name}</TableCell>
                                                     <TableCell label="Purok">Purok {row.purok}</TableCell>
-                                                    <TableCell label="Address" className="max-w-[200px] truncate">{row.address.trim() || '-'}</TableCell>
+                                                    <TableCell label="Address" className="max-w-[200px] truncate">{row.address?.trim() || '-'}</TableCell>
                                                 </>
                                             )}
                                             {activeTab === 'reports' && (

@@ -166,7 +166,7 @@ const UserDetail = () => {
                                             Purok {user.purok}
                                         </div>
 
-                                        <div className="text-gray-500">{user.address.trim() || '-'}</div>
+                                        <div className="text-gray-500">{user.address?.trim() || '-'}</div>
 
                                     </div>
                                 ) : (

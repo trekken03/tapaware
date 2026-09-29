@@ -181,7 +181,7 @@ const ReportDetail = () => {
                             </div>
                             <div>
                                 <p className="text-gray-500">Address</p>
-                                <p className="font-semibold text-gray-900">{report.address.trim() || '-'}</p>
+                                <p className="font-semibold text-gray-900">{report.address?.trim() || '-'}</p>
                             </div>
                             <div>
                                 <p className="text-gray-500">Time Occurred</p>

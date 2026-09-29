@@ -129,7 +129,7 @@ const TdsDetail = () => {
                             </div>
                             <div>
                                 <p className="text-gray-500">Address</p>
-                                <p className="font-semibold text-gray-900">{reading.address.trim() || '-'}</p>
+                                <p className="font-semibold text-gray-900">{reading.address?.trim() || '-'}</p>
                             </div>
                             <div>
                                 <p className="text-gray-500">Date Recorded</p>
