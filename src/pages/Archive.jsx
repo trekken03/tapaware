@@ -209,7 +209,7 @@ const Archive = () => {
                                                     <TableCell label="Household">#{row.household_number}</TableCell>
                                                     <TableCell label="Owner" className="font-semibold">{row.owner_name}</TableCell>
                                                     <TableCell label="Purok">Purok {row.purok}</TableCell>
-                                                    <TableCell label="Address" className="max-w-[200px] truncate">{row.address}</TableCell>
+                                                    <TableCell label="Address" className="max-w-[200px] truncate">{row.address.trim() || '-'}</TableCell>
                                                 </>
                                             )}
                                             {activeTab === 'reports' && (

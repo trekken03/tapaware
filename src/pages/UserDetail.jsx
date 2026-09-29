@@ -165,9 +165,9 @@ const UserDetail = () => {
                                             <MapPin size={14} className="text-gray-400" />
                                             Purok {user.purok}
                                         </div>
-                                        {user.address && (
-                                            <div className="text-gray-500">{user.address}</div>
-                                        )}
+
+                                        <div className="text-gray-500">{user.address.trim() || '-'}</div>
+
                                     </div>
                                 ) : (
                                     <p className="text-sm text-yellow-700">⚠️ No household linked to this account.</p>

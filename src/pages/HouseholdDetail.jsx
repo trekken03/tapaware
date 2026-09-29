@@ -166,7 +166,7 @@ const HouseholdDetail = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                             <div>
                                 <p className="text-gray-500">Address</p>
-                                <p className="font-semibold text-gray-900">{household.address}</p>
+                                <p className="font-semibold text-gray-900">{household.address.trim() || '-'}</p>
                             </div>
                             <div>
                                 <p className="text-gray-500">Date Added</p>

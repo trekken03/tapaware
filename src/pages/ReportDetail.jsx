@@ -95,6 +95,16 @@ const ReportDetail = () => {
         }
     }
 
+    const formatOccurredTime = (time) => {
+        if (!time) return '-'
+
+        const [hours, minutes] = time.split(':').map(Number)
+        return new Date(2000, 0, 1, hours, minutes).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+        })
+    }
+
     const handleBack = () => {
         console.log('location.state:', location.state)
 
@@ -171,7 +181,13 @@ const ReportDetail = () => {
                             </div>
                             <div>
                                 <p className="text-gray-500">Address</p>
-                                <p className="font-semibold text-gray-900">{report.address}</p>
+                                <p className="font-semibold text-gray-900">{report.address.trim() || '-'}</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">Time Occurred</p>
+                                <p className="font-semibold text-gray-900">
+                                    {formatOccurredTime(report.occurred_at)}
+                                </p>
                             </div>
                             <div>
                                 <p className="text-gray-500">Date Reported</p>
