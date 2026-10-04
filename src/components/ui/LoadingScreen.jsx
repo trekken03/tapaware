@@ -1,11 +1,11 @@
 const LoadingScreen = () => {
     return (
-        <div className="flex items-center justify-center min-h-screen bg-[#0a1a33]">
+        <div className="flex items-center justify-center min-h-screen bg-white">
             <div className="flex flex-col items-center gap-4">
                 <svg width="70" height="70" viewBox="0 0 80 80">
                     <path
                         d="M40 12 C40 12 24 34 24 46 A16 16 0 0 0 56 46 C56 34 40 12 40 12 Z"
-                        fill="#22d3ee"
+                        fill="#2563eb"
                     >
                         <animateTransform
                             attributeName="transform"
@@ -30,7 +30,7 @@ const LoadingScreen = () => {
                         />
                     </ellipse>
                 </svg>
-                <p className="text-cyan-200 text-sm font-medium tracking-wide">
+                <p className="text-black/80 text-sm font-medium tracking-wide">
                     Loading TapAware...
                 </p>
             </div>

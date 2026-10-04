@@ -43,6 +43,17 @@ const Homepage = () => {
         fetchData()
     }, [])
 
+    const [showIntro, setShowIntro] = useState(
+        () => localStorage.getItem('tapawareIntroSeen') !== 'true'
+    )
+    const [introEnded, setIntroEnded] = useState(false)
+    const [isIntroExiting, setIsIntroExiting] = useState(false)
+
+    const enterWebsite = () => {
+        localStorage.setItem('tapawareIntroSeen', 'true')
+        setIsIntroExiting(true)
+    }
+
     const fetchData = async () => {
         try {
             const [purokRes, summaryRes] = await Promise.all([
@@ -106,6 +117,52 @@ const Homepage = () => {
 
     return (
         <div className="bg-white">
+            {showIntro && (
+                <div
+                    onTransitionEnd={(event) => {
+                        if (event.target === event.currentTarget && isIntroExiting) {
+                            setShowIntro(false)
+                        }
+                    }}
+                    className={`fixed inset-0 z-[100] overflow-hidden bg-black transition-transform duration-700 ease-in-out ${isIntroExiting ? '-translate-y-full' : 'translate-y-0'}`}
+                >
+                    <video
+                        autoPlay
+                        muted
+                        playsInline
+                        preload="auto"
+                        onEnded={() => setIntroEnded(true)}
+                        onError={() => setIntroEnded(true)}
+                        className="absolute inset-0 h-full w-full object-cover"
+                    >
+                        <source src="/videos/TapAware-intro.mp4" type="video/mp4" />
+                    </video>
+
+                    <div className="absolute inset-0 bg-black/25" />
+
+                    {!introEnded && (
+                        <button
+                            type="button"
+                            onClick={enterWebsite}
+                            className="absolute right-5 top-5 z-10 rounded border border-white/60 px-4 py-2 text-sm font-medium text-white hover:bg-white/15"
+                        >
+                            Skip intro
+                        </button>
+                    )}
+
+                    {introEnded && (
+                        <button
+                            type="button"
+                            onClick={enterWebsite}
+                            aria-label="Enter website"
+                            className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-white"
+                        >
+                            <ArrowDown size={40} className="animate-bounce" aria-hidden="true" />
+                            <span className="text-sm font-semibold">Enter website</span>
+                        </button>
+                    )}
+                </div>
+            )}
             <LandingNavbar />
 
             {/* HERO */}
@@ -115,7 +172,7 @@ const Homepage = () => {
             >
                 {/* Background Video */}
                 <video
-                    autoPlay
+                    autoPlay={!showIntro}
                     loop
                     muted
                     playsInline
