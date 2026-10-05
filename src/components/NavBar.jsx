@@ -59,19 +59,19 @@ const LandingNavbar = () => {
 
     return (
         <nav
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-blue-900 shadow-lg ${scrolled ? 'py-3' : 'py-3'
+            className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#142f72]/95 shadow-[0_8px_30px_-18px_rgba(5,20,55,0.75)] backdrop-blur-md transition-all duration-300 ${scrolled ? 'py-3' : 'py-3'
                 }`}
         >
             <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between">
-                <button onClick={() => navigate('/')} className="flex items-center gap-2 text-white">
+                <button onClick={() => navigate('/')} className="flex items-center gap-2.5 text-white">
                     <img
-                        src="/assets/logo.webp"
+                        src="/assets/figure-main-logo.png"
                         alt="TapAware logo"
                         width={36}
                         height={36}
-                        className="w-9 h-9 object-contain rounded-full"
+                        className="h-9 w-9 shrink-0 translate-y-[2px] rounded-full object-contain"
                     />
-                    <span className="font-black tracking-tight text-lg">TapAware</span>
+                    <span className="text-lg font-black leading-none tracking-tight">TapAware</span>
                 </button>
 
                 {/* Desktop */}
@@ -80,7 +80,7 @@ const LandingNavbar = () => {
                         <button
                             key={link.id}
                             onClick={() => goToSection(link.id)}
-                            className="text-sm font-medium text-blue-100 hover:text-white transition-colors hover:cursor-pointer"
+                            className="text-sm font-medium rounded-full text-blue-100 transition-colors hover:cursor-pointer hover:text-cyan-100"
                         >
                             {link.label}
                         </button>
@@ -98,7 +98,7 @@ const LandingNavbar = () => {
                             </button>
                             <Button
                                 onClick={() => navigate('/dashboard')}
-                                className="bg-blue-400 hover:bg-blue-300 text-slate-950 hover:cursor-pointer"
+                                className=" rounded-full bg-white hover:bg-cyan-50 text-[#143472] hover:cursor-pointer"
                             >
                                 Dashboard
                             </Button>
@@ -111,7 +111,7 @@ const LandingNavbar = () => {
                             >
                                 <Button
 
-                                    className="bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 hover:cursor-pointer"
+                                    className=" rounded-full bg-white hover:bg-cyan-50 text-[#143472] flex items-center gap-2 hover:cursor-pointer"
                                 >
                                     <LogOut size={16} />
                                     Logout
@@ -125,7 +125,7 @@ const LandingNavbar = () => {
                         <>
                             <Button
                                 onClick={() => navigate('/dashboard')}
-                                className="bg-blue-400 hover:bg-blue-300 text-slate-950 hover:cursor-pointer"
+                                className="bg-white hover:bg-cyan-50 text-[#143472] hover:cursor-pointer rounded-full"
                             >
                                 Dashboard
                             </Button>
@@ -138,7 +138,7 @@ const LandingNavbar = () => {
                             >
                                 <Button
 
-                                    className="bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 hover:cursor-pointer"
+                                    className="bg-white rounded-full hover:bg-cyan-50 text-[#143472] flex items-center gap-2 hover:cursor-pointer"
                                 >
                                     <LogOut size={16} />
                                     Logout
@@ -150,7 +150,7 @@ const LandingNavbar = () => {
                     {!user && !isLoginPage && (
                         <Button
                             onClick={() => navigate('/login')}
-                            className="bg-blue-400 hover:bg-blue-300 text-slate-950"
+                            className="bg-white hover:bg-cyan-50 text-[#143472] rounded-full"
                         >
                             Log in
                         </Button>
@@ -169,7 +169,7 @@ const LandingNavbar = () => {
 
             {/* Mobile menu */}
             {isOpen && (
-                <div className="md:hidden bg-[#0a1a33] border-t border-white/10 mt-3">
+                <div className="mt-3 border-t border-white/10 bg-[#102765] md:hidden">
                     <div className="flex flex-col px-4 py-4 gap-1">
                         {navLinks.map((link) => (
                             <button
@@ -192,7 +192,7 @@ const LandingNavbar = () => {
                                 </button>
                                 <button
                                     onClick={() => { setIsOpen(false); navigate('/dashboard') }}
-                                    className="text-left py-2.5 text-blue-100 hover:text-white text-sm font-medium"
+                                    className="mt-2 bg-white hover:bg-cyan-50 text-[#143472] flex items-center gap-2 font-medium rounded-full justify-center h-7.5"
                                 >
                                     Dashboard
                                 </button>
@@ -205,7 +205,7 @@ const LandingNavbar = () => {
                                 >
                                     <Button
 
-                                        className="mt-2 bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 justify-center"
+                                        className="mt-2 bg-white hover:bg-cyan-50 text-[#143472] flex font-medium items-center gap-2 rounded-full justify-center"
                                     >
                                         <LogOut size={16} />
                                         Logout
@@ -219,7 +219,7 @@ const LandingNavbar = () => {
                             <>
                                 <button
                                     onClick={() => { setIsOpen(false); navigate('/dashboard') }}
-                                    className="text-left py-2.5 text-blue-100 hover:text-white text-sm font-medium"
+                                    className="mt-2 h-7.5 bg-white hover:bg-cyan-50 text-[#143472] flex font-medium items-center gap-2 rounded-full justify-center"
                                 >
                                     Dashboard
                                 </button>
@@ -232,7 +232,7 @@ const LandingNavbar = () => {
                                 >
                                     <Button
 
-                                        className="mt-2 bg-blue-400 hover:bg-blue-300 text-slate-950 flex items-center gap-2 justify-center"
+                                        className="rounded-full mt-2 bg-white hover:bg-cyan-50 text-[#143472] flex items-center gap-2 justify-center"
                                     >
                                         <LogOut size={16} />
                                         Logout
@@ -244,7 +244,7 @@ const LandingNavbar = () => {
                         {!user && !isLoginPage && (
                             <Button
                                 onClick={() => { setIsOpen(false); navigate('/login') }}
-                                className="mt-2 bg-blue-400 hover:bg-blue-300 text-slate-950"
+                                className="mt-2 bg-white hover:bg-cyan-50 text-[#143472]"
                             >
                                 Log in
                             </Button>
