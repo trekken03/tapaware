@@ -59,15 +59,9 @@ const ForgotPass = () => {
 
     return (
 
-        <div className="relative min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="relative min-h-screen bg-[url('/assets/mobile%20%5Fversion%5Fbackground.jpg')] bg-cover bg-center bg-no-repeat md:bg-[url('/assets/forgot_and_resetp_background.jpg')] flex items-center justify-center p-4">
             <LandingNavbar />
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-                <img
-                    src="/assets/logo.webp"
-                    alt=""
-                    className="w-[700px] opacity-10 object-contain"
-                />
-            </div>
+
 
             <Card className="relative z-10 w-full max-w-sm bg-white shadow-lg">
                 <div className="flex flex-col items-center mb-6">
