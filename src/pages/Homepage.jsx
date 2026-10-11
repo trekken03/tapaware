@@ -143,6 +143,11 @@ const Homepage = () => {
                         onError={() => setIntroEnded(true)}
                         className="absolute inset-0 h-full w-full object-cover"
                     >
+                        <source
+                            src="/videos/TapAware_mobile.mp4"
+                            type="video/mp4"
+                            media="(max-width: 767px)"
+                        />
                         <source src="/videos/TapAware-intro.mp4" type="video/mp4" />
                     </video>
 

@@ -4,6 +4,8 @@ import FooterLegalLinks from './legal/FooterLegalLinks'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Separator } from '@/components/ui/separator'
+import { Droplets } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 
 import Navbar from './NavBar';
 
@@ -35,25 +37,40 @@ const Watermark = () => (
     </div>
 )
 
-const PageFooter = () => (
-    <footer className="relative z-10 px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2 text-xs sm:text-sm text-gray-500 border-t border-gray-200">
-        <span>© {new Date().getFullYear()} TapAware - Barangay Cabalantian. All rights reserved.</span>
-        <FooterLegalLinks variant="light" />
+const PageFooter = ({ homepageStyle = false }) => (
+    <footer className={homepageStyle ? 'relative z-10 bg-[#071b4d] py-8 text-blue-200' : 'relative z-10 px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2 text-xs sm:text-sm text-gray-500 border-t border-gray-200'}>
+        {homepageStyle ? (
+            <div className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-x-8 gap-y-3 px-4 text-center sm:flex-row sm:flex-wrap sm:px-6">
+                <div className="flex items-center gap-2">
+                    <Droplets size={14} className="text-cyan-400" />
+                    <span className="text-xs">TapAware — Barangay Cabalantian Water Quality Monitoring System</span>
+                </div>
+                <FooterLegalLinks variant="dark" />
+                <p className="text-xs text-blue-300">© {new Date().getFullYear()} Barangay Cabalantian, Bacolor, Pampanga</p>
+            </div>
+        ) : (
+            <>
+                <span>© {new Date().getFullYear()} TapAware - Barangay Cabalantian. All rights reserved.</span>
+                <FooterLegalLinks variant="light" />
+            </>
+        )}
     </footer>
 )
 
 const Layout = ({ children }) => {
     const { user } = useAuth()
+    const location = useLocation()
     const isResident = user?.role === 'resident'
+    const residentHomepageStyle = isResident && ['/dashboard', '/profile'].includes(location.pathname)
 
     if (isResident) {
         return (
             <div className="relative flex min-h-screen bg-gray-100">
-                <Watermark />
+                {!residentHomepageStyle && <Watermark />}
                 <Navbar />
                 <div className="relative z-10 flex-1 flex flex-col min-h-screen pt-16">
                     <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
-                    <PageFooter />
+                    <PageFooter homepageStyle={residentHomepageStyle} />
                 </div>
             </div>
         )

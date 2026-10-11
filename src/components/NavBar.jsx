@@ -92,13 +92,13 @@ const LandingNavbar = () => {
 
                             <button
                                 onClick={() => navigate('/profile')}
-                                className="text-sm font-medium text-blue-100 hover:text-white transition-colors hover:cursor-pointer underline underline-offset-4"
+                                className={`text-sm font-medium text-blue-100 hover:text-white transition-colors hover:cursor-pointer ${location.pathname === '/profile' ? 'underline underline-offset-4' : ''}`}
                             >
-                                Hi, {user.name}
+                                My Account
                             </button>
                             <Button
                                 onClick={() => navigate('/dashboard')}
-                                className=" rounded-full bg-white hover:bg-cyan-50 text-[#143472] hover:cursor-pointer"
+                                className={`rounded-full bg-white hover:bg-cyan-50 text-[#143472] hover:cursor-pointer ${location.pathname === '/dashboard' ? 'underline underline-offset-4 decoration-2' : ''}`}
                             >
                                 Dashboard
                             </Button>
@@ -161,7 +161,7 @@ const LandingNavbar = () => {
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     aria-label={isOpen ? 'Close menu' : 'Open menu'}
-                    className="md:hidden text-white p-1"
+                    className="md:hidden flex min-h-11 min-w-11 items-center justify-center text-white"
                 >
                     {isOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
@@ -175,7 +175,7 @@ const LandingNavbar = () => {
                             <button
                                 key={link.id}
                                 onClick={() => goToSection(link.id)}
-                                className="text-left py-2.5 text-blue-100 hover:text-white text-sm font-medium"
+                                className="text-left min-h-11 py-3 text-blue-100 hover:text-white text-sm font-medium"
                             >
                                 {link.label}
                             </button>
@@ -186,13 +186,13 @@ const LandingNavbar = () => {
 
                                 <button
                                     onClick={() => { setIsOpen(false); navigate('/profile') }}
-                                    className="text-left py-2.5 text-blue-100 hover:text-white text-sm font-medium underline underline-offset-4"
+                                    className={`text-left min-h-11 py-3 text-blue-100 hover:text-white text-sm font-medium ${location.pathname === '/profile' ? 'underline underline-offset-4' : ''}`}
                                 >
-                                    Hi, {user.name}
+                                    My Account
                                 </button>
                                 <button
                                     onClick={() => { setIsOpen(false); navigate('/dashboard') }}
-                                    className="mt-2 bg-white hover:bg-cyan-50 text-[#143472] flex items-center gap-2 font-medium rounded-full justify-center h-7.5"
+                                    className={`mt-2 bg-white hover:bg-cyan-50 text-[#143472] flex items-center gap-2 font-medium rounded-full justify-center h-11 ${location.pathname === '/dashboard' ? 'underline underline-offset-4 decoration-2' : ''}`}
                                 >
                                     Dashboard
                                 </button>
@@ -205,7 +205,7 @@ const LandingNavbar = () => {
                                 >
                                     <Button
 
-                                        className="mt-2 bg-white hover:bg-cyan-50 text-[#143472] flex font-medium items-center gap-2 rounded-full justify-center"
+                                        className="mt-2 min-h-11 bg-white hover:bg-cyan-50 text-[#143472] flex font-medium items-center gap-2 rounded-full justify-center"
                                     >
                                         <LogOut size={16} />
                                         Logout

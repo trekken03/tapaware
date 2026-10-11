@@ -59,9 +59,6 @@ const Login = () => {
 
 
     return (
-
-
-
         <div className="relative min-h-screen bg-gray-50 flex items-center justify-center p-4">
             <LandingNavbar />
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
@@ -81,19 +78,17 @@ const Login = () => {
                             alt="logo"
                             className="w-10 h-10 object-contain hover:cursor-pointer "
                         />
-                        {/* <Droplets className="text-blue-800"/> */}
-                        <h1 className="text-2xl font-bold text-blue-900">
-                            TapAware
-                        </h1>
+
+
                     </div>
-                    <p className="text-gray-500 text-sm mt-1 text-center">
-                        Barangay Cabalantian Water Quality System
+                    <p className="text-blue-900 font-bold text-xl mt-1 text-center">
+                        Welcome!
+                    </p>
+                    <p className="text-blue-900  text-lg mt-1 text-center">
+                        Login to your account
                     </p>
                 </div>
-                <CardHeader>
 
-                    <CardTitle className="text-center">Login to your account</CardTitle>
-                </CardHeader>
                 <form onSubmit={handleSubmit}>
                     <CardContent>
 

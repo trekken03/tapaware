@@ -112,90 +112,122 @@ const ResidentDashboard = () => {
 
     return (
         <Layout>
-            <div>
-                {/* Header */}
-                <div className="mb-6 sm:mb-8">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
-                    <p className="text-gray-500 mt-1">Welcome, {user?.name}</p>
+            <div className="relative isolate -m-4 min-h-[calc(100svh-8rem)] overflow-hidden bg-gradient-to-b from-sky-100 via-sky-50 to-blue-100 p-4 sm:-m-6 sm:p-6 lg:-m-8 lg:p-8">
+                <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+                    <img
+                        src="/assets/login_clouds.png"
+                        alt=""
+                        width={367}
+                        height={151}
+                        className="absolute right-0 top-3 hidden w-72 sm:block"
+                    />
+                    <img
+                        src="/assets/login_clouds.png"
+                        alt=""
+                        width={367}
+                        height={151}
+                        className="absolute left-0 top-3.5 hidden w-72 sm:block"
+                    />
+                    <img
+                        src="/assets/login_page_water.png"
+                        alt=""
+                        width={1303}
+                        height={190}
+                        loading="lazy"
+                        className="absolute inset-x-0 bottom-0 h-auto max-h-[100px] w-full object-fill opacity-80"
+                    />
+                    <img
+                        src="/assets/login_page_houses.png"
+                        alt=""
+                        width={661}
+                        height={338}
+                        loading="lazy"
+                        className="absolute -bottom-2 -left-10 hidden w-[min(45vw,38rem)] sm:block"
+                    />
                 </div>
+                <div className="relative z-10 w-full">
+                    <section className="relative -mx-4 mb-0 min-h-44 overflow-hidden px-5 py-7 sm:-mx-6 sm:px-8 sm:py-9 lg:-mx-8 lg:px-10">
+                        <div className="relative z-10">
+                            <p className="text-sm font-semibold text-blue-800">Dashboard</p>
+                            <h1 className="mt-1 text-2xl font-bold leading-tight text-[#173574] sm:text-3xl lg:text-4xl">
+                                Welcome, {user?.name}!
+                            </h1>
+                        </div>
+                    </section>
 
-                {/* Stat cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    {statCards.map((stat) => {
-                        const Icon = stat.icon
-                        return (
-                            <Card key={stat.label}>
-                                <CardContent className="pt-6">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm text-gray-500">{stat.label}</p>
-                                            <p className={`text-3xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
-                                        </div>
-                                        <div className={`p-3 rounded-full ${stat.bg}`}>
-                                            <Icon size={20} className={stat.color} />
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )
-                    })}
-                </div>
-
-
-
-
-                {/* Household TDS and TDS by Purok */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Droplets size={20} className="text-blue-600" />
-                                Your Household Water TDS
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {latestTds ? (
-                                <div className={`p-6 rounded-lg ${latestTdsStatus.bg}`}>
-                                    <p className="text-sm text-gray-600 mb-2">Current TDS Reading</p>
-                                    <p className={`text-4xl font-bold ${latestTdsStatus.color}`}>
-                                        {parseFloat(latestTds.tds_value).toFixed(2)}
-                                    </p>
-                                    <p className="text-sm text-gray-600 mt-2">
-                                        Status: <span className={`font-semibold ${latestTdsStatus.color}`}>{latestTdsStatus.label}</span>
-                                    </p>
-                                    <p className="text-xs text-gray-500 mt-3 mb-3">
-                                        Last recorded:{new Date(latestTds.recorded_at).toLocaleDateString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric',
-                                            year: 'numeric',
-                                        })}
-                                    </p>
-                                    {user?.household_id && (
-
-                                        <div className="flex flex-wrap gap-4 text-sm text-gray-700">
-                                            <div className="flex items-center gap-1.5">
-                                                <Home size={15} className="text-gray-400" />
-                                                Household #{user.household_number}
+                    <div className="relative z-10 mb-7 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        {statCards.map((stat) => {
+                            const Icon = stat.icon
+                            return (
+                                <Card key={stat.label} className={`rounded-2xl border border-blue-200 bg-linear-to-br ${stat.bg} to-white shadow-sm`}>
+                                    <CardContent className="pt-5">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className={`text-sm font-semibold ${stat.color}`}>{stat.label}</p>
+                                                <p className={`mt-1 text-3xl font-bold ${stat.color}`}>{stat.value}</p>
+                                                <p className="mt-1 text-xs text-slate-500">
+                                                    {stat.label === 'My Reports' ? 'Total Reports' : 'Awaiting review'}
+                                                </p>
                                             </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <MapPin size={15} className="text-gray-400" />
-                                                Purok {user.purok}
+                                            <div className={`flex size-12 items-center justify-center rounded-full ${stat.bg}`}>
+                                                <Icon size={21} className={stat.color} />
                                             </div>
                                         </div>
-
-                                    )}
-
+                                    </CardContent>
+                                </Card>
+                            )
+                        })}
+                        <Card className={`rounded-2xl border border-slate-200 bg-linear-to-br ${latestTdsStatus?.bg ?? 'bg-white'} to-white shadow-sm md:col-span-2 xl:col-span-1`}>
+                            <CardContent className="flex h-full items-start gap-4 pt-5">
+                                <div className={`flex size-12 shrink-0 items-center justify-center rounded-full ${latestTdsStatus?.bg ?? 'bg-slate-100'}`}>
+                                    <Droplets size={21} className={latestTdsStatus?.color ?? 'text-slate-500'} />
                                 </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="font-semibold text-[#173574]">Household Water TDS</p>
+                                    {latestTds ? (
+                                        <>
+                                            <p className="mt-1 text-xs text-slate-500">Current TDS Reading</p>
+                                            <p className={`text-3xl font-bold ${latestTdsStatus.color}`}>
+                                                {parseFloat(latestTds.tds_value).toFixed(2)}
+                                            </p>
+                                            <p className="text-xs text-slate-600">
+                                                Status: <span className={`font-semibold ${latestTdsStatus.color}`}>{latestTdsStatus.label}</span>
+                                            </p>
+                                            <p className="mt-2 text-xs text-slate-500">
+                                                Last Recorded: {new Date(latestTds.recorded_at).toLocaleDateString('en-US', {
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    year: 'numeric',
+                                                })}
+                                            </p>
+                                            {user?.household_id && (
+                                                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Home size={15} className="text-gray-400" />
+                                                        Household #{user.household_number}
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <MapPin size={15} className="text-gray-400" />
+                                                        Purok {user.purok}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <p className="mt-2 text-sm text-slate-500">No TDS reading available yet for your household.</p>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                            ) : (
-                                <p className="text-gray-500 text-sm">No TDS reading available yet for your household.</p>
-                            )}
-                        </CardContent>
-                    </Card>
-                    <Card className="mb-6 h-min">
+                    </div>
+
+                    <Card className="mb-7 rounded-2xl border border-slate-200 bg-white shadow-sm">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-base">
-                                <Droplets size={18} className="text-blue-600" />
+                            <CardTitle className="flex items-center gap-3 text-lg font-bold text-[#173574]">
+                                <span className="flex size-10 items-center justify-center rounded-full bg-[#173574] text-white">
+                                    <ClockFading size={19} />
+                                </span>
                                 TDS Reading History ({tdsHistory.length})
                             </CardTitle>
                         </CardHeader>
@@ -203,8 +235,8 @@ const ResidentDashboard = () => {
                             {tdsHistory.length === 0 ? (
                                 <p className="text-gray-500 text-sm">No TDS readings recorded yet.</p>
                             ) : (
-                                <Table containerClassName="max-h-72 overflow-y-auto" className="md:min-w-[440px]">
-                                    <TableHeader className="bg-blue-800 sticky top-0 z-10">
+                                <Table containerClassName="max-h-72 overflow-y-auto" className="md:min-w-[620px]">
+                                    <TableHeader className="bg-[#24499b] sticky top-0 z-10">
                                         <TableRow>
                                             <TableHead>Date</TableHead>
                                             <TableHead>TDS</TableHead>
@@ -242,120 +274,122 @@ const ResidentDashboard = () => {
                         </CardContent>
                     </Card>
 
-
-                </div>
-
-
-                {/* My Reports */}
-                <Card className="mb-6 bg-white/80">
-                    <CardHeader>
-                        <div className="flex flex-col gap-4">
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <CardTitle className="flex flex-wrap items-center gap-2">
-                                    <FileText size={20} className="text-blue-600" />
-                                    My Reports
-                                    <span className="text-sm font-normal text-gray-500">
-                                        {searchTerm
-                                            ? `Showing ${filteredReports.length} of ${reports.length}`
-                                            : `(${reports.length})`}
-                                    </span>
-                                </CardTitle>
-                                <Button
-                                    className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
-                                    onClick={() => navigate('/reports/add')}
-                                >
-                                    <Plus size={16} />
-                                    Submit Report
-                                </Button>
-                            </div>
-
-                            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                                <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-                                    <TabsList variant="line">
-                                        <TabsTrigger value="all">All</TabsTrigger>
-                                        <TabsTrigger value="pending">Pending</TabsTrigger>
-                                        <TabsTrigger value="investigating">Investigating</TabsTrigger>
-                                        <TabsTrigger value="resolved">Resolved</TabsTrigger>
-                                    </TabsList>
-                                </Tabs>
-
-                                <InputGroup className="w-full lg:max-w-xs">
-                                    <InputGroupInput
-                                        placeholder="Search..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                    <InputGroupAddon>
-                                        <Search size={16} />
-                                    </InputGroupAddon>
-                                </InputGroup>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        {filteredReports.length === 0 ? (
-                            <div className="text-center py-12">
-                                <Home size={48} className="text-gray-300 mx-auto mb-4" />
-                                <p className="text-gray-500">
-                                    {reports.length === 0
-                                        ? "You haven't submitted any reports yet."
-                                        : 'No reports match your filters.'}
-                                </p>
-                                {reports.length === 0 && (
+                    {/* My Reports */}
+                    <Card className="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <CardHeader>
+                            <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <CardTitle className="flex flex-wrap items-center gap-3 text-lg font-bold text-[#173574]">
+                                        <span className="flex size-10 items-center justify-center rounded-full bg-[#173574] text-white">
+                                            <FileText size={19} />
+                                        </span>
+                                        My Reports
+                                        <span className="text-sm font-normal text-gray-500">
+                                            {searchTerm
+                                                ? `Showing ${filteredReports.length} of ${reports.length}`
+                                                : `(${reports.length})`}
+                                        </span>
+                                    </CardTitle>
                                     <Button
+                                        className="h-11 w-full bg-[#173574] text-white hover:bg-blue-800 sm:w-auto"
                                         onClick={() => navigate('/reports/add')}
-                                        className="mt-4 w-full sm:w-auto bg-blue-900 hover:bg-blue-700"
                                     >
-                                        Submit Your First Report
+                                        <Plus size={16} />
+                                        Submit Report
                                     </Button>
-                                )}
-                            </div>
-                        ) : (
-                            <>
-                                <Table className="md:min-w-[520px]">
-                                    <TableHeader className="bg-blue-800">
-                                        <TableRow>
-                                            <TableHead>No.</TableHead>
-                                            <TableHead>Issue</TableHead>
-                                            <TableHead>Reported</TableHead>
-                                            <TableHead className="text-center">Status</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {paginatedReports.map((r, index) => {
-                                            const s = getReportStatusStyle(r.status)
-                                            const rowNum = (currentPage - 1) * pageSize + index + 1
-
-                                            return (
-                                                <TableRow
-                                                    key={r.id}
-                                                    className="cursor-pointer hover:bg-gray-50"
-                                                    onClick={() => navigate(`/reports/${r.id}`)}
-                                                >
-                                                    <TableCell label="No.">{rowNum}</TableCell>
-                                                    <TableCell label="Issue" className="font-semibold capitalize">{r.issue_type}</TableCell>
-                                                    <TableCell label="Reported" className="whitespace-nowrap">
-                                                        {new Date(r.created_at).toLocaleDateString('en-US', {
-                                                            month: 'short', day: 'numeric', year: 'numeric',
-                                                        })}
-                                                    </TableCell>
-                                                    <TableCell label="Status" className="text-center">
-                                                        <span className={`${s.bg} ${s.color} inline-block w-[133px] px-2 py-1 text-xs font-semibold capitalize`}>
-                                                            {r.status}
-                                                        </span>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )
-                                        })}
-                                    </TableBody>
-                                </Table>
-                                <div className="mt-4 flex justify-end">
-                                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                                 </div>
-                            </>
-                        )}
-                    </CardContent>
-                </Card>
+
+                                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                    <div className="max-w-full overflow-x-auto">
+                                        <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+                                            <TabsList variant="line" className="h-11 w-max min-w-full">
+                                                <TabsTrigger value="all" className="min-h-11">All</TabsTrigger>
+                                                <TabsTrigger value="pending" className="min-h-11">Pending</TabsTrigger>
+                                                <TabsTrigger value="investigating" className="min-h-11">Investigating</TabsTrigger>
+                                                <TabsTrigger value="resolved" className="min-h-11">Resolved</TabsTrigger>
+                                            </TabsList>
+                                        </Tabs>
+                                    </div>
+
+                                    <InputGroup className="h-11 w-full lg:max-w-xs">
+                                        <InputGroupInput
+                                            placeholder="Search..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="h-11 text-base"
+                                        />
+                                        <InputGroupAddon>
+                                            <Search size={16} />
+                                        </InputGroupAddon>
+                                    </InputGroup>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {filteredReports.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <Home size={48} className="text-gray-300 mx-auto mb-4" />
+                                    <p className="text-gray-500">
+                                        {reports.length === 0
+                                            ? "You haven't submitted any reports yet."
+                                            : 'No reports match your filters.'}
+                                    </p>
+                                    {reports.length === 0 && (
+                                        <Button
+                                            onClick={() => navigate('/reports/add')}
+                                            className="mt-4 h-11 w-full bg-blue-900 hover:bg-blue-700 sm:w-auto"
+                                        >
+                                            Submit Your First Report
+                                        </Button>
+                                    )}
+                                </div>
+                            ) : (
+                                <>
+                                    <Table className="md:min-w-[620px]">
+                                        <TableHeader className="bg-[#24499b]">
+                                            <TableRow>
+                                                <TableHead>No.</TableHead>
+                                                <TableHead>Issue</TableHead>
+                                                <TableHead>Reported</TableHead>
+                                                <TableHead className="text-center">Status</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {paginatedReports.map((r, index) => {
+                                                const s = getReportStatusStyle(r.status)
+                                                const rowNum = (currentPage - 1) * pageSize + index + 1
+
+                                                return (
+                                                    <TableRow
+                                                        key={r.id}
+                                                        className="cursor-pointer hover:bg-gray-50"
+                                                        onClick={() => navigate(`/reports/${r.id}`)}
+                                                    >
+                                                        <TableCell label="No.">{rowNum}</TableCell>
+                                                        <TableCell label="Issue" className="font-semibold capitalize">{r.issue_type}</TableCell>
+                                                        <TableCell label="Reported" className="whitespace-nowrap">
+                                                            {new Date(r.created_at).toLocaleDateString('en-US', {
+                                                                month: 'short', day: 'numeric', year: 'numeric',
+                                                            })}
+                                                        </TableCell>
+                                                        <TableCell label="Status" className="text-center">
+                                                            <span className={`${s.bg} ${s.color} inline-block w-[133px] px-2 py-1 text-xs font-semibold capitalize`}>
+                                                                {r.status}
+                                                            </span>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )
+                                            })}
+                                        </TableBody>
+                                    </Table>
+                                    <div className="mt-4 flex flex-wrap justify-end">
+                                        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} className="[&_button]:min-h-11" />
+                                    </div>
+                                </>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </Layout>
     )
