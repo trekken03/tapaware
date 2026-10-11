@@ -59,7 +59,7 @@ const ForgotPass = () => {
 
     return (
 
-        <div className="relative min-h-screen bg-[url('/assets/mobile%20%5Fversion%5Fbackground.jpg')] bg-cover bg-center bg-no-repeat md:bg-[url('/assets/forgot_and_resetp_background.jpg')] flex items-center justify-center p-4">
+        <div className="relative min-h-screen bg-[url('/assets/mobile_version.jpg')] bg-cover bg-center bg-no-repeat md:bg-[url('/assets/forgot_and_resetp_.jpg')] flex items-center justify-center p-4">
             <LandingNavbar />
 
 
