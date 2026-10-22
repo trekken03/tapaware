@@ -21,6 +21,7 @@ create table users(
     role enum('resident','staff','admin') not null default 'resident',
     household_id int,
     password varchar(255) not null,
+    email_verified TINYINT(1) NOT NULL DEFAULT 1,
     created_at timestamp default current_timestamp,
     deleted_at timestamp null default null,
     foreign key(household_id) references households(id) on delete set null,
@@ -28,6 +29,16 @@ create table users(
     index idx_users_role (role)
 );
 
+CREATE TABLE email_verifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_email_verifications_user (user_id)
+);
 
 create table tds_readings(
     id int auto_increment primary key,

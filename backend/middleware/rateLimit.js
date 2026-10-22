@@ -50,6 +50,12 @@ const forgotPasswordLimiter = rateLimit({
     handler: logAndRespond('FORGOT_PASSWORD_RATE_LIMIT_EXCEEDED', (req) => req.body?.email || 'Unknown email', 15 * 60 * 1000)
 });
 
+const verifyEmailLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { message: 'Too many verification attempts, please try again after 15 minutes' }
+});
+
 const concernLimiter = rateLimit({
     windowMs: 60 * 60 * 1000,
     max: 3,
@@ -57,4 +63,4 @@ const concernLimiter = rateLimit({
     handler: logAndRespond('CONCERN_RATE_LIMIT_EXCEEDED', (req) => req.body?.name || 'Anonymous', 60 * 60 * 1000)
 });
 
-module.exports = { loginLimiter, forgotPasswordLimiter, concernLimiter };
+module.exports = { loginLimiter, forgotPasswordLimiter, verifyEmailLimiter, concernLimiter };

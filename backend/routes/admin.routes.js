@@ -7,6 +7,7 @@ const { verifyCsrf } = require('../middleware/csrf.middleware');
 
 router.get('/users/archived', verifyToken, requireRole('admin'), adminController.getArchivedUsers);
 router.get('/users', verifyToken, requireRole('admin'), adminController.getAllUsers);
+router.post('/users/:id/resend-verification', verifyToken, verifyCsrf, requireRole('admin'), adminController.resendVerification);
 router.put('/users/:id/role', verifyToken, verifyCsrf, requireRole('admin'), adminController.updateUserRole);
 router.put('/users/:id/restore', verifyToken, verifyCsrf, requireRole('admin'), adminController.restoreUser);
 router.delete('/users/:id/permanent', verifyToken, verifyCsrf, requireRole('admin'), adminController.permanentDeleteUser);

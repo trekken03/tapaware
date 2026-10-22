@@ -25,6 +25,7 @@ const AdminPanel = () => {
     const [flagged, setFlagged] = useState([])
     const [concerns, setConcerns] = useState([])
     const [loading, setLoading] = useState(true)
+    const [resendingUserId, setResendingUserId] = useState(null)
     const [searchParams, setSearchParams] = useSearchParams()
     const activeTab = searchParams.get('tab') || 'users'
     const [searchTerm, setSearchTerm] = useState('')
@@ -83,6 +84,46 @@ const AdminPanel = () => {
             toast.error(error.response?.data?.message || 'Failed to archive user')
         }
     }
+    const handleResendVerification = async (user) => {
+        setResendingUserId(user.id)
+        try {
+            const response = await API.post(`/admin/users/${user.id}/resend-verification`)
+            if (response.data.emailSent === false) {
+                toast.warning(response.data.message || 'The verification email could not be sent.')
+            } else {
+                toast.success(`Verification email sent to ${user.email}`)
+            }
+            await fetchData()
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to resend verification email')
+        } finally {
+            setResendingUserId(null)
+        }
+    }
+
+    const emailCell = (u) => (
+        <div className="flex flex-wrap items-center gap-2">
+            <span className="break-all">{u.email}</span>
+            {Number(u.email_verified) === 0 && (
+                <span className="inline-block rounded bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">
+                    Unverified
+                </span>
+            )}
+        </div>
+    )
+
+    const resendVerificationButton = (u) => Number(u.email_verified) === 0 && (
+        <Button
+            variant="outline"
+            size="sm"
+            className="whitespace-nowrap text-amber-700 border-amber-300 hover:bg-amber-50"
+            onClick={() => handleResendVerification(u)}
+            disabled={resendingUserId === u.id}
+        >
+            {resendingUserId === u.id ? 'Sending...' : 'Resend verification'}
+        </Button>
+    )
+
     const getRoleStyle = (role) => {
         switch (role) {
             case 'admin': return { color: 'text-purple-700', bg: 'bg-purple-100' }
@@ -161,6 +202,7 @@ const AdminPanel = () => {
     const userActions = (u) => (
         u.id !== currentUser.id ? (
             <div className="flex gap-2">
+                {resendVerificationButton(u)}
                 <Button
                     variant="outline"
                     size="sm"
@@ -306,11 +348,11 @@ const AdminPanel = () => {
                                                 >
                                                     <TableCell label="No.">{rowNumber(index)}</TableCell>
                                                     <TableCell label="Name" className="font-semibold">{u.name}</TableCell>
-                                                    <TableCell label="Email" className="break-all">{u.email}</TableCell>
+                                                    <TableCell label="Email">{emailCell(u)}</TableCell>
                                                     <TableCell label="Household">{u.household_number || '—'}</TableCell>
                                                     <TableCell label="Purok">{u.purok || '—'}</TableCell>
                                                     <TableCell label="Date Joined" className="whitespace-nowrap">{formatDate(u.created_at)}</TableCell>
-                                                    <TableCell onClick={(e) => e.stopPropagation()}>
+                                                    <TableCell label="Actions" onClick={(e) => e.stopPropagation()}>
                                                         {userActions(u)}
                                                     </TableCell>
                                                 </TableRow>
@@ -366,7 +408,7 @@ const AdminPanel = () => {
                                                     >
                                                         <TableCell label="No.">{rowNumber(index)}</TableCell>
                                                         <TableCell label="Name" className="font-semibold">{u.name}</TableCell>
-                                                        <TableCell label="Email" className="break-all">{u.email}</TableCell>
+                                                        <TableCell label="Email">{emailCell(u)}</TableCell>
                                                         <TableCell label="Role" onClick={(e) => e.stopPropagation()}>
                                                             {u.id === currentUser.id ? (
                                                                 <span className={`${roleStyle.bg} ${roleStyle.color} inline-block px-2 py-1 text-xs font-semibold capitalize`}>
@@ -385,7 +427,7 @@ const AdminPanel = () => {
                                                             )}
                                                         </TableCell>
                                                         <TableCell label="Date Joined" className="whitespace-nowrap">{formatDate(u.created_at)}</TableCell>
-                                                        <TableCell onClick={(e) => e.stopPropagation()}>
+                                                        <TableCell label="Actions" onClick={(e) => e.stopPropagation()}>
                                                             {userActions(u)}
                                                         </TableCell>
                                                     </TableRow>
@@ -428,6 +470,7 @@ const AdminPanel = () => {
                                                 <TableHead>Email</TableHead>
                                                 <TableHead>Role</TableHead>
                                                 <TableHead>Date Joined</TableHead>
+                                                <TableHead>Actions</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -441,13 +484,16 @@ const AdminPanel = () => {
                                                     >
                                                         <TableCell label="No.">{rowNumber(index)}</TableCell>
                                                         <TableCell label="Name" className="font-semibold">{u.name}</TableCell>
-                                                        <TableCell label="Email" className="break-all">{u.email}</TableCell>
+                                                        <TableCell label="Email">{emailCell(u)}</TableCell>
                                                         <TableCell label="Role">
                                                             <span className={`${roleStyle.bg} ${roleStyle.color} inline-block px-2 py-1 text-xs font-semibold capitalize`}>
                                                                 {u.role}
                                                             </span>
                                                         </TableCell>
                                                         <TableCell label="Date Joined" className="whitespace-nowrap">{formatDate(u.created_at)}</TableCell>
+                                                        <TableCell label="Actions" onClick={(e) => e.stopPropagation()}>
+                                                            {resendVerificationButton(u)}
+                                                        </TableCell>
                                                     </TableRow>
                                                 )
                                             })}

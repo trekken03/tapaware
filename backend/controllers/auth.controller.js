@@ -4,6 +4,7 @@ const generateToken = require('../utils/generateToken');
 const auditLog = require('../utils/auditLogger');
 const crypto = require('crypto');
 const sendEmail = require('../utils/emailSender');
+const sendVerificationEmail = require('../utils/emailVerification');
 const {
     authCookieOptions,
     csrfCookieOptions,
@@ -69,9 +70,11 @@ exports.register = async (req, res) => {
         }
 
         const [result] = await db.query(
-            'INSERT INTO users(name, email, role, household_id, password) VALUES (?,?,?,?,?)',
+            'INSERT INTO users(name, email, role, household_id, password, email_verified) VALUES (?,?,?,?,?,0)',
             [name, email, role, finalHouseholdId, hashedPassword]
         );
+
+        const { emailSent } = await sendVerificationEmail({ id: result.insertId, name, email, role });
 
         const [admins] = await db.query(
             'SELECT name, role FROM users WHERE id = ?',
@@ -90,7 +93,12 @@ exports.register = async (req, res) => {
             ip_address: req.ip
         });
 
-        res.status(201).json({ message: 'User registered successfully' });
+        res.status(201).json({
+            message: emailSent
+                ? 'User registered successfully. A verification email was sent.'
+                : 'User registered, but the verification email could not be sent. Use Resend verification from the Admin Panel.',
+            emailSent
+        });
 
 
 
@@ -188,6 +196,61 @@ exports.resetPassword = async (req, res) => {
     }
 };
 
+
+
+exports.verifyEmail = async (req, res) => {
+    const invalidLinkMessage = 'This verification link is invalid or has expired. Ask your administrator to resend it.';
+    const token = req.body?.token;
+
+    if (typeof token !== 'string' || !/^[a-f0-9]{64}$/.test(token)) {
+        return res.status(400).json({ message: invalidLinkMessage });
+    }
+
+    try {
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+        const [rows] = await db.query(
+            `SELECT ev.id, ev.user_id, ev.expires_at, ev.used,
+                    u.name, u.role, u.email_verified
+             FROM email_verifications ev
+             JOIN users u ON u.id = ev.user_id
+             WHERE ev.token_hash = ?`,
+            [tokenHash]
+        );
+
+        if (rows.length === 0) {
+            return res.status(400).json({ message: invalidLinkMessage });
+        }
+
+        const verification = rows[0];
+        if (Number(verification.email_verified) === 1) {
+            return res.status(200).json({ message: 'Email already verified' });
+        }
+
+        const expiresAt = new Date(verification.expires_at);
+        if (verification.used || !Number.isFinite(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) {
+            return res.status(400).json({ message: invalidLinkMessage });
+        }
+
+        await db.query('UPDATE users SET email_verified = 1 WHERE id = ?', [verification.user_id]);
+        await db.query('UPDATE email_verifications SET used = TRUE WHERE id = ?', [verification.id]);
+
+        await auditLog({
+            user_id: verification.user_id,
+            user_name: verification.name,
+            user_role: verification.role,
+            action: 'VERIFY_EMAIL',
+            table_affected: 'users',
+            record_id: verification.user_id,
+            ip_address: req.ip
+        });
+
+        return res.status(200).json({ message: 'Email verified successfully. You can now log in.' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
 exports.login = async (req, res) => {
     const { email, password } = req.body;
 
@@ -217,6 +280,10 @@ exports.login = async (req, res) => {
 
         if (user.deleted_at) {
             return res.status(403).json({ message: 'This account has been deactivated. Please contact an administrator.' });
+        }
+
+        if (user.email_verified !== null && user.email_verified !== undefined && Number(user.email_verified) === 0) {
+            return res.status(403).json({ message: 'Please verify your email before logging in. Check your inbox for the verification link, or ask an administrator to resend it.' });
         }
 
         const token = generateToken(user);
@@ -431,4 +498,3 @@ exports.changePassword = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-

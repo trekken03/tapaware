@@ -75,8 +75,12 @@ const AddUser = () => {
             }
 
             console.log('Submitting user data:', submitData)
-            await API.post('/auth/register', submitData)
-            toast.success('User added successfully')
+            const response = await API.post('/auth/register', submitData)
+            if (response.data.emailSent === false) {
+                toast.warning(response.data.message || 'The verification email could not be sent. Use Resend verification from the Admin Panel.')
+            } else {
+                toast.success(`Verification email sent to ${form.email}`)
+            }
             navigate('/admin')
         } catch (error) {
             const message = error.response?.data?.message || 'Failed to add user'

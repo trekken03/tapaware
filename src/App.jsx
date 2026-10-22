@@ -22,6 +22,7 @@ const ReportDetail = lazy(() => import('./pages/ReportDetail'));
 const EditUser = lazy(() => import('./pages/EditUser'));
 const ForgotPass = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const Homepage = lazy(() => import('./pages/Homepage'));
 const ConcernDetail = lazy(() => import('./pages/ConcernDetail'));
 const UserDetail = lazy(() => import('./pages/UserDetail'));
@@ -77,6 +78,7 @@ const App = () => {
                     <Route path="/admin/concerns/:id" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><ConcernDetail /></RoleBasedRoute>} />
                     <Route path="/forgot-password" element={<ForgotPass />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/verify-email" element={<VerifyEmail />} />
                     <Route path="/audit-trail/:id" element={<RoleBasedRoute allowedRoles={['admin']}><AuditDetail /></RoleBasedRoute>} />
                     <Route path="/admin/flags/:id" element={<RoleBasedRoute allowedRoles={['admin']}><FlagDetail /></RoleBasedRoute>} />
 

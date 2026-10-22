@@ -1,9 +1,10 @@
 const db = require('../models/db');
 const auditLog = require('../utils/auditLogger');
+const sendVerificationEmail = require('../utils/emailVerification');
 
 exports.getAllUsers = async (req, res) => {
     try {
-        const [rows] = await db.query(`Select u.id,u.name,u.email,u.role,u.household_id,
+        const [rows] = await db.query(`Select u.id,u.name,u.email,u.role,u.household_id,u.email_verified,
             h.household_number,h.purok,h.address,u.created_at from users u left join households h on u.household_id = h.id
             where u.deleted_at is null
             order by u.created_at desc`);
@@ -12,6 +13,52 @@ exports.getAllUsers = async (req, res) => {
     catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.resendVerification = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const [users] = await db.query(
+            'SELECT id, name, email, role, email_verified FROM users WHERE id = ? AND deleted_at IS NULL',
+            [id]
+        );
+        if (users.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const user = users[0];
+        if (Number(user.email_verified) === 1) {
+            return res.status(400).json({ message: 'This email is already verified.' });
+        }
+
+        const [recentTokens] = await db.query(
+            'SELECT created_at FROM email_verifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+            [id]
+        );
+        if (recentTokens.length > 0 && Date.now() - new Date(recentTokens[0].created_at).getTime() < 60 * 1000) {
+            return res.status(400).json({ message: 'A verification email was sent recently. Please wait 60 seconds before resending.' });
+        }
+
+        const { emailSent } = await sendVerificationEmail(user);
+        await auditLog({
+            user_id: req.user.id,
+            user_name: req.user.name,
+            user_role: req.user.role,
+            action: 'RESEND_VERIFICATION',
+            table_affected: 'users',
+            record_id: user.id,
+            ip_address: req.ip
+        });
+
+        return res.json({
+            message: emailSent ? 'Verification email sent successfully.' : 'The verification email could not be sent. Please try again later.',
+            emailSent
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
     }
 };
 
