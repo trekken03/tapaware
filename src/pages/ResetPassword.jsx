@@ -16,6 +16,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2, AlertCircle, XCircle, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import LandingNavbar from "@/components/NavBar";
+import SceneMascot from "@/components/SceneMascot";
 
 const ResetPassword = () => {
     const navigate = useNavigate();
@@ -60,9 +61,13 @@ const ResetPassword = () => {
 
     if (!token) {
         return (
-            <div className="min-h-screen bg-[url('/assets/mobile_version.jpg')] bg-cover bg-center bg-no-repeat md:bg-[url('/assets/forgot_and_resetp_.jpg')] flex flex-col items-center justify-center p-4">
+            <div className="relative min-h-screen bg-[url('/assets/mobile_version.jpg')] bg-cover bg-center bg-no-repeat md:bg-[url('/assets/new_login_bg.jpg')] flex flex-col items-center justify-center p-4 overflow-hidden">
                 <LandingNavbar />
-                <Card className="w-full max-w-sm shadow-lg">
+
+                {/* Mascot glued to the background scene (right of the centered card). Desktop only. */}
+                <SceneMascot src="/assets/login_figure.png" x={0.73} size={0.21} className="hidden lg:block" />
+
+                <Card className="relative z-10 w-full max-w-sm shadow-lg">
                     <CardContent className="pt-6">
                         <Alert variant="destructive">
                             <XCircle className="h-4 w-4" />
@@ -79,8 +84,14 @@ const ResetPassword = () => {
     }
 
     return (
-        <div className="relative min-h-screen bg-[url('/assets/mobile_version.jpg')] bg-cover bg-center bg-no-repeat md:bg-[url('/assets/forgot_and_resetp_background.jpg')] flex items-center justify-center p-4">
+        <div className="relative min-h-screen bg-[url('/assets/mobile_version.jpg')] bg-cover bg-center bg-no-repeat md:bg-[url('/assets/new_login_bg.jpg')] flex items-center justify-center p-4 overflow-hidden">
             <LandingNavbar />
+
+            {/* Mascot glued to the background scene (right of the centered card). Desktop only. */}
+            <SceneMascot src="/assets/login_figure.png" x={0.73} size={0.21} className="hidden lg:block" />
+
+            {/* Old big faded logo watermark, removed because the new background already has the branding.
+                Uncomment to bring it back.
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
                 <img
                     src="/assets/logo.webp"
@@ -88,6 +99,7 @@ const ResetPassword = () => {
                     className="w-[700px] opacity-10 object-contain"
                 />
             </div>
+            */}
 
             <Card className="relative z-10 w-full max-w-sm bg-white shadow-lg">
                 <div className="flex flex-col items-center mb-6">

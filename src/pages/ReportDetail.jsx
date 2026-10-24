@@ -156,7 +156,7 @@ const ReportDetail = () => {
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">{report.reported_by}</h1>
                                 <p className="text-gray-500">
-                                    Household #{report.household_number} - Purok {report.purok}
+                                    Household #{report.household_number} - Zone {report.zone}
                                 </p>
                             </div>
 

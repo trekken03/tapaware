@@ -109,7 +109,7 @@ const FlagDetail = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mb-4">
                             <div className="flex items-center gap-2">
                                 <MapPin size={15} className="text-gray-400" />
-                                <span className="text-gray-700">Purok {flag.purok} — {flag.address}</span>
+                                <span className="text-gray-700">Zone {flag.zone} — {flag.address}</span>
                             </div>
                             <div>
                                 <p className="text-gray-500">Last Reported</p>

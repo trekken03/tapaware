@@ -163,7 +163,7 @@ const UserDetail = () => {
                                         </div>
                                         <div className="flex items-center gap-1.5">
                                             <MapPin size={14} className="text-gray-400" />
-                                            Purok {user.purok}
+                                            Zone {user.zone}
                                         </div>
 
                                         <div className="text-gray-500">{user.address?.trim() || '-'}</div>

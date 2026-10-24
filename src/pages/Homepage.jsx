@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import LandingNavbar from '@/components/NavBar'
 import FooterLegalLinks from '@/components/legal/FooterLegalLinks'
 import WaterGauge, { getGaugeStatus } from '@/components/WaterGauge'
+import PokeMascot from '@/components/PokeMascot'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,10 +38,10 @@ const stickerOutline = {
 }
 
 const Homepage = () => {
-    const [purokData, setPurokData] = useState([])
+    const [zoneData, setZoneData] = useState([])
     const [summary, setSummary] = useState(null)
     const [loading, setLoading] = useState(true)
-    const [form, setForm] = useState({ name: '', contact_info: '', purok: '', message: '' })
+    const [form, setForm] = useState({ name: '', contact_info: '', zone: '', message: '' })
     const [submitting, setSubmitting] = useState(false)
     const location = useLocation();
     const { user } = useAuth();
@@ -64,11 +65,11 @@ const Homepage = () => {
 
     const fetchData = async () => {
         try {
-            const [purokRes, summaryRes] = await Promise.all([
-                API.get('/visualization/tds-by-purok'),
+            const [zoneRes, summaryRes] = await Promise.all([
+                API.get('/visualization/tds-by-zone'),
                 API.get('/visualization/summary'),
             ])
-            setPurokData(purokRes.data.filter(p => p.last_recorded))
+            setZoneData(zoneRes.data.filter(p => p.last_recorded))
             setSummary(summaryRes.data)
         } catch (error) {
             console.log('Error loading public water data:', error)
@@ -113,7 +114,7 @@ const Homepage = () => {
         try {
             await API.post('/concerns', form)
             toast.success('Your concern has been submitted. Thank you!')
-            setForm({ name: '', contact_info: '', purok: '', message: '' })
+            setForm({ name: '', contact_info: '', zone: '', message: '' })
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to submit. Please try again.')
         } finally {
@@ -209,7 +210,7 @@ const Homepage = () => {
                         </h1>
 
                         <p className="mb-8 max-w-md text-justify text-sm leading-relaxed text-blue-50 drop-shadow sm:text-base">
-                            TapAware tracks water quality across every purok in the
+                            TapAware tracks water quality across every zone in the
                             barangay, so residents always know where things stand,
                             and can speak up when something&rsquo;s wrong.
                         </p>
@@ -259,12 +260,12 @@ const Homepage = () => {
                             <div className="h-[220px] w-[220px] animate-pulse rounded-full border-4 border-white/30" />
                         ) : summary && overallStatus ? (
                             <div className="relative mt-16 w-full max-w-[300px] rounded-2xl bg-white px-6 pb-7 pt-9 text-[#14213d] shadow-2xl shadow-[#071d50]/30 md:mr-32 md:mt-0 lg:mr-40 xl:mr-56">
-                                <img
+                                {/* Mascot: small hop every few seconds, click it for a squash-and-pop + heart */}
+                                <PokeMascot
                                     src="/assets/figure-barangay-wide.png"
-                                    alt=""
-                                    aria-hidden="true"
-                                    style={stickerOutline}
-                                    className="pointer-events-none absolute bottom-full left-1/2 z-10 w-48 -translate-x-1/2 translate-y-[62px]"
+                                    origin="50% 73%"
+                                    imgStyle={stickerOutline}
+                                    className="absolute bottom-full left-1/2 z-10 w-48 -translate-x-1/2 translate-y-[62px]"
                                 />
                                 <p className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-[#17223c]">
                                     Barangay-wide Average
@@ -341,25 +342,25 @@ const Homepage = () => {
                 </div>
             </section>
 
-            {/* PUROK GAUGES */}
+            {/* ZONE GAUGES */}
             <section id="quality" className="relative overflow-hidden bg-[#e4f5fc] px-0 pb-32 pt-20">
                 <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
                     <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#4776ae]">Latest readings</span>
                     <h2 className="mb-10 text-3xl font-bold tracking-tight text-[#102c69]">
-                        Water quality by purok
+                        Water quality by zone
                     </h2>
 
                     {loading ? (
                         <p className="text-[#536a8d]">Loading readings...</p>
-                    ) : purokData.length === 0 ? (
+                    ) : zoneData.length === 0 ? (
                         <p className="text-[#536a8d]">No readings recorded yet.</p>
                     ) : (
                         <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:gap-x-12 lg:gap-y-8">
-                            {purokData.map((p) => (
-                                <div key={p.purok} className="flex justify-center rounded-xl border border-white/80 bg-white p-4 shadow-[0_10px_28px_-20px_rgba(12,43,86,0.55)] transition-transform duration-300 hover:-translate-y-1 sm:p-5">
+                            {zoneData.map((p) => (
+                                <div key={p.zone} className="flex justify-center rounded-xl border border-white/80 bg-white p-4 shadow-[0_10px_28px_-20px_rgba(12,43,86,0.55)] transition-transform duration-300 hover:-translate-y-1 sm:p-5">
                                     <WaterGauge
                                         value={p.average_tds}
-                                        label={`Purok ${p.purok}`}
+                                        label={`Zone ${p.zone}`}
                                         sublabel={`Last recorded on ${formatRecordedAt(p.last_recorded)}`}
                                     />
                                 </div>
@@ -416,12 +417,14 @@ const Homepage = () => {
                     {!user && (
 
                         <div className="relative w-full max-w-md md:justify-self-end">
-                            <img
+                            {/* Mascot: small hop every few seconds, click it for a squash-and-pop + heart */}
+                            <PokeMascot
                                 src="/assets/figure-form.png"
-                                alt=""
-                                aria-hidden="true"
-                                style={stickerOutline}
-                                className="pointer-events-none absolute right-107 top-1/2 z-20 hidden w-40 -translate-y-1/2 translate-x-4 md:block md:w-44 lg:w-52" />
+                                origin="50% 96%"
+                                imgStyle={stickerOutline}
+                                heartLeft="55%"
+                                className="absolute right-107 top-1/2 z-20 hidden w-40 -translate-y-1/2 translate-x-4 md:block md:w-44 lg:w-52"
+                            />
                             <Card className="relative z-10 rounded-2xl border-0 bg-white shadow-[0_0_48px_rgba(120,170,255,0.25)]">
                                 <CardContent className="pt-6">
                                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -432,11 +435,11 @@ const Homepage = () => {
                                                     placeholder="Juan Dela Cruz" required className={`${fieldBase} ${fieldHeight}`} />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="purok" className={labelClass}>Purok</Label>
+                                                <Label htmlFor="zone" className={labelClass}>Zone</Label>
                                                 <div className="relative">
-                                                    <select id="purok" name="purok" value={form.purok} onChange={handleChange} required
+                                                    <select id="zone" name="zone" value={form.zone} onChange={handleChange} required
                                                         className={`${fieldBase} ${fieldHeight} appearance-none pr-9`}>
-                                                        <option value="">Select purok...</option>
+                                                        <option value="">Select zone...</option>
                                                         {[1, 2, 3, 4, 5, 6].map(p => <option key={p} value={p}>{p}</option>)}
                                                     </select>
                                                     <ChevronDown size={16} aria-hidden="true"

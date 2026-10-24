@@ -27,7 +27,7 @@ const PrivacyModal = ({ trigger }) => {
               1. Types of Information Collected
             </h1>
             <p>
-              The system handles two types of information. Water quality data makes up most of what gets stored. Every record includes the TDS measurement in parts per million, the sampling location, and the collection timestamp. Location details are divided into barangay, purok, and specific household or water source. If the person collecting the sample observed anything notable like odor or discoloration, that can be added as an optional note. These observations only serve as supplementary context.
+              The system handles two types of information. Water quality data makes up most of what gets stored. Every record includes the TDS measurement in parts per million, the sampling location, and the collection timestamp. Location details are divided into barangay, zone, and specific household or water source. If the person collecting the sample observed anything notable like odor or discoloration, that can be added as an optional note. These observations only serve as supplementary context.
             </p>
             <p>The other type is user account information. The system saves usernames and passwords and nothing beyond that. No additional user details are kept. These credentials exist for authentication and for controlling what each user can do within the platform.</p>
             <h1 className='font-bold'>2. Purpose of Processing</h1>

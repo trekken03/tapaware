@@ -85,9 +85,9 @@ const Profile = () => {
     }
 
     const roleBadgeStyle = {
-        admin: 'bg-purple-100 text-purple-700',
-        staff: 'bg-blue-100 text-blue-700',
-        resident: 'bg-green-100 text-green-700',
+        admin: 'bg-purple-200 text-purple-800',
+        staff: 'bg-blue-200 text-blue-800',
+        resident: 'bg-green-200 text-green-800',
     }[user?.role] || 'bg-gray-100 text-gray-700'
 
     return (
@@ -129,48 +129,40 @@ const Profile = () => {
                     </div>
                 )}
 
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(-1)}
-                    className={user?.role === 'resident' ? 'relative z-10 mb-4 flex min-h-11 items-center gap-2' : 'flex items-center gap-2 mb-4'}
-                >
-                    <ArrowLeft size={16} />
-                    Back
-                </Button>
-                <h1 className={user?.role === 'resident' ? 'relative z-10 mb-6 text-2xl font-bold text-[#173574] sm:text-3xl' : 'text-2xl font-bold text-gray-900 mb-6'}>Account Settings</h1>
+
+                <h1 className="relative z-10 mx-auto mb-6 w-full max-w-5xl text-3xl font-bold text-[#102765]">Account Settings</h1>
 
                 {/* Header card */}
 
-                <div className={user?.role === 'resident' ? 'relative z-10 mx-auto grid w-full grid-cols-1 gap-5 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:grid-rows-[auto_auto]' : 'contents'}>
-                    <Card className={user?.role === 'resident' ? 'contents' : 'mb-6 overflow-hidden w-full'}>
+                <div className="relative z-10 mx-auto grid w-full max-w-5xl grid-cols-1 items-start gap-6 md:grid-cols-2">
+                    <Card className="contents">
 
-                        <CardContent className={user?.role === 'resident' ? 'contents' : 'pt-10 bg-white/10'}>
-                            <div className={user?.role === 'resident' ? 'rounded-2xl border border-slate-200 bg-white p-5 shadow-lg sm:col-start-1 sm:row-start-1' : 'contents'}>
-                                <div className={user?.role === 'resident' ? 'flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left' : 'gap-4 -mt-10 justify-center items-center flex mb-5'}>
-                                    <div className={user?.role === 'resident' ? 'size-20 rounded-full border-4 border-white bg-white shadow-sm flex items-center justify-center shrink-0' : 'w-30 h-30 rounded-full bg-white border-4 border-white shadow-sm flex items-center justify-center shrink-0'}>
-                                        <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center">
+                        <CardContent className="contents">
+                            <div className="rounded-2xl bg-white p-6 shadow-xl md:col-start-1 md:row-start-1">
+                                <div className="flex items-center gap-5">
+                                    <div className="flex size-20 shrink-0 items-center justify-center rounded-full border-4 border-white bg-blue-100 shadow-md">
+                                        <div className="flex size-full items-center justify-center rounded-full bg-blue-100">
                                             <User size={32} className="text-blue-700" />
                                         </div>
                                     </div>
                                     <div className="pb-1">
-                                        <h1 className={user?.role === 'resident' ? 'text-2xl font-bold text-[#173574]' : 'text-4xl font-bold text-gray-900'}>{user?.name}</h1>
-                                        <span className={user?.role === 'resident' ? `mt-1 inline-flex min-h-6 items-center px-2.5 py-0.5 text-xs font-semibold capitalize ${roleBadgeStyle}` : `inline-block mt-1 px-2.5 py-0.5 text-mn font-semibold capitalize ${roleBadgeStyle}`}>
+                                        <h1 className="text-2xl font-bold text-[#102765]">{user?.name}</h1>
+                                        <span className={`mt-2 inline-flex min-h-6 items-center rounded-full px-3 py-1 text-xs font-bold capitalize ${roleBadgeStyle}`}>
                                             {user?.role}
                                         </span>
                                     </div>
                                 </div>
 
                                 {user?.role === 'resident' && (
-                                    <div className="mt-4 flex flex-wrap items-center justify-center gap-4 border-t border-slate-100 pt-4 text-center sm:justify-start sm:text-left">
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-slate-100 pt-4 text-xs text-gray-500">
+                                        <div className="flex items-center gap-2">
                                             <Home size={15} className="text-gray-400" />
                                             {user?.household_number ? `Household #${user.household_number}` : 'No household linked'}
                                         </div>
                                         {user?.household_number && (
-                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                            <div className="flex items-center gap-2">
                                                 <MapPin size={15} className="text-gray-400" />
-                                                Purok {user?.purok}
+                                                Zone {user?.zone}
                                             </div>
                                         )}
                                     </div>
@@ -178,16 +170,16 @@ const Profile = () => {
                             </div>
 
                             {/* Personal Information */}
-                            <div className={user?.role === 'resident' ? 'contents' : 'grid sm:grid-cols-2 gap-6'}>
-                                <Card className={user?.role === 'resident' ? 'mb-0 h-min rounded-2xl border-0 bg-white shadow-lg sm:col-start-1 sm:row-start-2' : 'mb-6 h-min shadow-sm'}>
-                                    <CardContent className="pt-6">
-                                        <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-4">
-                                            <User size={18} className="text-blue-600" />
+                            <div className="contents">
+                                <Card className="mb-0 h-min min-w-0 rounded-2xl border-0 bg-white shadow-xl md:col-start-1 md:row-start-2">
+                                    <CardContent className="p-6">
+                                        <h2 className="mb-5 flex items-center gap-2 text-base font-semibold text-[#102765]">
+                                            <User size={18} className="text-[#102765]" />
                                             Personal Information
                                         </h2>
 
                                         <form onSubmit={handleUpdateProfile} className="space-y-4">
-                                            <div className={user?.role === 'resident' ? 'grid grid-cols-1 gap-4' : 'grid sm:grid-cols-2 gap-4'}>
+                                            <div className="grid grid-cols-1 gap-4">
                                                 <div className="space-y-2">
                                                     <Label htmlFor="name">Full Name</Label>
                                                     <Input
@@ -196,7 +188,7 @@ const Profile = () => {
                                                         value={form.name}
                                                         onChange={handleChange}
                                                         required
-                                                        className={user?.role === 'resident' ? 'h-11 text-base' : ''}
+                                                        className="h-11 rounded-md border-gray-300 bg-gray-50"
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
@@ -208,14 +200,14 @@ const Profile = () => {
                                                         value={form.email}
                                                         onChange={handleChange}
                                                         required
-                                                        className={user?.role === 'resident' ? 'h-11 text-base' : ''}
+                                                        className="h-11 rounded-md border-gray-300 bg-gray-50"
                                                     />
                                                 </div>
                                             </div>
 
                                             {user?.role === 'resident' && (
-                                                <p className="text-xs text-black">
-                                                    Household number and purok are managed by barangay staff.{' '}
+                                                <p className="text-xs text-gray-500">
+                                                    Household number and zone are managed by barangay staff.{' '}
                                                     <button
                                                         type="button"
                                                         onClick={() => navigate('/', { state: { scrollTo: 'contact' } })}
@@ -229,13 +221,13 @@ const Profile = () => {
 
 
 
-                                            <div className={user?.role === 'resident' ? 'pt-2' : 'pt-2 flex justify-end'}>
+                                            <div className="pt-2">
                                                 <Button
                                                     type="submit"
-                                                    className={user?.role === 'resident' ? 'h-11 w-full bg-blue-900 text-white hover:bg-blue-700' : 'bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2'}
+                                                    className="h-11 w-full bg-[#102765] text-white hover:bg-[#1a3a8f]"
                                                     disabled={loading}
                                                 >
-                                                    <Save size={16} className={user?.role === 'resident' ? 'mr-2' : ''} />
+                                                    <Save size={16} className="mr-2" />
                                                     {loading ? 'Saving...' : 'Save Changes'}
                                                 </Button>
                                             </div>
@@ -244,14 +236,14 @@ const Profile = () => {
                                 </Card>
 
                                 {/* Change Password */}
-                                <Card className={user?.role === 'resident' ? 'mb-0 rounded-2xl border-0 bg-white shadow-lg sm:col-start-2 h-min sm:row-span-2 sm:row-start-1' : 'mb-6 h-min shadow-sm'}>
-                                    <CardContent className="pt-6">
-                                        <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-4">
-                                            <KeyRound size={18} className="text-blue-600" />
+                                <Card className="mb-0 h-min min-w-0 rounded-2xl border-0 bg-white shadow-xl md:col-start-2 md:row-span-2 md:row-start-1">
+                                    <CardContent className="p-6">
+                                        <h2 className="mb-5 flex items-center gap-2 text-base font-semibold text-[#102765]">
+                                            <KeyRound size={18} className="text-[#102765]" />
                                             Change Password
                                         </h2>
 
-                                        <form onSubmit={handleChangePassword} className="space-y-4">
+                                        <form onSubmit={handleChangePassword} className="space-y-6">
                                             <div className="space-y-2">
                                                 <Label htmlFor="currentPassword">Current Password</Label>
                                                 <div className="relative">
@@ -264,18 +256,18 @@ const Profile = () => {
                                                         maxLength="20"
                                                         onChange={handlePasswordChange}
                                                         required
-                                                        className={user?.role === 'resident' ? 'h-11 pr-12 text-base' : ''}
+                                                        className="h-11 rounded-md border-gray-300 bg-gray-50 pr-12"
                                                     />
                                                     <button
                                                         type="button"
                                                         onClick={() => setShowPassword(!showPassword)}
-                                                        className={user?.role === 'resident' ? 'absolute right-1 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-gray-400 hover:text-gray-600' : 'absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600'}
+                                                        className="absolute right-1 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-gray-400 hover:text-gray-600"
                                                     >
                                                         {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div className="grid sm:grid-cols-1 gap-4">
+                                            <div className="grid grid-cols-1 gap-6">
                                                 <div className="space-y-2">
                                                     <Label htmlFor="newPassword">New Password</Label>
                                                     <div className="relative">
@@ -289,12 +281,12 @@ const Profile = () => {
                                                             maxLength="20"
                                                             onChange={handlePasswordChange}
                                                             required
-                                                            className={user?.role === 'resident' ? 'h-11 pr-12 text-base' : ''}
+                                                            className="h-11 rounded-md border-gray-300 bg-gray-50 pr-12"
                                                         />
                                                         <button
                                                             type="button"
                                                             onClick={() => setShowPassword1(!showPassword1)}
-                                                            className={user?.role === 'resident' ? 'absolute right-1 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-gray-400 hover:text-gray-600' : 'absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600'}
+                                                            className="absolute right-1 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-gray-400 hover:text-gray-600"
                                                         >
                                                             {showPassword1 ? <Eye size={18} /> : <EyeOff size={18} />}
                                                         </button>
@@ -314,25 +306,25 @@ const Profile = () => {
                                                             value={passwordForm.confirmPassword}
                                                             onChange={handlePasswordChange}
                                                             required
-                                                            className={user?.role === 'resident' ? 'h-11 pr-12 text-base' : ''}
+                                                            className="h-11 rounded-md border-gray-300 bg-gray-50 pr-12"
                                                         />
                                                         <button
                                                             type="button"
                                                             onClick={() => setShowPassword2(!showPassword2)}
-                                                            className={user?.role === 'resident' ? 'absolute right-1 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-gray-400 hover:text-gray-600' : 'absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600'}
+                                                            className="absolute right-1 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-gray-400 hover:text-gray-600"
                                                         >
                                                             {showPassword2 ? <Eye size={18} /> : <EyeOff size={18} />}
                                                         </button>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className={user?.role === 'resident' ? 'pt-2' : 'pt-2 flex justify-end'}>
+                                            <div className="pt-2">
                                                 <Button
                                                     type="submit"
-                                                    className={user?.role === 'resident' ? 'h-11 w-full bg-blue-900 text-white hover:bg-blue-700' : 'bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2'}
+                                                    className="h-11 w-full bg-[#102765] text-white hover:bg-[#1a3a8f]"
                                                     disabled={passwordLoading}
                                                 >
-                                                    <KeyRound size={16} className={user?.role === 'resident' ? 'mr-2' : ''} />
+                                                    <KeyRound size={16} className="mr-2" />
                                                     {passwordLoading ? 'Changing...' : 'Change Password'}
                                                 </Button>
                                             </div>

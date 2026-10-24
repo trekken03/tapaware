@@ -5,7 +5,7 @@ const sendEmail = require('../utils/emailSender');
 const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value || '');
 
 exports.submitConcern = async (req, res) => {
-    const { name, contact_info, purok, message } = req.body;
+    const { name, contact_info, zone, message } = req.body;
 
     if (!message || message.trim().length === 0) {
         return res.status(400).json({ message: 'Please describe your concern' });
@@ -13,8 +13,8 @@ exports.submitConcern = async (req, res) => {
 
     try {
         await db.query(
-            'INSERT INTO concerns(name, contact_info, purok, message) VALUES (?,?,?,?)',
-            [name || null, contact_info || null, purok || null, message]
+            'INSERT INTO concerns(name, contact_info, zone, message) VALUES (?,?,?,?)',
+            [name || null, contact_info || null, zone || null, message]
         );
 
         res.status(201).json({ message: 'Concern submitted successfully' });

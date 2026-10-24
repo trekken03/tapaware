@@ -21,7 +21,7 @@ const AddUser = () => {
         password: '',
         role: 'resident',
         household_number: '',
-        purok: '',
+        zone: '',
         address: ''
     })
 
@@ -50,7 +50,7 @@ const AddUser = () => {
         form.email.trim() !== '' &&
         form.password.trim() !== '' &&
         form.name.trim() !== '' &&
-        (!isResident || (form.household_number.trim() !== '' && form.purok.trim() !== '' && form.address.trim() !== ''))
+        (!isResident || (form.household_number.trim() !== '' && form.zone.trim() !== '' && form.address.trim() !== ''))
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -70,7 +70,7 @@ const AddUser = () => {
                 password: form.password,
                 role: form.role,
                 household_number: form.role === 'resident' && form.household_number ? parseInt(form.household_number, 10) : null,
-                purok: form.role === 'resident' && form.purok ? parseInt(form.purok, 10) : null,
+                zone: form.role === 'resident' && form.zone ? parseInt(form.zone, 10) : null,
                 address: form.role === 'resident' ? form.address : null
             }
 
@@ -210,18 +210,18 @@ const AddUser = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="purok">
-                                        Purok (for residents only)
+                                    <Label htmlFor="zone">
+                                        Zone (for residents only)
                                     </Label>
                                     <select
-                                        id="purok"
-                                        name="purok"
-                                        value={form.purok}
+                                        id="zone"
+                                        name="zone"
+                                        value={form.zone}
                                         onChange={handleChange}
                                         required={form.role === 'resident'}
                                         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value="">Select purok...</option>
+                                        <option value="">Select zone...</option>
                                         {[1, 2, 3, 4, 5, 6].map(p => (
                                             <option key={p} value={p}>{p}</option>
                                         ))}

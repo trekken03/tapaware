@@ -7,7 +7,7 @@ exports.getAllReadings = async (req, res) => {
             `SELECT tds_readings.*,
             households.household_number,
             households.owner_name,
-            households.purok,
+            households.zone,
             users.name as staff_name FROM tds_readings
             JOIN households ON tds_readings.household_id = households.id
             JOIN users ON tds_readings.staff_id = users.id
@@ -28,7 +28,7 @@ exports.getArchivedReadings = async (req, res) => {
             `SELECT tds_readings.*,
             households.household_number,
             households.owner_name,
-            households.purok,
+            households.zone,
             users.name as staff_name FROM tds_readings
             JOIN households ON tds_readings.household_id = households.id
             JOIN users ON tds_readings.staff_id = users.id
@@ -130,7 +130,7 @@ exports.getReadingById = async (req, res) => {
             `SELECT tds_readings.*,
             households.household_number,
             households.owner_name,
-            households.purok,
+            households.zone,
             households.address,
             users.name as staff_name
             FROM tds_readings JOIN households ON tds_readings.household_id = households.id

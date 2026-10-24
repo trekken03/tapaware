@@ -242,15 +242,7 @@ const AdminPanel = () => {
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Admin Panel</h1>
                         <p className="text-gray-500 mt-1">Manage users, Flagged households, and Concerns.</p>
                     </div>
-                    {(activeTab === 'users' || activeTab === 'staff' || activeTab === 'admin') && (
-                        <Button
-                            className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
-                            onClick={() => navigate('/admin/add-user')}
-                        >
-                            <Plus size={16} />
-                            Add user
-                        </Button>
-                    )}
+
                 </div>
 
 
@@ -292,9 +284,9 @@ const AdminPanel = () => {
                                 <button
                                     key={tab.key}
                                     onClick={() => setSearchParams({ tab: tab.key })}
-                                    className={`flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.key
-                                        ? 'border-blue-600 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                    className={`flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-3 text-sm font-medium border-b-2 hover:cursor-pointer transition-colors whitespace-nowrap ${activeTab === tab.key
+                                        ? 'border-blue-800 text-blue-800'
+                                        : 'border-transparent text-black hover:text-gray-700'
                                         }`}
                                 >
                                     <Icon size={16} />
@@ -304,6 +296,16 @@ const AdminPanel = () => {
                         })}
                     </div>
                 </div>
+
+                {(activeTab === 'users' || activeTab === 'staff' || activeTab === 'admin') && (
+                    <Button
+                        className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 border mb-2 ml-auto  border-black  shadow text-white flex items-center gap-2"
+                        onClick={() => navigate('/admin/add-user')}
+                    >
+                        <Plus size={16} />
+                        Add user
+                    </Button>
+                )}
 
                 {/* Users tab */}
                 {activeTab === 'users' && (
@@ -334,7 +336,7 @@ const AdminPanel = () => {
                                                 <TableHead>Name</TableHead>
                                                 <TableHead>Email</TableHead>
                                                 <TableHead>Household</TableHead>
-                                                <TableHead>Purok</TableHead>
+                                                <TableHead>Zone</TableHead>
                                                 <TableHead>Date Joined</TableHead>
                                                 <TableHead>Actions</TableHead>
                                             </TableRow>
@@ -350,7 +352,7 @@ const AdminPanel = () => {
                                                     <TableCell label="Name" className="font-semibold">{u.name}</TableCell>
                                                     <TableCell label="Email">{emailCell(u)}</TableCell>
                                                     <TableCell label="Household">{u.household_number || '—'}</TableCell>
-                                                    <TableCell label="Purok">{u.purok || '—'}</TableCell>
+                                                    <TableCell label="Zone">{u.zone || '—'}</TableCell>
                                                     <TableCell label="Date Joined" className="whitespace-nowrap">{formatDate(u.created_at)}</TableCell>
                                                     <TableCell label="Actions" onClick={(e) => e.stopPropagation()}>
                                                         {userActions(u)}
@@ -529,7 +531,7 @@ const AdminPanel = () => {
                                                 <TableHead>No.</TableHead>
                                                 <TableHead>Household</TableHead>
                                                 <TableHead>Owner</TableHead>
-                                                <TableHead>Purok</TableHead>
+                                                <TableHead>Zone</TableHead>
                                                 <TableHead>Issue Type</TableHead>
                                                 <TableHead>Times Reported</TableHead>
                                                 <TableHead>Status</TableHead>
@@ -545,7 +547,7 @@ const AdminPanel = () => {
                                                     <TableCell label="No.">{rowNumber(index)}</TableCell>
                                                     <TableCell label="Household">#{f.household_number}</TableCell>
                                                     <TableCell label="Owner" className="font-semibold">{f.owner_name}</TableCell>
-                                                    <TableCell label="Purok">Purok {f.purok}</TableCell>
+                                                    <TableCell label="Zone">Zone {f.zone}</TableCell>
                                                     <TableCell label="Issue Type" className="capitalize">{f.issue_type}</TableCell>
                                                     <TableCell label="Times Reported">
                                                         <span className="bg-red-100 text-red-700 inline-block px-2 py-1 text-xs font-semibold">
@@ -595,7 +597,7 @@ const AdminPanel = () => {
                                             <TableRow>
                                                 <TableHead>No.</TableHead>
                                                 <TableHead>Name</TableHead>
-                                                <TableHead>Purok</TableHead>
+                                                <TableHead>Zone</TableHead>
                                                 <TableHead>Message</TableHead>
                                                 <TableHead>Status</TableHead>
                                                 <TableHead>Date</TableHead>
@@ -610,7 +612,7 @@ const AdminPanel = () => {
                                                 >
                                                     <TableCell label="No.">{rowNumber(index)}</TableCell>
                                                     <TableCell label="Name" className="font-semibold">{c.name || 'Anonymous'}</TableCell>
-                                                    <TableCell label="Purok">{c.purok ? `Purok ${c.purok}` : '—'}</TableCell>
+                                                    <TableCell label="Zone">{c.zone ? `Zone ${c.zone}` : '—'}</TableCell>
                                                     <TableCell label="Message" className="max-w-[280px] truncate">{c.message}</TableCell>
                                                     <TableCell label="Status">
                                                         <span className={`inline-block px-2 py-1 text-xs font-semibold capitalize ${c.status === 'new' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'

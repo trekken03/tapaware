@@ -5,7 +5,7 @@ const sendVerificationEmail = require('../utils/emailVerification');
 exports.getAllUsers = async (req, res) => {
     try {
         const [rows] = await db.query(`Select u.id,u.name,u.email,u.role,u.household_id,u.email_verified,
-            h.household_number,h.purok,h.address,u.created_at from users u left join households h on u.household_id = h.id
+            h.household_number,h.zone,h.address,u.created_at from users u left join households h on u.household_id = h.id
             where u.deleted_at is null
             order by u.created_at desc`);
         res.json(rows);
@@ -65,7 +65,7 @@ exports.resendVerification = async (req, res) => {
 exports.getArchivedUsers = async (req, res) => {
     try {
         const [rows] = await db.query(`Select u.id,u.name,u.email,u.role,u.household_id,u.deleted_at,
-            h.household_number,h.purok,u.created_at from users u left join households h on u.household_id = h.id
+            h.household_number,h.zone,u.created_at from users u left join households h on u.household_id = h.id
             where u.deleted_at is not null
             order by u.deleted_at desc`);
         res.json(rows);
@@ -246,7 +246,7 @@ exports.getAuditTrailByUser = async (req, res) => {
 
 exports.updateUserInfo = async (req, res) => {
     const { id } = req.params;
-    const { name, email, household_number, purok } = req.body;
+    const { name, email, household_number, zone } = req.body;
     const currentUser = req.user;
 
     try {
@@ -262,13 +262,13 @@ exports.updateUserInfo = async (req, res) => {
 
         let finalHouseholdId = existing[0].household_id;
 
-        if (household_number && purok) {
+        if (household_number && zone) {
             const houseNum = parseInt(household_number, 10);
-            const purokNum = parseInt(purok, 10);
+            const zoneNum = parseInt(zone, 10);
 
             const [existingHousehold] = await db.query(
-                'SELECT id FROM households WHERE household_number = ? AND purok = ?',
-                [houseNum, purokNum]
+                'SELECT id FROM households WHERE household_number = ? AND zone = ?',
+                [houseNum, zoneNum]
             );
 
             if (existingHousehold.length > 0) {
@@ -281,13 +281,13 @@ exports.updateUserInfo = async (req, res) => {
 
                 if (existingResident.length > 0) {
                     return res.status(400).json({
-                        message: `Household #${houseNum} in Purok ${purokNum} already has a resident account linked to it. Please use a different household number or purok.`
+                        message: `Household #${houseNum} in Zone ${zoneNum} already has a resident account linked to it. Please use a different household number or zone.`
                     });
                 }
             } else {
                 const [newHousehold] = await db.query(
-                    'INSERT INTO households(household_number, purok, owner_name, address) VALUES (?,?,?,?)',
-                    [houseNum, purokNum, name, '']
+                    'INSERT INTO households(household_number, zone, owner_name, address) VALUES (?,?,?,?)',
+                    [houseNum, zoneNum, name, '']
                 );
                 finalHouseholdId = newHousehold.insertId;
             }
@@ -324,7 +324,7 @@ exports.updateUserInfo = async (req, res) => {
 };
 exports.updateUserInfo = async (req, res) => {
     const { id } = req.params;
-    const { name, email, household_number, purok, transfer_data, address } = req.body;
+    const { name, email, household_number, zone, transfer_data, address } = req.body;
     const currentUser = req.user;
     const addressProvided = Object.prototype.hasOwnProperty.call(req.body, 'address');
     const normalizedAddress = typeof address === 'string' ? address.trim() : '';
@@ -347,13 +347,13 @@ exports.updateUserInfo = async (req, res) => {
         const oldHouseholdId = existing[0].household_id;
         let finalHouseholdId = existing[0].household_id;
 
-        if (household_number && purok) {
+        if (household_number && zone) {
             const houseNum = parseInt(household_number, 10);
-            const purokNum = parseInt(purok, 10);
+            const zoneNum = parseInt(zone, 10);
 
             const [existingHousehold] = await db.query(
-                'SELECT id FROM households WHERE household_number = ? AND purok = ?',
-                [houseNum, purokNum]
+                'SELECT id FROM households WHERE household_number = ? AND zone = ?',
+                [houseNum, zoneNum]
             );
 
             if (existingHousehold.length > 0) {
@@ -366,13 +366,13 @@ exports.updateUserInfo = async (req, res) => {
 
                 if (existingResident.length > 0) {
                     return res.status(400).json({
-                        message: `Household #${houseNum} in Purok ${purokNum} already has a resident account linked to it. Please use a different household number or purok.`
+                        message: `Household #${houseNum} in Zone ${zoneNum} already has a resident account linked to it. Please use a different household number or zone.`
                     });
                 }
             } else {
                 const [newHousehold] = await db.query(
-                    'INSERT INTO households(household_number, purok, owner_name, address) VALUES (?,?,?,?)',
-                    [houseNum, purokNum, name, '']
+                    'INSERT INTO households(household_number, zone, owner_name, address) VALUES (?,?,?,?)',
+                    [houseNum, zoneNum, name, '']
                 );
                 finalHouseholdId = newHousehold.insertId;
             }
@@ -528,7 +528,7 @@ exports.getUserById = async (req, res) => {
     try {
         const [[user]] = await db.query(
             `SELECT u.id, u.name, u.email, u.role, u.household_id, u.created_at,
-            h.household_number, h.purok, h.address
+            h.household_number, h.zone, h.address
             FROM users u LEFT JOIN households h ON u.household_id = h.id
             WHERE u.id = ? AND u.deleted_at IS NULL`,
             [id]
@@ -550,7 +550,7 @@ exports.getUserById = async (req, res) => {
 
         if (user.role === 'staff' || user.role === 'admin') {
             [tdsReadings] = await db.query(
-                `SELECT tds_readings.*, households.household_number, households.purok
+                `SELECT tds_readings.*, households.household_number, households.zone
                 FROM tds_readings JOIN households ON tds_readings.household_id = households.id
                 WHERE tds_readings.staff_id = ? ORDER BY recorded_at DESC LIMIT 10`,
                 [id]
@@ -602,7 +602,7 @@ exports.getFlagById = async (req, res) => {
             `SELECT recurring_flags.*,
             households.household_number,
             households.owner_name,
-            households.purok,
+            households.zone,
             households.address
             FROM recurring_flags JOIN households ON recurring_flags.household_id = households.id
             WHERE recurring_flags.id = ?`,

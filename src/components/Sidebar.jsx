@@ -136,8 +136,8 @@ const Sidebar = (props) => {
                             className="rounded-lg hover:cursor-pointer group-data-[collapsible=icon]:justify-center"
                         >
                             <img
-                                src="/assets/logo.webp"
-                                alt="logo"
+                                src="/assets/figure-main-logo.png"
+                                alt="TapAware logo"
                                 className="size-8 shrink-0 rounded-full object-contain"
                             />
                             {/* Hidden outright when collapsed: a grid box defaults to
@@ -146,9 +146,6 @@ const Sidebar = (props) => {
                                 overflow-hidden box. */}
                             <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
                                 <span className="truncate font-bold text-white">TapAware</span>
-                                <span className="truncate text-xs text-sidebar-foreground/70">
-                                    Water Quality Monitoring System
-                                </span>
                             </div>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -171,7 +168,7 @@ const Sidebar = (props) => {
                                             asChild
                                             isActive={isActive}
                                             tooltip={item.label}
-                                            className="h-10 rounded-lg font-medium data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
+                                            className="h-10 rounded-lg font-medium data-active:rounded-xl data-active:bg-gradient-to-r data-active:from-[#4b83d6] data-active:to-[#6fa6ea] data-active:font-semibold data-active:text-white data-active:shadow-sm"
                                         >
                                             <NavLink to={item.path} onClick={() => handleNavClick(item)}>
                                                 <Icon className="transition-transform duration-200 group-hover/menu-button:scale-110" />

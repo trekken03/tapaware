@@ -118,7 +118,7 @@ const SubmitReport = () => {
                                                 #{householdInfo.household_number} — {householdInfo.owner_name}
                                             </p>
                                             <p className="text-sm text-gray-500">
-                                                Purok {householdInfo.purok} — {householdInfo.address}
+                                                Zone {householdInfo.zone} — {householdInfo.address}
                                             </p>
                                         </div>
                                     </div>

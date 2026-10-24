@@ -16,7 +16,7 @@ const TdsReadings = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const statusFilter = searchParams.get('status');
-    const [selectedPurok, setSelectedPurok] = useState('all');
+    const [selectedZone, setSelectedZone] = useState('all');
 
     useEffect(() => {
         fetchReadings()
@@ -67,11 +67,11 @@ const TdsReadings = () => {
         };
     };
 
-    const purokOptions = [...new Set(readings.map(r => r.purok).filter(Boolean))]
+    const zoneOptions = [...new Set(readings.map(r => r.zone).filter(Boolean))]
         .sort((a, b) => a.toString().localeCompare(b.toString(), undefined, { numeric: true }))
 
     const filteredReadings = readings.filter(r => {
-        if (selectedPurok !== 'all' && r.purok?.toString() !== selectedPurok) {
+        if (selectedZone !== 'all' && r.zone?.toString() !== selectedZone) {
             return false
         }
 
@@ -87,7 +87,7 @@ const TdsReadings = () => {
         return (
             r.household_number?.toString().includes(searchLower) ||
             r.owner_name?.toLowerCase().includes(searchLower) ||
-            r.purok?.toString().includes(searchLower) ||
+            r.zone?.toString().includes(searchLower) ||
             r.notes?.toLowerCase().includes(searchLower)
         )
     })
@@ -134,16 +134,16 @@ const TdsReadings = () => {
                             </CardTitle>
 
                             <div className="flex items-center gap-3">
-                                {/* Purok spinner */}
+                                {/* Zone spinner */}
                                 <select
-                                    value={selectedPurok}
-                                    onChange={(e) => setSelectedPurok(e.target.value)}
+                                    value={selectedZone}
+                                    onChange={(e) => setSelectedZone(e.target.value)}
                                     className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
-                                    <option value="all">All Puroks</option>
-                                    {purokOptions.map(purok => (
-                                        <option key={purok} value={purok}>
-                                            Purok {purok}
+                                    <option value="all">All Zones</option>
+                                    {zoneOptions.map(zone => (
+                                        <option key={zone} value={zone}>
+                                            Zone {zone}
                                         </option>
                                     ))}
                                 </select>
@@ -191,7 +191,7 @@ const TdsReadings = () => {
                                                 </div>
 
                                                 <div className="flex flex-col gap-1 text-sm text-gray-700">
-                                                    <p className="font-semibold text-gray-900">Household: #{r.household_number} - Purok {r.purok}</p>
+                                                    <p className="font-semibold text-gray-900">Household: #{r.household_number} - Zone {r.zone}</p>
                                                     <p className="font-semibold text-gray-900">TDS: {r.tds_value} ppm</p>
                                                     <p className="font-semibold text-gray-900">Recorded By: {r.staff_name}</p>
                                                     <p className="font-semibold text-gray-900">Notes: {r.notes || '—'}</p>

@@ -120,7 +120,7 @@ const AddTdsReading = () => {
                                                     #{householdInfo.household_number} — {householdInfo.owner_name}
                                                 </p>
                                                 <p className="text-sm text-gray-500">
-                                                    Purok {householdInfo.purok} — {householdInfo.address}
+                                                    Zone {householdInfo.zone} — {householdInfo.address}
                                                 </p>
                                             </div>
                                         </div>
@@ -142,7 +142,7 @@ const AddTdsReading = () => {
                                         <option value="">Select a household...</option>
                                         {households.map(h => (
                                             <option key={h.id} value={h.id}>
-                                                Purok {h.purok} #{h.household_number}  — {h.owner_name}
+                                                Zone {h.zone} #{h.household_number}  — {h.owner_name}
                                             </option>
                                         ))}
                                     </select>

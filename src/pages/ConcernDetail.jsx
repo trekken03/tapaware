@@ -143,7 +143,7 @@ const ConcernDetail = () => {
                         <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600">
                             <div className="flex items-center gap-1.5">
                                 <MapPin size={14} className="text-gray-400" />
-                                {concern.purok ? `Purok ${concern.purok}` : 'Purok not specified'}
+                                {concern.zone ? `Zone ${concern.zone}` : 'Zone not specified'}
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <Mail size={14} className="text-gray-400" />

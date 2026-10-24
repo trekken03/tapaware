@@ -32,9 +32,9 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- =========================================================
 
 -- ---------------------------------------------------------
--- Households (ids 1-20, one per resident, puroks 1-7)
+-- Households (ids 1-20, one per resident, zones 1-7)
 -- ---------------------------------------------------------
-INSERT INTO households (household_number, purok, owner_name, address) VALUES
+INSERT INTO households (household_number, zone, owner_name, address) VALUES
 ('1',  '1', 'Mike Ross',          'don jose st'),
 ('2',  '2', 'Rachel Zane',        'don alfredo st'),
 ('3',  '3', 'Donna Paulsen',      'don leo st'),
@@ -128,7 +128,7 @@ INSERT INTO reports (household_id, user_id, issue_type, description, status, cre
 (9, 11, 'odor', 'Getting worse over the week',        'investigating', DATE_SUB(CURDATE(), INTERVAL 5 DAY)),
 (9, 11, 'odor', 'Slight improvement but still present','resolved',      DATE_SUB(CURDATE(), INTERVAL 1 DAY)),
 
--- Assorted single reports across other households/puroks for variety
+-- Assorted single reports across other households/zones for variety
 (2,  4,  'low pressure',      'Barely any water pressure in the mornings', 'pending',       DATE_SUB(CURDATE(), INTERVAL 15 DAY)),
 (4,  6,  'cleanliness',       'Sediment visible in the storage tank',      'investigating', DATE_SUB(CURDATE(), INTERVAL 14 DAY)),
 (5,  7,  'broken hardware',   'Faucet handle is broken',                    'resolved',      DATE_SUB(CURDATE(), INTERVAL 13 DAY)),
@@ -151,7 +151,7 @@ INSERT INTO recurring_flags (household_id, issue_type, times_reported, last_repo
 -- ---------------------------------------------------------
 -- Public concerns — anonymous, phone-only, and already-replied examples
 -- ---------------------------------------------------------
-INSERT INTO concerns (name, contact_info, purok, message, status, reply_message, replied_by, replied_at, created_at) VALUES
+INSERT INTO concerns (name, contact_info, zone, message, status, reply_message, replied_by, replied_at, created_at) VALUES
 (NULL, NULL, '3',
  'May amoy na masangsang ang tubig sa amin, sana matingnan po.',
  'new', NULL, NULL, NULL, DATE_SUB(CURDATE(), INTERVAL 4 DAY)),
@@ -163,7 +163,7 @@ INSERT INTO concerns (name, contact_info, purok, message, status, reply_message,
 ('Juan Dela Cruz', '09171234567', '2',
  'Mababa ang tubig pressure sa aming lugar simula nung isang linggo.',
  'reviewed',
- 'Salamat sa report, may naka-iskedyul nang inspeksyon sa Purok 2 sa susunod na linggo.',
+ 'Salamat sa report, may naka-iskedyul nang inspeksyon sa Zone 2 sa susunod na linggo.',
  'Harvey Specter', DATE_SUB(CURDATE(), INTERVAL 1 DAY), DATE_SUB(CURDATE(), INTERVAL 6 DAY)),
 
 ('Maria Santos', 'maria.santos@gmail.com', '1',

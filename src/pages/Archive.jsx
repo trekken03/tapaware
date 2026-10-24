@@ -123,7 +123,7 @@ const Archive = () => {
             <div>
                 <div className="mb-6 sm:mb-8">
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
-                        <ArchiveIcon size={26} className="text-blue-600" />
+
                         Archive
                     </h1>
                     <p className="text-gray-500 mt-1">Archived records can be restored at any time, or deleted permanently.</p>
@@ -165,14 +165,14 @@ const Archive = () => {
                                             <>
                                                 <TableHead>Household</TableHead>
                                                 <TableHead>Owner</TableHead>
-                                                <TableHead>Purok</TableHead>
+                                                <TableHead>Zone</TableHead>
                                                 <TableHead>Address</TableHead>
                                             </>
                                         )}
                                         {activeTab === 'reports' && (
                                             <>
                                                 <TableHead>Household</TableHead>
-                                                <TableHead>Purok</TableHead>
+                                                <TableHead>Zone</TableHead>
                                                 <TableHead>Issue Type</TableHead>
                                                 <TableHead>Status</TableHead>
                                                 <TableHead>Reported By</TableHead>
@@ -181,7 +181,7 @@ const Archive = () => {
                                         {activeTab === 'concerns' && (
                                             <>
                                                 <TableHead>Name</TableHead>
-                                                <TableHead>Purok</TableHead>
+                                                <TableHead>Zone</TableHead>
                                                 <TableHead>Concern</TableHead>
                                                 <TableHead>Status</TableHead>
                                             </>
@@ -189,7 +189,7 @@ const Archive = () => {
                                         {activeTab === 'tds' && (
                                             <>
                                                 <TableHead>Household</TableHead>
-                                                <TableHead>Purok</TableHead>
+                                                <TableHead>Zone</TableHead>
                                                 <TableHead>TDS Value</TableHead>
                                                 <TableHead>Recorded By</TableHead>
                                             </>
@@ -215,14 +215,14 @@ const Archive = () => {
                                                 <>
                                                     <TableCell label="Household">#{row.household_number}</TableCell>
                                                     <TableCell label="Owner" className="font-semibold">{row.owner_name}</TableCell>
-                                                    <TableCell label="Purok">Purok {row.purok}</TableCell>
+                                                    <TableCell label="Zone">Zone {row.zone}</TableCell>
                                                     <TableCell label="Address" className="max-w-[200px] truncate">{row.address?.trim() || '-'}</TableCell>
                                                 </>
                                             )}
                                             {activeTab === 'reports' && (
                                                 <>
                                                     <TableCell label="Household">#{row.household_number} — {row.owner_name}</TableCell>
-                                                    <TableCell label="Purok">Purok {row.purok}</TableCell>
+                                                    <TableCell label="Zone">Zone {row.zone}</TableCell>
                                                     <TableCell label="Issue Type" className="capitalize">{row.issue_type}</TableCell>
                                                     <TableCell label="Status" className="capitalize">{row.status}</TableCell>
                                                     <TableCell label="Reported By">{row.reported_by}</TableCell>
@@ -231,7 +231,7 @@ const Archive = () => {
                                             {activeTab === 'concerns' && (
                                                 <>
                                                     <TableCell label="Name" className="font-semibold">{row.name || 'Anonymous'}</TableCell>
-                                                    <TableCell label="Purok">{row.purok ? `Purok ${row.purok}` : '—'}</TableCell>
+                                                    <TableCell label="Zone">{row.zone ? `Zone ${row.zone}` : '—'}</TableCell>
                                                     <TableCell label="Concern" className="max-w-[280px] truncate">{row.message}</TableCell>
                                                     <TableCell label="Status" className="capitalize">{row.status}</TableCell>
                                                 </>
@@ -239,7 +239,7 @@ const Archive = () => {
                                             {activeTab === 'tds' && (
                                                 <>
                                                     <TableCell label="Household">#{row.household_number} — {row.owner_name}</TableCell>
-                                                    <TableCell label="Purok">Purok {row.purok}</TableCell>
+                                                    <TableCell label="Zone">Zone {row.zone}</TableCell>
                                                     <TableCell label="TDS Value">{row.tds_value} ppm</TableCell>
                                                     <TableCell label="Recorded By">{row.staff_name}</TableCell>
                                                 </>

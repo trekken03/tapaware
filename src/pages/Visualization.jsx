@@ -72,12 +72,12 @@ const getStoredOrDefaultDates = () => {
 
 const Visualization = () => {
     const [byIssue, setByIssue] = useState([])
-    const [byPurok, setByPurok] = useState([])
+    const [byZone, setByZone] = useState([])
     const [byStatus, setByStatus] = useState([])
     const [tdsTrend, setTdsTrend] = useState([])
     const [trendingIssues, setTrendingIssues] = useState([])
     const [trendingByTime, setTrendingByTime] = useState([])
-    const [tdsByPurok, setTdsByPurok] = useState([])
+    const [tdsByZone, setTdsByZone] = useState([])
 
     const [loading, setLoading] = useState(true)
     const [isExporting, setIsExporting] = useState(false)
@@ -85,7 +85,7 @@ const Visualization = () => {
     const [dateRange, setDateRange] = useState(getStoredOrDefaultDates)
     // Refs to the actual rendered chart cards, so the PDF can screenshot
     // exactly what's on screen instead of redrawing an approximation.
-    const purokChartRef = useRef(null)
+    const zoneChartRef = useRef(null)
     const issueChartRef = useRef(null)
     const statusChartRef = useRef(null)
     const tdsChartRef = useRef(null)
@@ -184,8 +184,8 @@ const Visualization = () => {
                 y += 8
             }
 
-            const totalReports = byPurok.reduce((sum, purok) => sum + Number(purok.report_count || 0), 0)
-            const maxReports = Math.max(...byPurok.map((purok) => Number(purok.report_count || 0)), 1)
+            const totalReports = byZone.reduce((sum, zone) => sum + Number(zone.report_count || 0), 0)
+            const maxReports = Math.max(...byZone.map((zone) => Number(zone.report_count || 0)), 1)
             const latestTds = tdsTrend.length > 0 ? tdsTrend[0] : null
 
 
@@ -237,28 +237,28 @@ const Visualization = () => {
             // --- Summary ---
             addSectionTitle('Summary')
             addRow(['Total reports', totalReports], [45, 40])
-            addRow(['Puroks tracked', byPurok.length], [45, 40])
+            addRow(['Zones tracked', byZone.length], [45, 40])
             addRow(['Issue types', byIssue.length], [45, 40])
             addRow(['Latest average TDS', latestTds ? `${Number(latestTds.average || 0).toFixed(2)} ppm` : 'No data'], [45, 40])
             y += 4
 
             // --- Real charts, screenshotted so the PDF matches the on-screen page exactly ---
-            // --- Reports per Purok: chart + detail table together ---
-            if (purokChartRef.current) {
-                y = await addChartSection(pdf, 'Reports per Purok', purokChartRef.current, { margin, pageWidth, pageHeight, y })
+            // --- Reports per Zone: chart + detail table together ---
+            if (zoneChartRef.current) {
+                y = await addChartSection(pdf, 'Reports per Zone', zoneChartRef.current, { margin, pageWidth, pageHeight, y })
             }
 
-            addTableHeader(['Purok', 'Reports', 'Share'], [35, 30, 120])
-            byPurok.forEach((purok) => {
+            addTableHeader(['Zone', 'Reports', 'Share'], [35, 30, 120])
+            byZone.forEach((zone) => {
                 addPageIfNeeded(9)
-                const reportCount = Number(purok.report_count || 0)
+                const reportCount = Number(zone.report_count || 0)
                 const barWidth = (reportCount / maxReports) * 70
                 const sharePct = totalReports > 0 ? ((reportCount / totalReports) * 100).toFixed(1) : '0.0'
 
                 pdf.setFont('helvetica', 'normal')
                 pdf.setFontSize(10)
                 pdf.setTextColor(55, 65, 81)
-                pdf.text(`Purok ${purok.purok}`, margin + 2, y)
+                pdf.text(`Zone ${zone.zone}`, margin + 2, y)
                 pdf.text(String(reportCount), margin + 37, y)
                 pdf.setFillColor(229, 231, 235)
                 pdf.rect(margin + 65, y - 4, 70, 4, 'F')
@@ -335,23 +335,23 @@ const Visualization = () => {
         setLoading(true)
         try {
             const params = { from: dateRange.from, to: dateRange.to }
-            const [issueRes, purokRes, statusRes, trendRes, trendingRes, timeRes, tdsByPurokRes] = await Promise.all([
+            const [issueRes, zoneRes, statusRes, trendRes, trendingRes, timeRes, tdsByZoneRes] = await Promise.all([
                 API.get('/visualization/reports-by-issue', { params }),
-                API.get('/visualization/reports-by-purok', { params }),
+                API.get('/visualization/reports-by-zone', { params }),
                 API.get('/visualization/reports-by-status', { params }),
                 API.get('/visualization/tds-trend', { params }),
                 API.get('/visualization/trending-issues', { params }),
                 API.get('/visualization/trending-by-time', { params }),
-                API.get('/visualization/tds-by-purok', { params }),
+                API.get('/visualization/tds-by-zone', { params }),
 
             ])
             setByIssue(issueRes.data)
-            setByPurok(purokRes.data)
+            setByZone(zoneRes.data)
             setByStatus(statusRes.data)
             setTdsTrend(trendRes.data)
             setTrendingIssues(trendingRes.data)
             setTrendingByTime(timeRes.data)
-            setTdsByPurok(tdsByPurokRes.data)
+            setTdsByZone(tdsByZoneRes.data)
 
         } catch (error) {
             console.log('Error fetching visualization:', error)
@@ -370,8 +370,8 @@ const Visualization = () => {
 
 
 
-    const topIssuePerPurok = trendingIssues.reduce((acc, row) => {
-        if (!acc.find(item => item.purok === row.purok)) {
+    const topIssuePerZone = trendingIssues.reduce((acc, row) => {
+        if (!acc.find(item => item.zone === row.zone)) {
             acc.push(row)
         }
         return acc
@@ -535,24 +535,24 @@ const Visualization = () => {
 
 
 
-                        {/* Reports per purok */}
-                        <Card ref={purokChartRef}>
+                        {/* Reports per zone */}
+                        <Card ref={zoneChartRef}>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
                                     <BarChart3 size={18} className="text-blue-600" />
-                                    Reports per purok
+                                    Reports per zone
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={280}>
-                                    <BarChart data={byPurok} >
+                                    <BarChart data={byZone} >
                                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                         <XAxis
-                                            dataKey="purok"
+                                            dataKey="zone"
                                             fontSize={12}
 
                                             tick={{ fill: '#6b7280' }}
-                                            tickFormatter={(v) => `Purok ${v}`}
+                                            tickFormatter={(v) => `Zone ${v}`}
                                         />
                                         <YAxis
                                             fontSize={12}
@@ -561,35 +561,35 @@ const Visualization = () => {
                                         />
                                         <Tooltip
                                             formatter={(value) => [value, 'Reports']}
-                                            labelFormatter={(label) => `Purok ${label}`}
+                                            labelFormatter={(label) => `Zone ${label}`}
                                         />
                                         <Bar dataKey="report_count" fill="#1e40af" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </CardContent>
                         </Card>
-                        {/* Average TDS by purok */}
+                        {/* Average TDS by zone */}
                         <Card >
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
                                     <BarChart3 size={18} className="text-blue-600" />
-                                    Average TDS by Purok
+                                    Average TDS by Zone
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                {tdsByPurok.every(p => !p.last_recorded) ? (
+                                {tdsByZone.every(p => !p.last_recorded) ? (
                                     <p className="text-gray-500 text-sm text-center py-12">
                                         No TDS readings recorded yet.
                                     </p>
                                 ) : (
                                     <ResponsiveContainer width="100%" height={280}>
-                                        <BarChart data={tdsByPurok}>
+                                        <BarChart data={tdsByZone}>
                                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                             <XAxis
-                                                dataKey="purok"
+                                                dataKey="zone"
                                                 fontSize={12}
                                                 tick={{ fill: '#6b7280' }}
-                                                tickFormatter={(v) => `Purok ${v}`}
+                                                tickFormatter={(v) => `Zone ${v}`}
                                             />
                                             <YAxis
                                                 fontSize={12}
@@ -598,10 +598,10 @@ const Visualization = () => {
                                             />
                                             <Tooltip
                                                 formatter={(value) => [`${Number(value).toFixed(2)} ppm`, 'Avg TDS']}
-                                                labelFormatter={(label) => `Purok ${label}`}
+                                                labelFormatter={(label) => `Zone ${label}`}
                                             />
                                             <Bar dataKey="average_tds" radius={[2, 2, 0, 0]}>
-                                                {tdsByPurok.map((entry, index) => (
+                                                {tdsByZone.map((entry, index) => (
                                                     <Cell key={`cell-${index}`} fill={getTDSColor(entry.average_tds)} />
                                                 ))}
                                             </Bar>
@@ -672,11 +672,11 @@ const Visualization = () => {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-base">
                                 <BarChart3 size={18} className="text-blue-600" />
-                                Report Count per Purok
+                                Report Count per Zone
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {byPurok.length === 0 ? (
+                            {byZone.length === 0 ? (
                                 <p className="text-gray-500 text-sm text-center py-12">
                                     No reports recorded yet.
                                 </p>
@@ -685,22 +685,22 @@ const Visualization = () => {
                                     <TableHeader className="bg-blue-800">
                                         <TableRow>
                                             <TableHead>No.</TableHead>
-                                            <TableHead>Purok</TableHead>
+                                            <TableHead>Zone</TableHead>
                                             <TableHead>Total Reports</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {byPurok.map((p, index) => (
-                                            <TableRow key={p.purok ?? index}>
+                                        {byZone.map((p, index) => (
+                                            <TableRow key={p.zone ?? index}>
                                                 <TableCell label="No.">{index + 1}</TableCell>
-                                                <TableCell label="Purok" className="font-semibold">Purok {p.purok}</TableCell>
+                                                <TableCell label="Zone" className="font-semibold">Zone {p.zone}</TableCell>
                                                 <TableCell label="Total Reports">
                                                     <div className="flex items-center gap-3">
                                                         <div className="flex-1 bg-gray-100 h-2 max-w-32">
                                                             <div
                                                                 className="bg-blue-600 h-2"
                                                                 style={{
-                                                                    width: `${Math.min((p.report_count / Math.max(...byPurok.map(x => x.report_count || 1))) * 100, 100)}%`
+                                                                    width: `${Math.min((p.report_count / Math.max(...byZone.map(x => x.report_count || 1))) * 100, 100)}%`
                                                                 }}
                                                             />
                                                         </div>
@@ -720,16 +720,16 @@ const Visualization = () => {
                 </div>
 
             </div>
-            {/* Trending issue per purok */}
+            {/* Trending issue per zone */}
             <Card className="mt-6">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base">
                         <BarChart3 size={18} className="text-blue-600" />
-                        Trending Issue per Purok
+                        Trending Issue per Zone
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {topIssuePerPurok.length === 0 ? (
+                    {topIssuePerZone.length === 0 ? (
                         <p className="text-gray-500 text-sm text-center py-12">
                             No reports recorded yet.
                         </p>
@@ -738,16 +738,16 @@ const Visualization = () => {
                             <TableHeader className="bg-blue-800">
                                 <TableRow>
                                     <TableHead>No.</TableHead>
-                                    <TableHead>Purok</TableHead>
+                                    <TableHead>Zone</TableHead>
                                     <TableHead>Top Issue</TableHead>
                                     <TableHead>Times Reported</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {topIssuePerPurok.map((row, index) => (
-                                    <TableRow key={row.purok}>
+                                {topIssuePerZone.map((row, index) => (
+                                    <TableRow key={row.zone}>
                                         <TableCell label="No.">{index + 1}</TableCell>
-                                        <TableCell label="Purok" className="font-semibold">Purok {row.purok}</TableCell>
+                                        <TableCell label="Zone" className="font-semibold">Zone {row.zone}</TableCell>
                                         <TableCell label="Top Issue">
                                             <span className="bg-blue-100 text-blue-700 inline-block px-2 py-1 text-xs font-semibold capitalize">
                                                 {row.issue_type}

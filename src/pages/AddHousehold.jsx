@@ -16,7 +16,7 @@ const AddHousehold = () => {
 
     const [form, setForm] = useState({
         household_number: '',
-        purok: '',
+        zone: '',
         owner_name: '',
         address: ''
     })
@@ -102,16 +102,16 @@ const AddHousehold = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="purok">Purok</Label>
+                                    <Label htmlFor="zone">Zone</Label>
                                     <select
-                                        id="purok"
-                                        name="purok"
-                                        value={form.purok}
+                                        id="zone"
+                                        name="zone"
+                                        value={form.zone}
                                         onChange={handleChange}
                                         required
                                         className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value="">Select purok...</option>
+                                        <option value="">Select zone...</option>
                                         {[1, 2, 3, 4, 5, 6].map(p => (
                                             <option key={p} value={p}>{p}</option>
                                         ))}

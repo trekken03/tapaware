@@ -110,7 +110,7 @@ const TdsDetail = () => {
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">{reading.owner_name}</h1>
                                 <p className="text-gray-500">
-                                    Household #{reading.household_number} - Purok {reading.purok}
+                                    Household #{reading.household_number} - Zone {reading.zone}
                                 </p>
                             </div>
                             <span className={`${status.bg} ${status.color} px-3 py-1  text-sm font-semibold`}>

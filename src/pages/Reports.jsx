@@ -23,7 +23,7 @@ const Reports = () => {
     const navigate = useNavigate()
     const { user } = useAuth()
     const [searchParams, setSearchParams] = useSearchParams()
-    const [selectedPurok, setSelectedPurok] = useState('all');
+    const [selectedZone, setSelectedZone] = useState('all');
     const statusFilter = searchParams.get('status')
 
     useEffect(() => {
@@ -103,24 +103,24 @@ const Reports = () => {
                 };
         }
     };
-    const purokOptions = [...new Set(reports.map(r => r.purok).filter(Boolean))]
+    const zoneOptions = [...new Set(reports.map(r => r.zone).filter(Boolean))]
         .sort((a, b) => a.toString().localeCompare(b.toString(), undefined, { numeric: true }))
 
-    const statusPurokFiltered = reports.filter(r => {
-        if (selectedPurok !== 'all' && r.purok?.toString() !== selectedPurok) {
+    const statusZoneFiltered = reports.filter(r => {
+        if (selectedZone !== 'all' && r.zone?.toString() !== selectedZone) {
             return false
         }
         const matchesStatus = !statusFilter || r.status === statusFilter
         return matchesStatus
     })
 
-    const filteredReports = statusPurokFiltered.filter(r => {
+    const filteredReports = statusZoneFiltered.filter(r => {
         const searchLower = searchTerm.toLowerCase()
         return (
             r.issue_type.toLowerCase().includes(searchLower) ||
             r.household_number?.toString().includes(searchLower) ||
             r.owner_name?.toLowerCase().includes(searchLower) ||
-            r.purok?.toString().includes(searchLower)
+            r.zone?.toString().includes(searchLower)
         )
     })
 
@@ -135,7 +135,7 @@ const Reports = () => {
 
     useEffect(() => {
         setCurrentPage(1)
-    }, [searchTerm, selectedPurok, statusFilter])
+    }, [searchTerm, selectedZone, statusFilter])
 
     useEffect(() => {
         if (currentPage > totalPages) {
@@ -192,8 +192,8 @@ const Reports = () => {
                                 {!isResident ? `${statusLabel} Reports` : 'My Reports'}
                                 <span className="text-sm font-normal text-gray-500">
                                     {searchTerm
-                                        ? `Showing ${filteredReports.length} of ${statusPurokFiltered.length}`
-                                        : `(${statusPurokFiltered.length})`}
+                                        ? `Showing ${filteredReports.length} of ${statusZoneFiltered.length}`
+                                        : `(${statusZoneFiltered.length})`}
                                 </span>
                             </CardTitle>
 
@@ -209,15 +209,15 @@ const Reports = () => {
 
                                 <div className="flex items-center gap-3">
                                     {!isResident && (
-                                        <Select value={selectedPurok} onValueChange={setSelectedPurok}>
+                                        <Select value={selectedZone} onValueChange={setSelectedZone}>
                                             <SelectTrigger className="w-[140px]">
-                                                <SelectValue placeholder="All Puroks" />
+                                                <SelectValue placeholder="All Zones" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="all">All Puroks</SelectItem>
-                                                {purokOptions.map(purok => (
-                                                    <SelectItem key={purok} value={purok}>
-                                                        Purok {purok}
+                                                <SelectItem value="all">All Zones</SelectItem>
+                                                {zoneOptions.map(zone => (
+                                                    <SelectItem key={zone} value={zone}>
+                                                        Zone {zone}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -265,7 +265,7 @@ const Reports = () => {
                                             <TableHead>Issue</TableHead>
                                             <TableHead>Owner Name</TableHead>
                                             {!isResident && <TableHead>Household</TableHead>}
-                                            <TableHead>Purok</TableHead>
+                                            <TableHead>Zone</TableHead>
 
                                             <TableHead>Reported</TableHead>
                                             {!isResident && <TableHead className="text-center">Actions</TableHead>}
@@ -300,8 +300,8 @@ const Reports = () => {
                                                         </TableCell>
                                                     )}
 
-                                                    <TableCell label="Purok">
-                                                        Purok {r.purok || '—'}
+                                                    <TableCell label="Zone">
+                                                        Zone {r.zone || '—'}
                                                     </TableCell>
 
                                                     <TableCell label="Reported">

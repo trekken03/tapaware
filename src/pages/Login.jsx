@@ -18,6 +18,7 @@ import API from "@/services/api";
 import { Link } from "react-router-dom";
 import { toast } from 'sonner'
 import LandingNavbar from "@/components/NavBar";
+import SceneMascot from "@/components/SceneMascot";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -59,9 +60,12 @@ const Login = () => {
 
 
     return (
-        <div className="relative min-h-screen bg-[url('/assets/mobile_version.jpg')] bg-cover bg-center bg-no-repeat md:bg-[url('/assets/login-background.jpg')] flex items-center justify-end p-4 sm:pr-8 lg:pr-[7%]">
+        <div className="relative min-h-screen bg-[url('/assets/mobile_version.jpg')] bg-cover bg-center bg-no-repeat md:bg-[url('/assets/new_login_bg.jpg')] flex items-center justify-end p-4 sm:pr-8 lg:pr-[7%] overflow-hidden">
             <LandingNavbar />
 
+            {/* Mascot glued to the background scene (left of the card). Desktop only.
+                x = horizontal position, size = width (both as a fraction of the background image) */}
+            <SceneMascot src="/assets/login_figure.png" x={0.45} size={0.21} className="hidden md:block" />
 
             <Card className="relative z-10 w-full max-w-sm bg-white shadow-lg">
                 <div className="flex flex-col items-center mb-6">

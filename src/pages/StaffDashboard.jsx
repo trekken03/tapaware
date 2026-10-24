@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom'
 const StaffDashboard = () => {
     const [summary, setSummary] = useState(null)
     const [flagged, setFlagged] = useState([])
-    const [tdsByPurok, setTdsByPurok] = useState([])
+    const [tdsByZone, setTdsByZone] = useState([])
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
 
@@ -19,14 +19,14 @@ const StaffDashboard = () => {
 
     const fetchData = async () => {
         try {
-            const [summaryRes, flaggedRes, tdsPurokRes] = await Promise.all([
+            const [summaryRes, flaggedRes, tdsZoneRes] = await Promise.all([
                 API.get('/visualization/summary'),
                 API.get('/visualization/flagged'),
-                API.get('/visualization/tds-by-purok')
+                API.get('/visualization/tds-by-zone')
             ])
             setSummary(summaryRes.data)
             setFlagged(flaggedRes.data)
-            setTdsByPurok(tdsPurokRes.data || [])
+            setTdsByZone(tdsZoneRes.data || [])
         } catch (error) {
             console.log('Error fetching dashboard data:', error)
         } finally {
@@ -35,11 +35,11 @@ const StaffDashboard = () => {
     }
 
     const statCards = [
-        { label: 'Total Reports', value: summary?.total_reports || 0, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', path: '/reports' },
-        { label: 'Total Households', value: summary?.total_households || 0, icon: Home, color: 'text-green-600', bg: 'bg-green-50', path: '/households' },
-        { label: 'Flagged Households', value: summary?.flagged_households || 0, icon: Flag, color: 'text-red-600', bg: 'bg-red-50' },
-        { label: 'Pending Reports', value: summary?.pending_reports || 0, icon: ClockFading, color: 'text-yellow-600', bg: 'bg-yellow-50', path: '/reports?status=pending' },
-        { label: 'Average TDS (ppm)', value: summary?.average_tds || 0, icon: Droplets, color: 'text-purple-600', bg: 'bg-purple-50', path: '/visualization' },
+        { label: 'Total Reports', value: summary?.total_reports || 0, icon: FileText, color: 'text-blue-900', titleColor: 'text-blue-800', border: 'border-blue-300', gradient: 'from-white to-blue-100', badge: 'bg-blue-400', caption: 'Total Reports', path: '/reports' },
+        { label: 'Total Households', value: summary?.total_households || 0, icon: Home, color: 'text-purple-700', titleColor: 'text-purple-700', border: 'border-purple-400', gradient: 'from-white to-purple-100', badge: 'bg-purple-700', caption: 'Households', path: '/households' },
+        { label: 'Flagged Households', value: summary?.flagged_households || 0, icon: Flag, color: 'text-red-600', titleColor: 'text-red-600', border: 'border-red-400', gradient: 'from-white to-red-50', badge: 'bg-red-500', caption: 'Households' },
+        { label: 'Pending Reports', value: summary?.pending_reports || 0, icon: ClockFading, color: 'text-amber-600', titleColor: 'text-amber-600', border: 'border-amber-300', gradient: 'from-white to-amber-100', badge: 'bg-amber-400', caption: 'Reports', path: '/reports?status=pending' },
+        { label: 'Average TDS (ppm)', value: summary?.average_tds || 0, icon: Droplets, color: 'text-green-600', titleColor: 'text-green-700', border: 'border-green-400', gradient: 'from-white to-green-100', badge: 'bg-green-600', caption: 'ppm', path: '/visualization' },
     ]
 
     const tdsColors = (tds) => {
@@ -71,21 +71,22 @@ const StaffDashboard = () => {
                 </div>
 
                 {/* Stat cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+                <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                     {statCards.map((stat) => {
                         const Icon = stat.icon
                         return (
-                            <Card key={stat.label} className="cursor-pointer hover:shadow-lg transition-shadow transition-shadow hover:-translate-y-2 duration-300 transition-all" onClick={() => navigate(stat.path)}>
-                                <CardContent className="pt-6">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm text-gray-500">{stat.label}</p>
-                                            <p className={`text-3xl font-bold mt-1 ${stat.color}`}>
+                            <Card key={stat.label} className={`cursor-pointer rounded-xl border ${stat.border} bg-gradient-to-b ${stat.gradient} shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg`} onClick={() => navigate(stat.path)}>
+                                <CardContent className="p-4">
+                                    <div className="flex items-start gap-3">
+                                        <div className={`flex size-11 shrink-0 items-center justify-center rounded-full ${stat.badge}`}>
+                                            <Icon size={20} className="text-white" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className={`text-sm font-semibold ${stat.titleColor}`}>{stat.label}</p>
+                                            <p className={`mt-1 text-3xl font-bold ${stat.color}`}>
                                                 {stat.value}
                                             </p>
-                                        </div>
-                                        <div className={`p-3 rounded-full ${stat.bg}`}>
-                                            <Icon size={20} className={stat.color} />
+                                            <p className="mt-1 text-xs text-gray-500">{stat.caption}</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -94,23 +95,23 @@ const StaffDashboard = () => {
                     })}
                 </div>
 
-                {/* TDS by Purok */}
+                {/* TDS by Zone */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <TrendingUp size={20} className="text-blue-600" />
-                                Average TDS by Purok
+                                Average TDS by Zone
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {tdsByPurok.length === 0 ? (
+                            {tdsByZone.length === 0 ? (
                                 <p className="text-gray-500 text-sm">No TDS data available.</p>
                             ) : (
                                 <div className="space-y-3">
-                                    {tdsByPurok.map((item) => (
-                                        <div key={item.purok} className="flex items-center justify-between pb-3 last:border-b-0">
-                                            <span className="text-sm font-medium text-gray-700">Purok {item.purok}</span>
+                                    {tdsByZone.map((item) => (
+                                        <div key={item.zone} className="flex items-center justify-between pb-3 last:border-b-0">
+                                            <span className="text-sm font-medium text-gray-700">Zone {item.zone}</span>
                                             <div className="flex items-center gap-2">
                                                 <span className={`text-lg font-bold ${tdsColors(parseFloat(item.average_tds))}`}>{parseFloat(item.average_tds).toFixed(2)}</span>
                                                 <span className="text-xs text-gray-500">ppm</span>
@@ -173,7 +174,7 @@ const StaffDashboard = () => {
                                         <TableHead>No.</TableHead>
                                         <TableHead>Household</TableHead>
                                         <TableHead>Owner</TableHead>
-                                        <TableHead>Purok</TableHead>
+                                        <TableHead>Zone</TableHead>
                                         <TableHead>Issue Type</TableHead>
                                         <TableHead>Times Reported</TableHead>
                                         <TableHead>Status</TableHead>
@@ -185,7 +186,7 @@ const StaffDashboard = () => {
                                             <TableCell label="No.">{index + 1}</TableCell>
                                             <TableCell label="Household">#{flag.household_number}</TableCell>
                                             <TableCell label="Owner" className="font-semibold">{flag.owner_name}</TableCell>
-                                            <TableCell label="Purok">Purok {flag.purok}</TableCell>
+                                            <TableCell label="Zone">Zone {flag.zone}</TableCell>
                                             <TableCell label="Issue Type" className="capitalize">{flag.issue_type}</TableCell>
                                             <TableCell label="Times Reported">
                                                 <span className="bg-red-100 text-red-700 inline-block px-2 py-1 text-xs font-semibold">

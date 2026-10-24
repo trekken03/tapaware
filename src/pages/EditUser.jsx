@@ -27,7 +27,7 @@ const EditUser = () => {
         name: existingUser?.name || '',
         email: existingUser?.email || '',
         household_number: existingUser?.household_number || '',
-        purok: existingUser?.purok || '',
+        zone: existingUser?.zone || '',
         address: existingUser?.address || ''
     })
 
@@ -55,7 +55,7 @@ const EditUser = () => {
 
     const householdChanged = existingUser?.household_number &&
         (form.household_number?.toString() !== existingUser.household_number?.toString() ||
-            form.purok?.toString() !== existingUser.purok?.toString())
+            form.zone?.toString() !== existingUser.zone?.toString())
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -105,7 +105,7 @@ const EditUser = () => {
         form.name !== (existingUser?.name || '') ||
         form.email !== (existingUser?.email || '') ||
         form.household_number?.toString() !== (existingUser?.household_number?.toString() || '') ||
-        form.purok?.toString() !== (existingUser?.purok?.toString() || '') ||
+        form.zone?.toString() !== (existingUser?.zone?.toString() || '') ||
         form.address !== (existingUser?.address || '')
 
     return (
@@ -200,16 +200,16 @@ const EditUser = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="purok">Purok</Label>
+                                    <Label htmlFor="zone">Zone</Label>
                                     <select
-                                        id="purok"
-                                        name="purok"
-                                        value={form.purok}
+                                        id="zone"
+                                        name="zone"
+                                        value={form.zone}
                                         onChange={handleChange}
                                         required
                                         className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value="">Select purok...</option>
+                                        <option value="">Select zone...</option>
                                         {[1, 2, 3, 4, 5, 6].map(p => (
                                             <option key={p} value={p}>{p}</option>
                                         ))}

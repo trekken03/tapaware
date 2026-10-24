@@ -43,16 +43,16 @@ exports.getArchivedHouseholds = async (req, res) => {
 
 exports.addHousehold = async (req, res) => {
 
-    const { household_number, purok, owner_name, address } = req.body;
+    const { household_number, zone, owner_name, address } = req.body;
 
     try {
         if (
             household_number === undefined ||
             household_number === null ||
             household_number === '' ||
-            purok === undefined ||
-            purok === null ||
-            purok === '' ||
+            zone === undefined ||
+            zone === null ||
+            zone === '' ||
             typeof owner_name !== 'string' ||
             !owner_name.trim() ||
             typeof address !== 'string' ||
@@ -64,7 +64,7 @@ exports.addHousehold = async (req, res) => {
         }
 
 
-        const [existing] = await db.query('SELECT * FROM households WHERE household_number = ? and purok = ?', [household_number, purok]);
+        const [existing] = await db.query('SELECT * FROM households WHERE household_number = ? and zone = ?', [household_number, zone]);
         if (existing.length > 0) {
             if (existing[0].deleted_at) {
                 return res.status(400).json({ message: 'This household was previously archived. Restore it from the Archive instead of creating a new one.' });
@@ -72,8 +72,8 @@ exports.addHousehold = async (req, res) => {
             return res.status(400).json({ message: 'Household address already exists' });
         }
         const [result] = await db.query(
-            'INSERT INTO households(household_number,purok,owner_name,address) VALUES (?,?,?,?)',
-            [household_number, purok, owner_name, address]
+            'INSERT INTO households(household_number,zone,owner_name,address) VALUES (?,?,?,?)',
+            [household_number, zone, owner_name, address]
         );
         await auditLog({
             user_id: req.user ? req.user.id : null,
@@ -82,7 +82,7 @@ exports.addHousehold = async (req, res) => {
             action: 'ADD_HOUSEHOLD',
             table_affected: 'households',
             record_id: result.insertId,
-            details: `Added household: ${household_number} - ${owner_name}, purok: ${purok}`,
+            details: `Added household: ${household_number} - ${owner_name}, zone: ${zone}`,
             ip_address: req.ip
         });
         res.status(201).json({ message: 'household added successfully' });
@@ -176,7 +176,7 @@ exports.deleteHousehold = async (req, res) => {
             action: 'ARCHIVE_HOUSEHOLD',
             table_affected: 'households',
             record_id: id,
-            details: `Archived household #${existing[0].household_number} - ${existing[0].owner_name}, purok ${existing[0].purok}`,
+            details: `Archived household #${existing[0].household_number} - ${existing[0].owner_name}, zone ${existing[0].zone}`,
             ip_address: req.ip
         });
 
@@ -217,7 +217,7 @@ exports.restoreHousehold = async (req, res) => {
             action: 'RESTORE_HOUSEHOLD',
             table_affected: 'households',
             record_id: id,
-            details: `Restored household #${existing[0].household_number} - ${existing[0].owner_name}, purok ${existing[0].purok}`,
+            details: `Restored household #${existing[0].household_number} - ${existing[0].owner_name}, zone ${existing[0].zone}`,
             ip_address: req.ip
         });
 
@@ -258,7 +258,7 @@ exports.permanentDeleteHousehold = async (req, res) => {
             action: 'PERMANENT_DELETE_HOUSEHOLD',
             table_affected: 'households',
             record_id: id,
-            details: `Permanently deleted household #${existing[0].household_number} - ${existing[0].owner_name}, purok ${existing[0].purok}. Also removed ${report_count} report(s) and ${reading_count} TDS reading(s); ${user_count} user account(s) unlinked`,
+            details: `Permanently deleted household #${existing[0].household_number} - ${existing[0].owner_name}, zone ${existing[0].zone}. Also removed ${report_count} report(s) and ${reading_count} TDS reading(s); ${user_count} user account(s) unlinked`,
             ip_address: req.ip
         });
 

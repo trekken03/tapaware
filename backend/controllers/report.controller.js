@@ -8,7 +8,7 @@ exports.getAllReports = async (req, res) => {
         let query = `SELECT reports.*,
             households.household_number,
             households.owner_name,
-            households.purok,
+            households.zone,
             users.name as reported_by
             FROM reports JOIN households ON reports.household_id =households.id
             JOIN users ON reports.user_id = users.id
@@ -31,7 +31,7 @@ exports.getArchivedReports = async (req, res) => {
             `SELECT reports.*,
             households.household_number,
             households.owner_name,
-            households.purok,
+            households.zone,
             users.name as reported_by
             FROM reports JOIN households ON reports.household_id = households.id
             JOIN users ON reports.user_id = users.id
@@ -136,12 +136,12 @@ exports.submitReport = async (req, res) => {
         }
 
         try {
-            const [[household]] = await db.query('SELECT purok FROM households WHERE id = ?', [household_id]);
+            const [[household]] = await db.query('SELECT zone FROM households WHERE id = ?', [household_id]);
             const timeBucket = getTimeBucket(finalOccurredTime);
 
             const [existingPattern] = await db.query(
-                'SELECT * FROM time_patterns WHERE purok = ? AND issue_type = ? AND time_bucket = ?',
-                [household.purok, normalizedIssueType, timeBucket]
+                'SELECT * FROM time_patterns WHERE zone = ? AND issue_type = ? AND time_bucket = ?',
+                [household.zone, normalizedIssueType, timeBucket]
             );
 
             if (existingPattern.length > 0) {
@@ -151,8 +151,8 @@ exports.submitReport = async (req, res) => {
                 );
             } else {
                 await db.query(
-                    'INSERT INTO time_patterns(purok, issue_type, time_bucket, times_reported, last_reported_at) VALUES (?,?,?,1,NOW())',
-                    [household.purok, normalizedIssueType, timeBucket]
+                    'INSERT INTO time_patterns(zone, issue_type, time_bucket, times_reported, last_reported_at) VALUES (?,?,?,1,NOW())',
+                    [household.zone, normalizedIssueType, timeBucket]
                 );
             }
         } catch (patternError) {
@@ -273,7 +273,7 @@ exports.getReportById = async (req, res) => {
             `SELECT reports.*,
             households.household_number,
             households.owner_name,
-            households.purok,
+            households.zone,
             households.address,
             users.name as reported_by
             FROM reports JOIN households ON reports.household_id = households.id

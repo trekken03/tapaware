@@ -78,7 +78,7 @@ exports.getFlaggedHouseholds = async (req, res) => {
             `SELECT recurring_flags.*,
             households.household_number,
             households.owner_name,
-            households.purok
+            households.zone
             FROM recurring_flags JOIN households ON recurring_flags.household_id = households.id
             WHERE recurring_flags.status = 'active' AND households.deleted_at IS NULL
             ORDER BY recurring_flags.times_reported DESC`
@@ -116,14 +116,14 @@ exports.getTdsTrend = async (req, res) => {
     }
 };
 
-exports.getTdsByPurok = async (req, res) => {
+exports.getTdsByZone = async (req, res) => {
     const { from, to } = req.query;
     try {
         // This endpoint is public (the homepage renders it to anonymous visitors),
         // so it deliberately exposes no reading counts — only the average and the
-        // date of the most recent reading. last_recorded is NULL for a purok with
+        // date of the most recent reading. last_recorded is NULL for a zone with
         // no readings, which is how callers tell "empty" apart from "has data".
-        let query = `SELECT households.purok,
+        let query = `SELECT households.zone,
             AVG(tds_readings.tds_value) as average_tds,
             MAX(tds_readings.recorded_at) as last_recorded
             FROM households
@@ -135,7 +135,7 @@ exports.getTdsByPurok = async (req, res) => {
             params.push(from, `${to} 23:59:59`);
         }
 
-        query += ` WHERE households.deleted_at IS NULL GROUP BY households.purok ORDER BY households.purok ASC`;
+        query += ` WHERE households.deleted_at IS NULL GROUP BY households.zone ORDER BY households.zone ASC`;
         const [rows] = await db.query(query, params);
         res.json(rows);
     }
@@ -187,10 +187,10 @@ exports.getResidentSummary = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-exports.getReportsByPurokCount = async (req, res) => {
+exports.getReportsByZoneCount = async (req, res) => {
     const { from, to } = req.query;
     try {
-        let query = `SELECT households.purok, COUNT(reports.id) as report_count
+        let query = `SELECT households.zone, COUNT(reports.id) as report_count
             FROM households LEFT JOIN reports ON households.id = reports.household_id AND reports.deleted_at IS NULL`;
         const params = [];
 
@@ -199,7 +199,7 @@ exports.getReportsByPurokCount = async (req, res) => {
             params.push(from, `${to} 23:59:59`);
         }
 
-        query += ` WHERE households.deleted_at IS NULL GROUP BY households.purok ORDER BY report_count DESC`;
+        query += ` WHERE households.deleted_at IS NULL GROUP BY households.zone ORDER BY report_count DESC`;
         const [rows] = await db.query(query, params);
         res.json(rows);
     }
@@ -208,10 +208,10 @@ exports.getReportsByPurokCount = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-exports.getTrendingIssuesByPurok = async (req, res) => {
+exports.getTrendingIssuesByZone = async (req, res) => {
     const { from, to } = req.query;
     try {
-        let query = `SELECT households.purok, reports.issue_type, COUNT(*) as count
+        let query = `SELECT households.zone, reports.issue_type, COUNT(*) as count
             FROM reports JOIN households ON reports.household_id = households.id
             WHERE reports.deleted_at IS NULL`;
         const params = [];
@@ -221,7 +221,7 @@ exports.getTrendingIssuesByPurok = async (req, res) => {
             params.push(from, `${to} 23:59:59`);
         }
 
-        query += ` GROUP BY households.purok, reports.issue_type ORDER BY households.purok ASC, count DESC`;
+        query += ` GROUP BY households.zone, reports.issue_type ORDER BY households.zone ASC, count DESC`;
         const [rows] = await db.query(query, params);
         res.json(rows);
     }

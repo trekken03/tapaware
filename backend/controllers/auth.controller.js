@@ -16,7 +16,7 @@ const {
 
 
 exports.register = async (req, res) => {
-    const { name, email, role, household_id, household_number, purok, address, password } = req.body;
+    const { name, email, role, household_id, household_number, zone, address, password } = req.body;
     const currentUser = req.user;
 
     try {
@@ -37,14 +37,14 @@ exports.register = async (req, res) => {
         let finalHouseholdId = household_id || null;
 
         // For residents, look up or create household
-        if (role === 'resident' && household_number && purok) {
+        if (role === 'resident' && household_number && zone) {
             // Convert to integers for database comparison
             const houseNum = parseInt(household_number, 10);
-            const purokNum = parseInt(purok, 10);
+            const zoneNum = parseInt(zone, 10);
 
             const [existingHousehold] = await db.query(
-                'SELECT id FROM households WHERE household_number = ? AND purok = ?',
-                [houseNum, purokNum]
+                'SELECT id FROM households WHERE household_number = ? AND zone = ?',
+                [houseNum, zoneNum]
             );
 
             if (existingHousehold.length > 0) {
@@ -57,13 +57,13 @@ exports.register = async (req, res) => {
 
                 if (existingResident.length > 0) {
                     return res.status(400).json({
-                        message: `Household #${houseNum} in Purok ${purokNum} already has a resident account linked to it. Please use a different household number or purok.`
+                        message: `Household #${houseNum} in Zone ${zoneNum} already has a resident account linked to it. Please use a different household number or zone.`
                     });
                 }
             } else {
                 const [newHousehold] = await db.query(
-                    'INSERT INTO households(household_number, purok, owner_name, address) VALUES (?,?,?,?)',
-                    [houseNum, purokNum, name, address || '']
+                    'INSERT INTO households(household_number, zone, owner_name, address) VALUES (?,?,?,?)',
+                    [houseNum, zoneNum, name, address || '']
                 );
                 finalHouseholdId = newHousehold.insertId;
             }
@@ -258,7 +258,7 @@ exports.login = async (req, res) => {
         const [rows] = await db.query(
             `SELECT users.*,
             households.household_number,
-            households.purok,
+            households.zone,
             households.address
             FROM users
             LEFT JOIN households ON users.household_id = households.id
@@ -316,7 +316,7 @@ exports.login = async (req, res) => {
                 role: user.role,
                 household_id: user.household_id,
                 household_number: user.household_number,
-                purok: user.purok,
+                zone: user.zone,
                 address: user.address
             }
         });
@@ -344,7 +344,7 @@ exports.getMe = async (req, res) => {
         const [rows] = await db.query(
             `SELECT users.*,
             households.household_number,
-            households.purok,
+            households.zone,
             households.address
             FROM users
             LEFT JOIN households ON users.household_id = households.id
@@ -366,7 +366,7 @@ exports.getMe = async (req, res) => {
                 role: user.role,
                 household_id: user.household_id,
                 household_number: user.household_number,
-                purok: user.purok,
+                zone: user.zone,
                 address: user.address
             }
         });
@@ -386,7 +386,7 @@ exports.getAllUsers = async (req, res) => {
             users.role,
             users.household_id,
             households.household_number,
-            households.purok,
+            households.zone,
             users.created_at
             FROM users
             LEFT JOIN households ON users.household_id = households.id

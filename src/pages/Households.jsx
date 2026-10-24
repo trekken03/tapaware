@@ -22,7 +22,7 @@ const Households = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const [currentPage, setCurrentPage] = useState(1)
     const [pageSize] = useState(10)
-    const [selectedPurok, setSelectedPurok] = useState('all');
+    const [selectedZone, setSelectedZone] = useState('all');
     const navigate = useNavigate()
     const [searchParams, setSearchParams] = useSearchParams()
     const statusFilter = searchParams.get('status')
@@ -77,11 +77,11 @@ const Households = () => {
         }
     };
 
-    const purokOptions = [...new Set(households.map(h => h.purok).filter(Boolean))]
+    const zoneOptions = [...new Set(households.map(h => h.zone).filter(Boolean))]
         .sort((a, b) => a.toString().localeCompare(b.toString(), undefined, { numeric: true }))
 
-    const statusPurokFiltered = households.filter(h => {
-        if (selectedPurok !== 'all' && h.purok?.toString() !== selectedPurok) {
+    const statusZoneFiltered = households.filter(h => {
+        if (selectedZone !== 'all' && h.zone?.toString() !== selectedZone) {
             return false
         }
         if (statusFilter && h.computed_status !== statusFilter) {
@@ -90,12 +90,12 @@ const Households = () => {
         return true
     })
 
-    const filteredHouseholds = statusPurokFiltered.filter(h => {
+    const filteredHouseholds = statusZoneFiltered.filter(h => {
         const searchLower = searchTerm.toLowerCase()
         return (
             h.household_number?.toString().includes(searchLower) ||
             h.owner_name?.toLowerCase().includes(searchLower) ||
-            h.purok?.toString().includes(searchLower) ||
+            h.zone?.toString().includes(searchLower) ||
             h.address?.toLowerCase().includes(searchLower)
         )
     })
@@ -105,7 +105,7 @@ const Households = () => {
 
     useEffect(() => {
         setCurrentPage(1)
-    }, [searchTerm, selectedPurok, statusFilter])
+    }, [searchTerm, selectedZone, statusFilter])
 
     useEffect(() => {
         if (currentPage > totalPages) {
@@ -150,8 +150,8 @@ const Households = () => {
                                 All Households
                                 <span className="text-sm font-normal text-gray-500">
                                     {searchTerm
-                                        ? `Showing ${filteredHouseholds.length} of ${statusPurokFiltered.length}`
-                                        : `(${statusPurokFiltered.length})`}
+                                        ? `Showing ${filteredHouseholds.length} of ${statusZoneFiltered.length}`
+                                        : `(${statusZoneFiltered.length})`}
                                 </span>
                             </CardTitle>
 
@@ -166,15 +166,15 @@ const Households = () => {
                                 </Tabs>
 
                                 <div className="flex items-center gap-3">
-                                    <Select value={selectedPurok} onValueChange={setSelectedPurok}>
+                                    <Select value={selectedZone} onValueChange={setSelectedZone}>
                                         <SelectTrigger className="w-[140px]">
-                                            <SelectValue placeholder="All Puroks" />
+                                            <SelectValue placeholder="All Zones" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all">All Puroks</SelectItem>
-                                            {purokOptions.map(purok => (
-                                                <SelectItem key={purok} value={purok}>
-                                                    Purok {purok}
+                                            <SelectItem value="all">All Zones</SelectItem>
+                                            {zoneOptions.map(zone => (
+                                                <SelectItem key={zone} value={zone}>
+                                                    Zone {zone}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -208,7 +208,7 @@ const Households = () => {
                                             <TableHead>No.</TableHead>
                                             <TableHead>Owner</TableHead>
                                             <TableHead>Household</TableHead>
-                                            <TableHead>Purok</TableHead>
+                                            <TableHead>Zone</TableHead>
                                             <TableHead>Address</TableHead>
                                             <TableHead>Date Added</TableHead>
                                             <TableHead className="text-center">Status</TableHead>
@@ -230,7 +230,7 @@ const Households = () => {
                                                     <TableCell label="No.">{rowNum}</TableCell>
                                                     <TableCell label="Owner" className="font-semibold">{h.owner_name}</TableCell>
                                                     <TableCell label="Household">#{h.household_number}</TableCell>
-                                                    <TableCell label="Purok">Purok {h.purok}</TableCell>
+                                                    <TableCell label="Zone">Zone {h.zone}</TableCell>
                                                     <TableCell label="Address" className="max-w-[200px] truncate">{h.address?.trim() || '-'}</TableCell>
                                                     <TableCell label="Date Added">
                                                         {new Date(h.created_at).toLocaleDateString('en-US', {

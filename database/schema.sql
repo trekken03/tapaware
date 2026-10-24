@@ -6,12 +6,12 @@ use tapaware;
 create table households(
     id int auto_increment primary key,
     household_number varchar(50) not null,
-    purok varchar(100) not null,
+    zone varchar(100) not null,
     owner_name varchar(250) not null,
     address varchar(250) not null,
     created_at timestamp default current_timestamp,
     deleted_at timestamp null default null,
-    unique key unique_household_purok (household_number, purok)
+    unique key unique_household_zone (household_number, zone)
 );
 
 create table users(
@@ -118,7 +118,7 @@ create table concerns(
     id int auto_increment primary key,
     name varchar(250),
     contact_info varchar(250),
-    purok varchar(100),
+    zone varchar(100),
     message text not null,
     status enum('new','reviewed') not null default 'new',
     reply_message text,
@@ -132,11 +132,11 @@ create table concerns(
 
 CREATE TABLE time_patterns(
     id int auto_increment primary key,
-    purok varchar(100) not null,
+    zone varchar(100) not null,
     issue_type enum('odor','discoloration','low pressure','cleanliness','broken hardware','other') not null,
     time_bucket enum('morning','afternoon','evening','night') not null,
     times_reported int not null default 0,
     last_reported_at timestamp not null default current_timestamp,
-    unique key unique_time_pattern (purok, issue_type, time_bucket),
-    index idx_time_patterns_purok (purok)
+    unique key unique_time_pattern (zone, issue_type, time_bucket),
+    index idx_time_patterns_zone (zone)
 );

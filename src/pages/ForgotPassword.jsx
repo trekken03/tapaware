@@ -16,6 +16,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { MailCheck, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import LandingNavbar from "@/components/NavBar";
+import SceneMascot from "@/components/SceneMascot";
 
 const ForgotPass = () => {
     const navigate = useNavigate();
@@ -59,9 +60,11 @@ const ForgotPass = () => {
 
     return (
 
-        <div className="relative min-h-screen bg-[url('/assets/mobile_version.jpg')] bg-cover bg-center bg-no-repeat md:bg-[url('/assets/forgot_and_resetp_.jpg')] flex items-center justify-center p-4">
+        <div className="relative min-h-screen bg-[url('/assets/mobile_version.jpg')] bg-cover bg-center bg-no-repeat md:bg-[url('/assets/new_login_bg.jpg')] flex items-center justify-center p-4 overflow-hidden">
             <LandingNavbar />
 
+            {/* Mascot glued to the background scene (right of the centered card). Desktop only. */}
+            <SceneMascot src="/assets/login_figure.png" x={0.73} size={0.21} className="hidden lg:block" />
 
             <Card className="relative z-10 w-full max-w-sm bg-white shadow-lg">
                 <div className="flex flex-col items-center mb-6">

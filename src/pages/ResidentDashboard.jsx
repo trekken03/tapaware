@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import Layout from '@/components/Layout'
+import Layout, { TopScene } from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
@@ -69,8 +69,8 @@ const ResidentDashboard = () => {
     }
 
     const statCards = [
-        { label: 'My Reports', value: summary?.my_reports || 0, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
-        { label: 'Pending Reports', value: summary?.pending_reports || 0, icon: ClockFading, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+        { label: 'My Reports', value: summary?.my_reports || 0, icon: FileText, color: 'text-blue-900', titleColor: 'text-blue-800', border: 'border-blue-300', gradient: 'from-white to-blue-100', badge: 'bg-blue-400' },
+        { label: 'Pending Reports', value: summary?.pending_reports || 0, icon: ClockFading, color: 'text-amber-600', titleColor: 'text-amber-600', border: 'border-amber-300', gradient: 'from-white to-amber-100', badge: 'bg-amber-400' },
     ]
 
     const filteredReports = reports.filter(r => {
@@ -112,107 +112,80 @@ const ResidentDashboard = () => {
 
     return (
         <Layout>
-            <div className="relative isolate -m-4 min-h-[calc(100svh-8rem)] overflow-hidden bg-gradient-to-b from-sky-100 via-sky-50 to-blue-100 p-4 sm:-m-6 sm:p-6 lg:-m-8 lg:p-8">
-                <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-                    <img
-                        src="/assets/login_clouds.png"
-                        alt=""
-                        width={367}
-                        height={151}
-                        className="absolute right-0 top-3 hidden w-72 sm:block"
-                    />
-                    <img
-                        src="/assets/login_clouds.png"
-                        alt=""
-                        width={367}
-                        height={151}
-                        className="absolute left-0 top-3.5 hidden w-72 sm:block"
-                    />
-                    <img
-                        src="/assets/login_page_water.png"
-                        alt=""
-                        width={1303}
-                        height={190}
-                        loading="lazy"
-                        className="absolute inset-x-0 bottom-0 h-auto max-h-[100px] w-full object-fill opacity-80"
-                    />
-                    <img
-                        src="/assets/login_page_houses.png"
-                        alt=""
-                        width={661}
-                        height={338}
-                        loading="lazy"
-                        className="absolute -bottom-2 -left-10 hidden w-[min(45vw,38rem)] sm:block"
-                    />
-                </div>
-                <div className="relative z-10 w-full">
-                    <section className="relative -mx-4 mb-0 min-h-44 overflow-hidden px-5 py-7 sm:-mx-6 sm:px-8 sm:py-9 lg:-mx-8 lg:px-10">
+            <div className="relative -m-4 min-h-[calc(100vh-4rem)] bg-[#eff3fb] sm:-m-6 lg:-m-8">
+                <TopScene />
+                <div className="relative z-10 p-4 sm:p-6 lg:p-8">
+                    <section className="relative -mx-4 mb-0 min-h-44 px-5 py-7 sm:-mx-6 sm:px-8 sm:py-9 lg:-mx-8 lg:px-10">
                         <div className="relative z-10">
-                            <p className="text-sm font-semibold text-blue-800">Dashboard</p>
-                            <h1 className="mt-1 text-2xl font-bold leading-tight text-[#173574] sm:text-3xl lg:text-4xl">
+                            <p className="text-xs font-semibold text-[#102765]">Dashboard</p>
+                            <h1 className="mt-1 text-2xl font-bold leading-tight text-[#102765] sm:text-3xl lg:text-4xl">
                                 Welcome, {user?.name}!
                             </h1>
                         </div>
                     </section>
 
-                    <div className="relative z-10 mb-7 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="relative z-10 mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         {statCards.map((stat) => {
                             const Icon = stat.icon
                             return (
-                                <Card key={stat.label} className={`rounded-2xl border border-blue-200 bg-linear-to-br ${stat.bg} to-white shadow-sm`}>
-                                    <CardContent className="pt-5">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className={`text-sm font-semibold ${stat.color}`}>{stat.label}</p>
+                                <Card key={stat.label} className={`rounded-xl border ${stat.border} bg-gradient-to-b ${stat.gradient} shadow-sm`}>
+                                    <CardContent className="p-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className={`flex size-11 shrink-0 items-center justify-center rounded-full ${stat.badge}`}>
+                                                <Icon size={21} className="text-white" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className={`text-sm font-semibold ${stat.titleColor}`}>{stat.label}</p>
                                                 <p className={`mt-1 text-3xl font-bold ${stat.color}`}>{stat.value}</p>
                                                 <p className="mt-1 text-xs text-slate-500">
                                                     {stat.label === 'My Reports' ? 'Total Reports' : 'Awaiting review'}
                                                 </p>
-                                            </div>
-                                            <div className={`flex size-12 items-center justify-center rounded-full ${stat.bg}`}>
-                                                <Icon size={21} className={stat.color} />
                                             </div>
                                         </div>
                                     </CardContent>
                                 </Card>
                             )
                         })}
-                        <Card className={`rounded-2xl border border-slate-200 bg-linear-to-br ${latestTdsStatus?.bg ?? 'bg-white'} to-white shadow-sm md:col-span-2 xl:col-span-1`}>
-                            <CardContent className="flex h-full items-start gap-4 pt-5">
-                                <div className={`flex size-12 shrink-0 items-center justify-center rounded-full ${latestTdsStatus?.bg ?? 'bg-slate-100'}`}>
-                                    <Droplets size={21} className={latestTdsStatus?.color ?? 'text-slate-500'} />
+                        <Card className="rounded-xl border border-green-400 bg-gradient-to-b from-white to-green-100 shadow-sm sm:col-span-2 lg:col-span-2">
+                            <CardContent className="flex h-full items-start gap-4 p-4">
+                                <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-green-600">
+                                    <Droplets size={21} className="text-white" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="font-semibold text-[#173574]">Household Water TDS</p>
+                                    <p className="font-semibold text-green-700">Household Water TDS</p>
                                     {latestTds ? (
-                                        <>
-                                            <p className="mt-1 text-xs text-slate-500">Current TDS Reading</p>
-                                            <p className={`text-3xl font-bold ${latestTdsStatus.color}`}>
-                                                {parseFloat(latestTds.tds_value).toFixed(2)}
-                                            </p>
-                                            <p className="text-xs text-slate-600">
-                                                Status: <span className={`font-semibold ${latestTdsStatus.color}`}>{latestTdsStatus.label}</span>
-                                            </p>
-                                            <p className="mt-2 text-xs text-slate-500">
-                                                Last Recorded: {new Date(latestTds.recorded_at).toLocaleDateString('en-US', {
-                                                    month: 'short',
-                                                    day: 'numeric',
-                                                    year: 'numeric',
-                                                })}
-                                            </p>
-                                            {user?.household_id && (
-                                                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Home size={15} className="text-gray-400" />
-                                                        Household #{user.household_number}
+                                        <div className="mt-1 flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                                            <div>
+                                                <p className="text-xs text-slate-500">Current TDS Reading</p>
+                                                <p className="text-3xl font-bold text-green-600">
+                                                    {parseFloat(latestTds.tds_value).toFixed(2)}
+                                                </p>
+                                                <p className="text-xs text-slate-600">
+                                                    Status: <span className={`font-semibold ${latestTdsStatus.color}`}>{latestTdsStatus.label}</span>
+                                                </p>
+                                            </div>
+                                            <div className="shrink-0 text-xs text-slate-500 sm:text-right">
+                                                <p>
+                                                    Last Recorded: {new Date(latestTds.recorded_at).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric',
+                                                    })}
+                                                </p>
+                                                {user?.household_id && (
+                                                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-slate-600 sm:justify-end">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <Home size={15} className="text-gray-400" />
+                                                            Household #{user.household_number}
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <MapPin size={15} className="text-gray-400" />
+                                                            Zone {user.zone}
+                                                        </div>
                                                     </div>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <MapPin size={15} className="text-gray-400" />
-                                                        Purok {user.purok}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </>
+                                                )}
+                                            </div>
+                                        </div>
                                     ) : (
                                         <p className="mt-2 text-sm text-slate-500">No TDS reading available yet for your household.</p>
                                     )}
@@ -236,7 +209,7 @@ const ResidentDashboard = () => {
                                 <p className="text-gray-500 text-sm">No TDS readings recorded yet.</p>
                             ) : (
                                 <Table containerClassName="max-h-72 overflow-y-auto" className="md:min-w-[620px]">
-                                    <TableHeader className="bg-[#24499b] sticky top-0 z-10">
+                                    <TableHeader className="sticky top-0 z-10 bg-[#102765]">
                                         <TableRow>
                                             <TableHead>Date</TableHead>
                                             <TableHead>TDS</TableHead>
@@ -261,7 +234,7 @@ const ResidentDashboard = () => {
                                                     </TableCell>
                                                     <TableCell label="Recorded By">{t.staff_name}</TableCell>
                                                     <TableCell label="Status" className="text-center">
-                                                        <span className={`${s.bg} ${s.color} inline-block w-[110px] px-2 py-1 text-xs font-semibold`}>
+                                                        <span className={`${s.bg} ${s.color} inline-block w-[110px] rounded-full px-2 py-1 text-xs font-semibold`}>
                                                             {s.label}
                                                         </span>
                                                     </TableCell>
