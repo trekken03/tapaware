@@ -20,7 +20,7 @@ router.get('/me', verifyToken, authController.getMe);
 router.post('/forgot-password', forgotPasswordLimiter, authController.forgotPassword);
 router.post('/reset-password', forgotPasswordLimiter, authController.resetPassword);
 router.post('/verify-email', verifyEmailLimiter, authController.verifyEmail);
-router.put('/profile', verifyToken, verifyCsrf, validateFields(['name', 'email']), authController.updateProfile);
+router.put('/profile', verifyToken, verifyCsrf, validateFields(['name']), authController.updateProfile);
 router.put('/change-password', verifyToken, verifyCsrf, authController.changePassword);
 
 module.exports = router;

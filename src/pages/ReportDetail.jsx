@@ -82,7 +82,7 @@ const ReportDetail = () => {
             <Layout>
                 <div className="text-center py-12">
                     <p className="text-gray-500">Report not found.</p>
-                    <Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
+                    <Button className="mt-4" onClick={() => navigate(-1)}>
                         Back
                     </Button>
                 </div>
@@ -140,9 +140,9 @@ const ReportDetail = () => {
             <div>
                 <div className="flex items-center justify-between mb-4">
                     <Button
-                        variant="outline"
+
                         size="sm"
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
                         onClick={handleBack}
                     >
                         <ArrowLeft size={14} />
@@ -152,7 +152,7 @@ const ReportDetail = () => {
                         &&
                         (
                             <ConfirmDialog title={isResident ? 'Delete this report?' : 'Archive this report?'} description={report.active_flag ? `This report is part of an active ${report.issue_type} flag for this household, currently reported ${report.active_flag.times_reported}x. ${isResident ? 'Deleting' : 'Archiving'} it will reduce that count.` : `${isResident ? 'Sure you want to delete this report?' : 'It can be restored later from the Archive.'}`} actionText={isResident ? 'Delete Report' : 'Archive Report'} actionVariant="destructive" onConfirm={handleDelete} >
-                                <Button className="flex items-center gap-1 text-white bg-red-600 hover:bg-red-500 hover:cursor-pointer" >
+                                <Button className="flex items-center gap-1 border-red-600 bg-red-600 text-white hover:bg-red-700 hover:cursor-pointer" >
                                     <Trash2 size={14} /> {isResident ? 'Delete Report' : 'Archive Report'}
                                 </Button>
                             </ConfirmDialog>)}

@@ -52,8 +52,8 @@ const Profile = () => {
         setLoading(true)
 
         try {
-            await API.put('/auth/profile', form)
-            updateUser(form)
+            await API.put('/auth/profile', { name: form.name })
+            updateUser({ name: form.name })
             toast.success('Profile updated successfully!')
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to update profile')
@@ -208,10 +208,11 @@ const Profile = () => {
                                                         name="email"
                                                         type="email"
                                                         value={form.email}
-                                                        onChange={handleChange}
-                                                        required
-                                                        className="h-11 rounded-md border-gray-300 bg-gray-50"
+                                                        readOnly
+                                                        aria-readonly="true"
+                                                        className="h-11 cursor-not-allowed rounded-md border-gray-300 bg-slate-100 text-slate-500"
                                                     />
+                                                    <p className="text-xs text-gray-500">Your email can only be changed by an administrator.</p>
                                                 </div>
                                             </div>
 

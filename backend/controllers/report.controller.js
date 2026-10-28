@@ -57,6 +57,47 @@ const getTimeBucket = (timeString) => {
 exports.submitReport = async (req, res) => {
     const { household_id, user_id, issue_type, other_issue, description, occurred_time } = req.body;
 
+    const isPositiveInteger = (value) => {
+        if (typeof value === 'number') {
+            return Number.isSafeInteger(value) && value > 0;
+        }
+
+        return typeof value === 'string' &&
+            /^\d+$/.test(value) &&
+            Number.isSafeInteger(Number(value)) &&
+            Number(value) > 0;
+    };
+
+    if (!isPositiveInteger(household_id) || !isPositiveInteger(user_id)) {
+        return res.status(400).json({ message: 'Missing household or user information.' });
+    }
+
+    try {
+        const [[household]] = await db.query(
+            'SELECT id FROM households WHERE id = ? AND deleted_at IS NULL',
+            [household_id]
+        );
+        if (!household) {
+            return res.status(400).json({ message: 'Household not found.' });
+        }
+
+        const validIssueTypes = ['odor', 'discoloration', 'low pressure', 'cleanliness', 'broken hardware', 'other'];
+        if (typeof issue_type !== 'string' || !validIssueTypes.includes(issue_type)) {
+            return res.status(400).json({ message: 'Please select a valid issue type.' });
+        }
+
+        if (description !== undefined && typeof description !== 'string') {
+            return res.status(400).json({ message: 'Please describe the issue.' });
+        }
+
+        if (
+            occurred_time !== undefined &&
+            occurred_time !== '' &&
+            (typeof occurred_time !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(occurred_time))
+        ) {
+            return res.status(400).json({ message: 'Please enter a valid time.' });
+        }
+
     const normalizedIssueType = issue_type === 'other' ? 'other' : issue_type;
 
     const cleanOtherIssue =
@@ -75,7 +116,6 @@ exports.submitReport = async (req, res) => {
     const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     const finalOccurredTime = occurred_time || currentTime;
 
-    try {
         const [result] = await db.query(
             `INSERT INTO reports
         (household_id, user_id, issue_type, other_issue, description, occurred_at)
@@ -438,4 +478,3 @@ exports.permanentDeleteReport = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-

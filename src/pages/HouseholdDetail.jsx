@@ -128,7 +128,7 @@ const HouseholdDetail = () => {
                     <Button
                         variant="outline"
                         size="sm"
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
                         onClick={handleBack}
                     >
                         <ArrowLeft size={14} />
@@ -142,7 +142,7 @@ const HouseholdDetail = () => {
                             actionVariant="destructive"
                             onConfirm={handleDelete}
                         >
-                            <Button className="flex items-center gap-1 text-white bg-red-600 hover:bg-red-500 hover:cursor-pointer">
+                            <Button className="flex items-center gap-1 border-red-600 bg-red-600 text-white hover:bg-red-700 hover:cursor-pointer">
                                 <Trash2 size={14} />
                                 Archive Household
                             </Button>
@@ -285,7 +285,7 @@ const HouseholdDetail = () => {
                                 </CardTitle>
                                 <Button
                                     size="sm"
-                                    className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-1"
+                                    className="border-blue-900 bg-blue-900 text-white hover:bg-blue-800 flex items-center gap-1"
                                     onClick={() => navigate(`/tds/add?household_id=${id}`)}
                                 >
                                     <Plus size={14} />

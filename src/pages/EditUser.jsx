@@ -49,6 +49,13 @@ const EditUser = () => {
                 return;
             }
         }
+
+        if (name === "contact_number") {
+
+            if (!/^\d{0,11}$/.test(value)) {
+                return;
+            }
+        }
         setForm({
             ...form, [name]: value
         })
@@ -81,8 +88,12 @@ const EditUser = () => {
                 payload.transfer_data = transferChoice === 'correction'
             }
 
-            await API.put(`/admin/users/${id}`, payload)
-            toast.success('User updated successfully')
+            const response = await API.put(`/admin/users/${id}`, payload)
+            if (response.data.emailSent === false) {
+                toast.warning(response.data.emailMessage || response.data.message || 'The verification email could not be sent. Use Resend verification from the Admin Panel.')
+            } else {
+                toast.success('User updated successfully')
+            }
             navigate('/admin')
         } catch (error) {
             const message = error.response?.data?.message || 'Failed to update user'
@@ -98,7 +109,7 @@ const EditUser = () => {
             <Layout>
                 <div className="text-center py-12">
                     <p className="text-gray-500">No user data found. Please go back and click Edit again.</p>
-                    <Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
+                    <Button className="mt-4" onClick={() => navigate(-1)}>
                         Back
                     </Button>
                 </div>
@@ -137,20 +148,20 @@ const EditUser = () => {
                         onConfirm={() => navigate(leaveTo)}
                     >
                         <Button
-                            variant="outline"
+
                             size="sm"
                             onClick={() => handleLeave(-1)}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-2 bg-white text-black"
                         >
                             <ArrowLeft size={16} />
                             Back
                         </Button>
                     </ConfirmDialog>) || (
                             <Button
-                                variant="outline"
+
                                 size="sm"
                                 onClick={() => navigate(-1)}
-                                className="flex items-center gap-2"
+                                className="flex items-center gap-2 bg-white text-black"
                             >
                                 <ArrowLeft size={16} />
                                 Back
@@ -199,6 +210,11 @@ const EditUser = () => {
                                         onChange={handleChange}
                                         required
                                     />
+                                    {form.email.trim().toLowerCase() !== (existingUser?.email || '').trim().toLowerCase() && (
+                                        <p className="text-sm text-amber-700">
+                                            Changing this email marks the account as unverified and sends a verification link to the new address. The user cannot log in until they verify it.
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -211,6 +227,8 @@ const EditUser = () => {
                                         placeholder="09XXXXXXXXX"
                                         value={form.contact_number}
                                         onChange={handleChange}
+                                        minLength={11}
+                                        maxLength={11}
                                     />
                                 </div>
 
@@ -274,6 +292,9 @@ const EditUser = () => {
                                         />
                                         <span>
                                             <strong>The resident moved to a new address.</strong>
+                                            <span className="block text-xs text-gray-600">
+                                                Keep the previous household and its history separate from the new household.
+                                            </span>
                                         </span>
                                     </label>
                                     <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
@@ -287,6 +308,9 @@ const EditUser = () => {
                                         />
                                         <span>
                                             <strong>This is a data entry correction.</strong>
+                                            <span className="block text-xs text-gray-600">
+                                                Correct the household number or zone and retain the existing household history.
+                                            </span>
                                         </span>
                                     </label>
                                 </div>
@@ -314,7 +338,7 @@ const EditUser = () => {
 
                                         <Button
                                             type="button"
-                                            variant="outline"
+
                                             className="w-full sm:w-auto"
                                             onClick={() => handleLeave('/admin')}
                                         >

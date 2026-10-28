@@ -448,34 +448,23 @@ exports.updateProfile = async (req, res) => {
     const { name, email } = req.body;
     const userId = req.user.id;
 
-
-    const normalizedEmail =
-        typeof email === 'string' ? email.trim().toLowerCase() : '';
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
-        return res.status(400).json({ message: 'Please provide a valid email address' });
-    }
-
-
-
     try {
-        const [existing] = await db.query(
-            'SELECT * FROM users WHERE email = ? AND id != ?',
-            [normalizedEmail, userId]
-        );
-
-        if (existing.length > 0) {
-            return res.status(400).json({ message: 'Email already in use by another account' });
-        }
-
         const [[currentUserRow]] = await db.query(
-            'SELECT household_id, role FROM users WHERE id = ?',
+            'SELECT email, household_id, role FROM users WHERE id = ?',
             [userId]
         );
 
+        if (
+            Object.prototype.hasOwnProperty.call(req.body, 'email') &&
+            (typeof email !== 'string' ||
+                email.trim().toLowerCase() !== String(currentUserRow.email).trim().toLowerCase())
+        ) {
+            return res.status(403).json({ message: 'Your email can only be changed by an administrator.' });
+        }
+
         await db.query(
-            'UPDATE users SET name = ?, email = ? WHERE id = ?',
-            [name, normalizedEmail, userId]
+            'UPDATE users SET name = ? WHERE id = ?',
+            [name, userId]
         );
 
         if (currentUserRow.role === 'resident' && currentUserRow.household_id) {
@@ -496,7 +485,7 @@ exports.updateProfile = async (req, res) => {
             ip_address: req.ip
         });
 
-        res.json({ message: 'Profile updated successfully', user: { name, email: normalizedEmail } });
+        res.json({ message: 'Profile updated successfully', user: { name, email: currentUserRow.email } });
     }
     catch (error) {
         console.error(error);

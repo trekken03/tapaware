@@ -94,7 +94,7 @@ const FlagDetail = () => {
                 <Button
                     variant="outline"
                     size="sm"
-                    className="mb-4 flex items-center gap-1"
+                    className="mb-4 flex items-center gap-1 border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
                     onClick={() => navigate('/admin?tab=flagged')}
                 >
                     <ArrowLeft size={14} />
@@ -211,7 +211,7 @@ const FlagDetail = () => {
                 <div className="mt-4 flex justify-end">
                     <Button
                         variant="outline"
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 border-blue-900 bg-blue-900 text-white hover:bg-blue-800 hover:text-white"
                         onClick={() => navigate(`/households/${flag.household_id}`, {
                             state: { from: 'flags', flagId: flag.id }
                         })}

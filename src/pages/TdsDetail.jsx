@@ -65,7 +65,7 @@ const TdsDetail = () => {
             <Layout>
                 <div className="text-center py-12">
                     <p className="text-gray-500">Reading not found.</p>
-                    <Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
+                    <Button className="mt-4" onClick={() => navigate(-1)}>
                         Back
                     </Button>
                 </div>
@@ -80,9 +80,9 @@ const TdsDetail = () => {
             <div>
                 <div className="flex items-center justify-between mb-4">
                     <Button
-                        variant="outline"
+
                         size="sm"
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
                         onClick={() => navigate(-1)}
                     >
                         <ArrowLeft size={14} />
@@ -96,7 +96,7 @@ const TdsDetail = () => {
                             actionVariant="destructive"
                             onConfirm={handleDelete}
                         >
-                            <Button className="flex items-center gap-1 text-white bg-red-600 hover:bg-red-500 hover:cursor-pointer">
+                            <Button className="flex items-center gap-1 border-red-600 bg-red-600 text-white hover:bg-red-700 hover:cursor-pointer">
                                 <Trash2 size={14} />
                                 Archive Reading
                             </Button>

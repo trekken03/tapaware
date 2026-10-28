@@ -56,7 +56,7 @@ const AuditDetail = () => {
                 <Button
                     variant="outline"
                     size="sm"
-                    className="mb-4 flex items-center gap-1"
+                    className="mb-4 flex items-center gap-1 border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
                     onClick={() => navigate(-1)}
                 >
                     <ArrowLeft size={14} />

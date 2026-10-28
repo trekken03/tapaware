@@ -104,7 +104,7 @@ const ConcernDetail = () => {
                     <Button
                         variant="outline"
                         size="sm"
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
                         onClick={() => navigate(-1)}
                     >
                         <ArrowLeft size={14} />
@@ -118,7 +118,7 @@ const ConcernDetail = () => {
                             actionVariant="destructive"
                             onConfirm={handleArchive}
                         >
-                            <Button variant="outline" size="sm" className="flex items-center gap-1 text-red-600">
+                            <Button variant="outline" size="sm" className="flex items-center gap-1 border-red-600 bg-red-600 text-white hover:bg-red-700 hover:text-white">
                                 <ArchiveIcon size={14} />
                                 Archive
                             </Button>
@@ -202,7 +202,7 @@ const ConcernDetail = () => {
                                         <Button
                                             type="submit"
                                             disabled={sending}
-                                            className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
+                                            className="border-blue-900 bg-blue-900 hover:bg-blue-800 text-white flex items-center gap-2"
                                         >
                                             <Send size={16} />
                                             {sending ? 'Sending...' : 'Send Reply'}
@@ -234,7 +234,7 @@ const ConcernDetail = () => {
                                     <Button
                                         type="submit"
                                         disabled={sending}
-                                        className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
+                                        className="border-blue-900 bg-blue-900 hover:bg-blue-800 text-white flex items-center gap-2"
                                     >
                                         <Send size={16} />
                                         {sending ? 'Sending...' : 'Send Reply'}

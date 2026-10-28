@@ -247,7 +247,7 @@ exports.getAuditTrailByUser = async (req, res) => {
 
 exports.updateUserInfo = async (req, res) => {
     const { id } = req.params;
-    const { name, email, household_number, zone } = req.body;
+    const { name, email, household_number, contact_number, zone } = req.body;
     const currentUser = req.user;
 
     try {
@@ -256,7 +256,11 @@ exports.updateUserInfo = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const [emailCheck] = await db.query('SELECT * FROM users WHERE email = ? AND id != ?', [email, id]);
+        const candidateEmail = typeof email === 'string' ? email : existing[0].email;
+        const emailChanged = candidateEmail.trim().toLowerCase() !== String(existing[0].email).trim().toLowerCase();
+        const emailToStore = emailChanged ? candidateEmail.trim() : candidateEmail;
+
+        const [emailCheck] = await db.query('SELECT * FROM users WHERE email = ? AND id != ?', [emailToStore, id]);
         if (emailCheck.length > 0) {
             return res.status(400).json({ message: 'Email already in use by another account' });
         }
@@ -287,16 +291,16 @@ exports.updateUserInfo = async (req, res) => {
                 }
             } else {
                 const [newHousehold] = await db.query(
-                    'INSERT INTO households(household_number, zone, owner_name, address) VALUES (?,?,?,?)',
-                    [houseNum, zoneNum, name, '']
+                    'INSERT INTO households(household_number, zone, contact_number,owner_name, address) VALUES (?,?,?,?)',
+                    [houseNum, zoneNum, contact_number, name, '']
                 );
                 finalHouseholdId = newHousehold.insertId;
             }
         }
 
         await db.query(
-            'UPDATE users SET name = ?, email = ?, household_id = ? WHERE id = ?',
-            [name, email, finalHouseholdId, id]
+            'UPDATE users SET name = ?, email = ?, contact_number=? household_id = ? WHERE id = ?',
+            [name, email, contact_number, finalHouseholdId, id]
         );
 
         if (existing[0].role === 'resident' && finalHouseholdId) {
@@ -349,49 +353,102 @@ exports.updateUserInfo = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const [emailCheck] = await db.query('SELECT * FROM users WHERE email = ? AND id != ?', [email, id]);
+        const emailToStore = String(email || '').trim();
+        const emailChanged = emailToStore.toLowerCase() !== String(existing[0].email || '').trim().toLowerCase();
+
+        const [emailCheck] = await db.query('SELECT * FROM users WHERE email = ? AND id != ?', [emailToStore, id]);
         if (emailCheck.length > 0) {
             return res.status(400).json({ message: 'Email already in use by another account' });
         }
 
         const oldHouseholdId = existing[0].household_id;
-        let finalHouseholdId = existing[0].household_id;
+        let oldHousehold = null;
+        if (oldHouseholdId) {
+            const [[household]] = await db.query('SELECT * FROM households WHERE id = ?', [oldHouseholdId]);
+            oldHousehold = household || null;
+        }
 
-        if (household_number && zone) {
-            const houseNum = parseInt(household_number, 10);
-            const zoneNum = parseInt(zone, 10);
+        let finalHouseholdId = oldHousehold ? oldHouseholdId : null;
+        const incomingHouseholdNumber = household_number ? String(household_number).trim() : '';
+        const incomingZone = zone ? String(zone).trim() : '';
+        const householdPairProvided = incomingHouseholdNumber !== '' && incomingZone !== '';
+        const householdPairChanged = householdPairProvided && (
+            !oldHousehold ||
+            incomingHouseholdNumber !== String(oldHousehold.household_number).trim() ||
+            incomingZone !== String(oldHousehold.zone).trim()
+        );
 
-            const [existingHousehold] = await db.query(
-                'SELECT id FROM households WHERE household_number = ? AND zone = ?',
-                [houseNum, zoneNum]
+        if (householdPairChanged) {
+            const [[targetHousehold]] = await db.query(
+                'SELECT * FROM households WHERE household_number = ? AND zone = ?',
+                [incomingHouseholdNumber, incomingZone]
             );
 
-            if (existingHousehold.length > 0) {
-                finalHouseholdId = existingHousehold[0].id;
+            if (targetHousehold?.deleted_at) {
+                return res.status(400).json({ message: 'That household was archived. Restore it from the Archive first.' });
+            }
 
+            if (targetHousehold) {
                 const [existingResident] = await db.query(
-                    `SELECT id FROM users WHERE household_id = ? AND role = 'resident' AND id != ?`,
-                    [finalHouseholdId, id]
+                    `SELECT id FROM users WHERE household_id = ? AND role = 'resident' AND deleted_at IS NULL AND id != ?`,
+                    [targetHousehold.id, id]
                 );
 
                 if (existingResident.length > 0) {
                     return res.status(400).json({
-                        message: `Household #${houseNum} in Zone ${zoneNum} already has a resident account linked to it. Please use a different household number or zone.`
+                        message: `Household #${incomingHouseholdNumber} in Zone ${incomingZone} already has a resident account linked to it. Please use a different household number or zone.`
                     });
+                }
+
+                finalHouseholdId = targetHousehold.id;
+            } else if (transfer_data && oldHousehold) {
+                const [[otherUsers]] = await db.query(
+                    'SELECT COUNT(*) AS count FROM users WHERE household_id = ? AND deleted_at IS NULL AND id != ?',
+                    [oldHouseholdId, id]
+                );
+
+                if (Number(otherUsers.count) === 0) {
+                    await db.query(
+                        'UPDATE households SET household_number = ?, zone = ? WHERE id = ?',
+                        [incomingHouseholdNumber, incomingZone, oldHouseholdId]
+                    );
+                    finalHouseholdId = oldHouseholdId;
+                    await auditLog({
+                        user_id: currentUser.id,
+                        user_name: currentUser.name,
+                        user_role: currentUser.role,
+                        action: 'UPDATE_HOUSEHOLD',
+                        table_affected: 'households',
+                        record_id: oldHouseholdId,
+                        details: `Corrected household from #${oldHousehold.household_number} zone ${oldHousehold.zone} to #${incomingHouseholdNumber} zone ${incomingZone}`,
+                        ip_address: req.ip
+                    });
+                } else {
+                    const [newHousehold] = await db.query(
+                        'INSERT INTO households(household_number, zone, owner_name, address) VALUES (?,?,?,?)',
+                        [incomingHouseholdNumber, incomingZone, name, '']
+                    );
+                    finalHouseholdId = newHousehold.insertId;
                 }
             } else {
                 const [newHousehold] = await db.query(
                     'INSERT INTO households(household_number, zone, owner_name, address) VALUES (?,?,?,?)',
-                    [houseNum, zoneNum, name, '']
+                    [incomingHouseholdNumber, incomingZone, name, '']
                 );
                 finalHouseholdId = newHousehold.insertId;
             }
         }
 
-        await db.query(
-            'UPDATE users SET name = ?, email = ?, household_id = ?, contact_number = ? WHERE id = ?',
-            [name, email, finalHouseholdId, contactNumberProvided ? normalizedContactNumber : existing[0].contact_number, id]
-        );
+        const userUpdateQuery = emailChanged
+            ? 'UPDATE users SET name = ?, email = ?, email_verified = 0, household_id = ?, contact_number = ? WHERE id = ?'
+            : 'UPDATE users SET name = ?, email = ?, household_id = ?, contact_number = ? WHERE id = ?';
+        await db.query(userUpdateQuery, [
+            name,
+            emailToStore,
+            finalHouseholdId,
+            contactNumberProvided ? normalizedContactNumber : existing[0].contact_number,
+            id
+        ]);
 
         if (existing[0].role === 'resident' && finalHouseholdId) {
             await db.query(
@@ -402,7 +459,7 @@ exports.updateUserInfo = async (req, res) => {
 
         // Household changed and admin explicitly chose "same household, fix a data entry error" —
         // move the old household's history over to the corrected one.
-        const householdActuallyChanged = oldHouseholdId && finalHouseholdId && oldHouseholdId !== finalHouseholdId;
+        const householdActuallyChanged = Boolean(oldHouseholdId && finalHouseholdId && oldHouseholdId !== finalHouseholdId);
 
         if (transfer_data && householdActuallyChanged) {
             await db.query(
@@ -454,6 +511,78 @@ exports.updateUserInfo = async (req, res) => {
             });
         }
 
+        if (oldHouseholdId && !oldHousehold?.deleted_at && finalHouseholdId && oldHouseholdId !== finalHouseholdId) {
+            const [[activeUsers]] = await db.query(
+                'SELECT COUNT(*) AS count FROM users WHERE household_id = ? AND deleted_at IS NULL',
+                [oldHouseholdId]
+            );
+            const [[activeReports]] = await db.query(
+                'SELECT COUNT(*) AS count FROM reports WHERE household_id = ? AND deleted_at IS NULL',
+                [oldHouseholdId]
+            );
+            const [[activeReadings]] = await db.query(
+                'SELECT COUNT(*) AS count FROM tds_readings WHERE household_id = ? AND deleted_at IS NULL',
+                [oldHouseholdId]
+            );
+            const [[remainingFlags]] = await db.query(
+                'SELECT COUNT(*) AS count FROM recurring_flags WHERE household_id = ?',
+                [oldHouseholdId]
+            );
+
+            if (
+                Number(activeUsers.count) === 0 &&
+                Number(activeReports.count) === 0 &&
+                Number(activeReadings.count) === 0 &&
+                Number(remainingFlags.count) === 0
+            ) {
+                const archivedAt = new Date();
+                await db.query('UPDATE households SET deleted_at = ? WHERE id = ?', [archivedAt, oldHouseholdId]);
+                await db.query(
+                    'UPDATE reports SET deleted_at = ? WHERE household_id = ? AND deleted_at IS NULL',
+                    [archivedAt, oldHouseholdId]
+                );
+                await db.query(
+                    'UPDATE tds_readings SET deleted_at = ? WHERE household_id = ? AND deleted_at IS NULL',
+                    [archivedAt, oldHouseholdId]
+                );
+                await auditLog({
+                    user_id: currentUser.id,
+                    user_name: currentUser.name,
+                    user_role: currentUser.role,
+                    action: 'ARCHIVE_HOUSEHOLD',
+                    table_affected: 'households',
+                    record_id: oldHouseholdId,
+                    details: `Automatically archived empty household #${oldHousehold?.household_number} - ${oldHousehold?.owner_name}, zone ${oldHousehold?.zone}`,
+                    ip_address: req.ip
+                });
+            }
+        }
+
+        let emailSent = null;
+        let emailMessage = null;
+        if (emailChanged) {
+            const verificationResult = await sendVerificationEmail(
+                { id, name, email: emailToStore, role: existing[0].role },
+                undefined,
+                'email_changed'
+            );
+            emailSent = verificationResult.emailSent;
+            emailMessage = emailSent
+                ? 'A verification link was sent to the new email address.'
+                : 'The email was changed, but the verification email could not be sent. Use Resend verification from the Admin Panel.';
+
+            await auditLog({
+                user_id: currentUser.id,
+                user_name: currentUser.name,
+                user_role: currentUser.role,
+                action: 'CHANGE_USER_EMAIL',
+                table_affected: 'users',
+                record_id: id,
+                details: `Changed user email from ${existing[0].email} to ${emailToStore}`,
+                ip_address: req.ip
+            });
+        }
+
         await auditLog({
             user_id: currentUser.id,
             user_name: currentUser.name,
@@ -465,10 +594,13 @@ exports.updateUserInfo = async (req, res) => {
             ip_address: req.ip
         });
 
-        res.json({ message: 'User updated successfully' });
+        res.json({ message: 'User updated successfully', emailSent, emailMessage });
     }
     catch (error) {
         console.error(error);
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ message: 'That household number and purok already exist.' });
+        }
         res.status(500).json({ message: 'Server error' });
     }
 };

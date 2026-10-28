@@ -87,15 +87,15 @@ const UserDetail = () => {
         <Layout>
             <div className="w-full mx-auto">
                 <div className="flex items-center justify-between mb-4">
-                    <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={() => navigate(-1)}>
+                    <Button size="sm" className="flex items-center gap-1 border-gray-300 bg-white text-gray-700 hover:bg-gray-100" onClick={() => navigate(-1)}>
                         <ArrowLeft size={14} />
                         Back
                     </Button>
                     {user.role !== 'admin' && (<div className="flex gap-2">
                         <Button
-                            variant="outline"
+
                             size="sm"
-                            className="flex items-center gap-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                            className="flex items-center gap-1 border-blue-900 bg-blue-900 text-white hover:bg-blue-800 hover:text-white"
                             onClick={() => navigate(`/admin/edit-user/${id}`, { state: user })}
                         >
                             <Pencil size={14} />
@@ -109,9 +109,9 @@ const UserDetail = () => {
                             onConfirm={handleDelete}
                         >
                             <Button
-                                variant="outline"
+
                                 size="sm"
-                                className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                                className="flex items-center gap-1 border-red-600 bg-red-600 text-white hover:bg-red-700 hover:text-white"
                             >
                                 <Trash2 size={14} />
                                 Archive
