@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 import { Label } from '@/components/ui/label'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ArrowLeft, Home } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
@@ -13,6 +14,7 @@ import { toast } from 'sonner'
 const AddHousehold = () => {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
+    const [confirmOpen, setConfirmOpen] = useState(false)
 
     const [form, setForm] = useState({
         household_number: '',
@@ -37,9 +39,12 @@ const AddHousehold = () => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault()
+        setConfirmOpen(true)
+    }
 
+    const saveHousehold = async () => {
         setLoading(true)
 
         try {
@@ -163,6 +168,16 @@ const AddHousehold = () => {
                 </Card>
 
             </div>
+            <ConfirmDialog
+                open={confirmOpen}
+                onOpenChange={setConfirmOpen}
+                title="Create household?"
+                description="This will add a new household record."
+                actionText="Create household"
+                actionVariant="default"
+                isLoading={loading}
+                onConfirm={saveHousehold}
+            />
         </Layout>
     )
 }

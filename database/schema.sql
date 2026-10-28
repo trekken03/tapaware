@@ -20,6 +20,7 @@ create table users(
     email varchar(250) not null unique,
     role enum('resident','staff','admin') not null default 'resident',
     household_id int,
+    contact_number varchar(20) null,
     password varchar(255) not null,
     email_verified TINYINT(1) NOT NULL DEFAULT 1,
     created_at timestamp default current_timestamp,

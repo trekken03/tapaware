@@ -5,6 +5,7 @@ const auditLog = require('../utils/auditLogger');
 const crypto = require('crypto');
 const sendEmail = require('../utils/emailSender');
 const sendVerificationEmail = require('../utils/emailVerification');
+const normalizeContactNumber = require('../utils/contactNumber');
 const {
     authCookieOptions,
     csrfCookieOptions,
@@ -16,10 +17,25 @@ const {
 
 
 exports.register = async (req, res) => {
-    const { name, email, role, household_id, household_number, zone, address, password } = req.body;
+    const { name, email, role, household_id, household_number, zone, address, password, contact_number } = req.body;
+    const passwordMode = req.body.password_mode || 'manual';
     const currentUser = req.user;
 
     try {
+        if (!['generate', 'manual'].includes(passwordMode)) {
+            return res.status(400).json({ message: 'Password mode must be generate or manual.' });
+        }
+
+        const contactNumberPresent = typeof contact_number === 'string' && contact_number.trim() !== '';
+        const normalizedContactNumber = contactNumberPresent ? normalizeContactNumber(contact_number) : null;
+        if (
+            (contact_number != null && typeof contact_number !== 'string') ||
+            (contactNumberPresent && !normalizedContactNumber) ||
+            (role === 'resident' && !normalizedContactNumber)
+        ) {
+            return res.status(400).json({ message: 'Enter a valid Philippine mobile number in the format 09XXXXXXXXX.' });
+        }
+
         const [existing] = await db.query(
             'SELECT * FROM users WHERE email = ?',
             [email]
@@ -32,7 +48,31 @@ exports.register = async (req, res) => {
             return res.status(400).json({ message: 'Email already registered' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        let temporaryPassword;
+        if (passwordMode === 'generate') {
+            const uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+            const lowercase = 'abcdefghijkmnopqrstuvwxyz';
+            const digits = '23456789';
+            const alphabet = uppercase + lowercase + digits;
+            const passwordCharacters = [
+                uppercase[crypto.randomInt(uppercase.length)],
+                lowercase[crypto.randomInt(lowercase.length)],
+                digits[crypto.randomInt(digits.length)],
+            ];
+
+            while (passwordCharacters.length < 8) {
+                passwordCharacters.push(alphabet[crypto.randomInt(alphabet.length)]);
+            }
+
+            for (let index = passwordCharacters.length - 1; index > 0; index -= 1) {
+                const swapIndex = crypto.randomInt(index + 1);
+                [passwordCharacters[index], passwordCharacters[swapIndex]] = [passwordCharacters[swapIndex], passwordCharacters[index]];
+            }
+            temporaryPassword = passwordCharacters.join('');
+        }
+
+        const passwordToHash = passwordMode === 'generate' ? temporaryPassword : password;
+        const hashedPassword = await bcrypt.hash(passwordToHash, 10);
 
         let finalHouseholdId = household_id || null;
 
@@ -70,11 +110,14 @@ exports.register = async (req, res) => {
         }
 
         const [result] = await db.query(
-            'INSERT INTO users(name, email, role, household_id, password, email_verified) VALUES (?,?,?,?,?,0)',
-            [name, email, role, finalHouseholdId, hashedPassword]
+            'INSERT INTO users(name, email, role, household_id, contact_number, password, email_verified) VALUES (?,?,?,?,?,?,0)',
+            [name, email, role, finalHouseholdId, normalizedContactNumber, hashedPassword]
         );
 
-        const { emailSent } = await sendVerificationEmail({ id: result.insertId, name, email, role });
+        const { emailSent } = await sendVerificationEmail(
+            { id: result.insertId, name, email, role },
+            passwordMode === 'generate' ? temporaryPassword : undefined
+        );
 
         const [admins] = await db.query(
             'SELECT name, role FROM users WHERE id = ?',
@@ -96,7 +139,9 @@ exports.register = async (req, res) => {
         res.status(201).json({
             message: emailSent
                 ? 'User registered successfully. A verification email was sent.'
-                : 'User registered, but the verification email could not be sent. Use Resend verification from the Admin Panel.',
+                : passwordMode === 'generate'
+                    ? 'The account was created, but the verification email could not be sent. The password was not shown to anyone. Use Resend verification from the Admin Panel and have the user use Forgot password after verifying.'
+                    : 'User registered, but the verification email could not be sent. Use Resend verification from the Admin Panel.',
             emailSent
         });
 

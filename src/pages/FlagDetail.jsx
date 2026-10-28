@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ArrowLeft, Flag, FileText, Home, MapPin } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
@@ -23,6 +24,8 @@ const FlagDetail = () => {
     const navigate = useNavigate()
     const [flag, setFlag] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [pendingStatus, setPendingStatus] = useState(null)
+    const [statusConfirmOpen, setStatusConfirmOpen] = useState(false)
 
 
     useEffect(() => {
@@ -50,6 +53,12 @@ const FlagDetail = () => {
         } catch (error) {
             toast.error(error.response?.data?.message || 'Error updating flag status')
         }
+    }
+
+    const requestStatusUpdate = (newStatus) => {
+        if (newStatus === flag.status) return
+        setPendingStatus(newStatus)
+        setStatusConfirmOpen(true)
     }
 
     if (loading) {
@@ -133,8 +142,8 @@ const FlagDetail = () => {
 
 
                                 <select
-                                    value={flag.status}
-                                    onChange={(e) => handleStatusUpdate(e.target.value)}
+                                    value={pendingStatus || flag.status}
+                                    onChange={(e) => requestStatusUpdate(e.target.value)}
                                     className="bg-red-100 text-red-700 border-0 px-3 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
                                 >
                                     {flag.status === 'active' && (
@@ -212,6 +221,18 @@ const FlagDetail = () => {
                     </Button>
                 </div>
             </div>
+            <ConfirmDialog
+                open={statusConfirmOpen}
+                onOpenChange={(open) => {
+                    setStatusConfirmOpen(open)
+                    if (!open) setPendingStatus(null)
+                }}
+                title="Change flag status?"
+                description={`This will change the flag status to ${pendingStatus || 'the selected status'}.`}
+                actionText="Update status"
+                actionVariant="default"
+                onConfirm={() => pendingStatus && handleStatusUpdate(pendingStatus)}
+            />
         </Layout>
     )
 }

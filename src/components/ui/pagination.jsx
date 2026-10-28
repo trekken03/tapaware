@@ -41,7 +41,7 @@ function Pagination({ currentPage, totalPages, onPageChange, siblingCount = 1, c
                     "inline-flex items-center rounded-md border px-3 py-1.5 text-sm font-medium transition",
                     currentPage <= 1
                         ? "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                        : "border-gray-300 bg-white text-gray-700 hover:cursor-pointer hover:bg-gray-50"
                 )}
             >
                 Previous
@@ -66,7 +66,7 @@ function Pagination({ currentPage, totalPages, onPageChange, siblingCount = 1, c
                                 "inline-flex min-w-[2rem] items-center justify-center rounded-md border px-3 py-1.5 text-sm font-medium transition",
                                 page === currentPage
                                     ? "border-blue-600 bg-blue-600 text-white"
-                                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                                    : "border-gray-300 bg-white text-gray-700 hover:cursor-pointer hover:bg-gray-50"
                             )}
                             aria-current={page === currentPage ? "page" : undefined}
                         >
@@ -84,7 +84,7 @@ function Pagination({ currentPage, totalPages, onPageChange, siblingCount = 1, c
                     "inline-flex items-center rounded-md border px-3 py-1.5 text-sm font-medium transition",
                     currentPage >= totalPages
                         ? "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                        : "border-gray-300 bg-white text-gray-700 hover:cursor-pointer hover:bg-gray-50"
                 )}
             >
                 Next

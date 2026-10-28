@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { ArrowLeft, FileText, Home } from 'lucide-react'
@@ -14,6 +15,7 @@ const SubmitReport = () => {
     const navigate = useNavigate()
     const { user } = useAuth()
     const [loading, setLoading] = useState(false)
+    const [confirmOpen, setConfirmOpen] = useState(false)
 
     const [householdInfo, setHouseholdInfo] = useState(null)
     const [form, setForm] = useState({
@@ -49,15 +51,18 @@ const SubmitReport = () => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault()
-
 
         if (!form.household_id) {
             toast.error('Your account is not linked to a household. Please linked a household in your profile')
             return
         }
 
+        setConfirmOpen(true)
+    }
+
+    const submitReport = async () => {
         setLoading(true)
 
         try {
@@ -222,6 +227,16 @@ const SubmitReport = () => {
                 </Card>
 
             </div>
+            <ConfirmDialog
+                open={confirmOpen}
+                onOpenChange={setConfirmOpen}
+                title="Submit report?"
+                description="This will submit your water quality concern to the barangay."
+                actionText="Submit report"
+                actionVariant="default"
+                isLoading={loading}
+                onConfirm={submitReport}
+            />
         </Layout>
     )
 }

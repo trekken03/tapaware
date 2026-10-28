@@ -31,6 +31,8 @@ const ReportDetail = () => {
     const { user } = useAuth()
     const [report, setReport] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [pendingStatus, setPendingStatus] = useState(null)
+    const [statusConfirmOpen, setStatusConfirmOpen] = useState(false)
 
     useEffect(() => {
         fetchReport()
@@ -57,6 +59,12 @@ const ReportDetail = () => {
             console.log('Error updating status:', error)
             toast.error('Failed to update report status')
         }
+    }
+
+    const requestStatusUpdate = (newStatus) => {
+        if (newStatus === report.status) return
+        setPendingStatus(newStatus)
+        setStatusConfirmOpen(true)
     }
 
     if (loading) {
@@ -210,8 +218,8 @@ const ReportDetail = () => {
                                 {report.status !== 'resolved' ? (
 
                                     <select
-                                        value={report.status}
-                                        onChange={(e) => handleStatusUpdate(e.target.value)}
+                                        value={pendingStatus || report.status}
+                                        onChange={(e) => requestStatusUpdate(e.target.value)}
                                         className={`${status.bg} ${status.color} border-0  px-3 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
                                     >
                                         {report.status === 'pending' && (
@@ -276,6 +284,18 @@ const ReportDetail = () => {
                     </CardContent>
                 </Card>
             </div>
+            <ConfirmDialog
+                open={statusConfirmOpen}
+                onOpenChange={(open) => {
+                    setStatusConfirmOpen(open)
+                    if (!open) setPendingStatus(null)
+                }}
+                title="Change report status?"
+                description={`This will change the report status to ${pendingStatus || 'the selected status'}.`}
+                actionText="Update status"
+                actionVariant="default"
+                onConfirm={() => pendingStatus && handleStatusUpdate(pendingStatus)}
+            />
         </Layout>
     )
 }

@@ -7,7 +7,13 @@ const { verifyCsrf } = require('../middleware/csrf.middleware');
 const { loginLimiter, forgotPasswordLimiter, verifyEmailLimiter } = require('../middleware/rateLimit');
 const validateFields = require('../middleware/validateFields')
 
-router.post('/register', verifyToken, verifyCsrf, requireRole('admin'), validateFields(['name', 'email', 'role', 'password']), authController.register);
+router.post('/register', verifyToken, verifyCsrf, requireRole('admin'), validateFields((req) => {
+    // keep every field that was in your old array, EXCEPT 'password'
+    const fields = ['name', 'email', 'role'];
+    // password is only required when the admin types one manually
+    if ((req.body.password_mode || 'manual') === 'manual') fields.push('password');
+    return fields;
+}), authController.register);
 router.post('/login', loginLimiter, validateFields(['email', 'password']), authController.login);
 router.post('/logout', verifyCsrf, authController.logout);
 router.get('/me', verifyToken, authController.getMe);

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,15 +10,23 @@ import API from '@/services/api'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
+// Shared look for every field: white, thin gray outline, rounded, same height.
+const labelClass = 'font-normal text-gray-900'
+const fieldClass = 'h-11 rounded-lg border-gray-300 bg-white'
+const nativeSelectClass =
+    'h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+
 const AddUser = () => {
     const navigate = useNavigate()
-    const formRef = useRef(null)
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false);
+    const [passwordMode, setPasswordMode] = useState('generate')
+    const [confirmOpen, setConfirmOpen] = useState(false)
     const [form, setForm] = useState({
         name: '',
         email: '',
         password: '',
+        contact_number: '',
         role: 'resident',
         household_number: '',
         zone: '',
@@ -41,45 +49,67 @@ const AddUser = () => {
             }
         }
 
+        if (name === "contact_number") {
+
+            if (!/^\d{0,11}$/.test(value)) {
+                return;
+            }
+        }
+
         setForm({ ...form, [name]: value });
     }
 
 
     const isResident = form.role === 'resident'
+    const normalizePhone = (value) => value.trim().replace(/[\s\-()]/g, '').replace(/^\+?63/, '0')
+    const normalizedPhone = normalizePhone(form.contact_number)
     const isFormReady =
         form.email.trim() !== '' &&
-        form.password.trim() !== '' &&
+        (passwordMode === 'generate' || form.password.trim() !== '') &&
         form.name.trim() !== '' &&
         (!isResident || (form.household_number.trim() !== '' && form.zone.trim() !== '' && form.address.trim() !== ''))
 
     const handleSubmit = async (e) => {
         e.preventDefault()
 
+        if (form.contact_number.trim() && !/^09\d{9}$/.test(normalizedPhone)) {
+            toast.error('Enter a valid Philippine mobile number in the format 09XXXXXXXXX.')
+            return
+        }
+        if (isResident && !normalizedPhone) {
+            toast.error('Contact number is required for residents.')
+            return
+        }
+        if (passwordMode === 'manual' && form.password.length < 8) {
+            toast.error('Password too short! must be at least 8 characters long!')
+            return
+        }
+
+        setConfirmOpen(true)
+    }
+
+    const saveUser = async () => {
         setLoading(true)
-
         try {
-            if (form.password.length < 8) {
-                toast.error('Password too short! must be at least 8 characters long!')
-                return
-
-            }
-
             const submitData = {
                 name: form.name,
                 email: form.email,
-                password: form.password,
+                ...(passwordMode === 'manual' ? { password: form.password } : {}),
+                password_mode: passwordMode,
                 role: form.role,
+                contact_number: normalizedPhone || null,
                 household_number: form.role === 'resident' && form.household_number ? parseInt(form.household_number, 10) : null,
                 zone: form.role === 'resident' && form.zone ? parseInt(form.zone, 10) : null,
                 address: form.role === 'resident' ? form.address : null
             }
 
-            console.log('Submitting user data:', submitData)
             const response = await API.post('/auth/register', submitData)
             if (response.data.emailSent === false) {
                 toast.warning(response.data.message || 'The verification email could not be sent. Use Resend verification from the Admin Panel.')
             } else {
-                toast.success(`Verification email sent to ${form.email}`)
+                toast.success(passwordMode === 'generate'
+                    ? `Verification email sent to ${form.email}, including a temporary password.`
+                    : `Verification email sent to ${form.email}`)
             }
             navigate('/admin')
         } catch (error) {
@@ -113,16 +143,16 @@ const AddUser = () => {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-2 text-blue-700">
                             <Users size={20} className="text-blue-600" />
                             User Information
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
 
-                        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
+                                <Label htmlFor="email" className={labelClass}>Email</Label>
                                 <Input
                                     id="email"
                                     name="email"
@@ -130,70 +160,103 @@ const AddUser = () => {
                                     placeholder="e.g. juan@gmail.com"
                                     value={form.email}
                                     onChange={handleChange}
+                                    className={fieldClass}
                                     required
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+
+                            {/* Row 1: Full Name | Password.
+                                In "Generate" mode this row is as tall as a normal field. In "Type manually"
+                                mode the password box appears under the dropdown and the rows below move
+                                down to make room for it. */}
+                            <div className="grid items-start gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="name">Full Name</Label>
+                                    <Label htmlFor="name" className={labelClass}>Full Name</Label>
                                     <Input
                                         id="name"
                                         name="name"
                                         placeholder="e.g. Juan Dela Cruz"
                                         value={form.name}
                                         onChange={handleChange}
+                                        className={fieldClass}
                                         required
                                     />
-
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="password">Password</Label>
-                                    <div className="relative">
-                                        <Input
-                                            id="password"
-                                            name="password"
-                                            type={showPassword ? 'text' : 'password'}
-                                            placeholder="Enter password"
-                                            value={form.password}
-
-                                            maxLength="20"
-                                            className="pr-10"
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                        >
-                                            {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-                                        </button>
-                                    </div>
-
                                 </div>
 
-
-
-
                                 <div className="space-y-2">
-                                    <Label htmlFor="role">Role</Label>
+                                    <Label htmlFor="password-mode" className={labelClass}>Password</Label>
+                                    <select
+                                        id="password-mode"
+                                        value={passwordMode}
+                                        onChange={(e) => setPasswordMode(e.target.value)}
+                                        className={nativeSelectClass}
+                                    >
+                                        <option value="generate">Generate random password</option>
+                                        <option value="manual">Type manually</option>
+                                    </select>
+                                    {passwordMode === 'manual' && (
+                                        <div className="relative">
+                                            <Input
+                                                id="password"
+                                                name="password"
+                                                type={showPassword ? 'text' : 'password'}
+                                                placeholder="Enter password"
+                                                value={form.password}
+                                                maxLength="20"
+                                                className={`${fieldClass} pr-10`}
+                                                onChange={handleChange}
+                                                required={passwordMode === 'manual'}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                            >
+                                                {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Row 2: Role | Contact number */}
+                            <div className="grid items-start gap-4 sm:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="role" className={labelClass}>Role</Label>
                                     <select
                                         id="role"
                                         name="role"
                                         value={form.role}
                                         onChange={handleChange}
-                                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className={nativeSelectClass}
                                     >
                                         <option value="resident">Resident</option>
                                         <option value="staff">Staff</option>
                                         <option value="admin">Admin</option>
                                     </select>
                                 </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="contact_number" className={labelClass}>Contact number</Label>
+                                    <Input
+                                        id="contact_number"
+                                        name="contact_number"
+                                        type="tel"
+                                        inputMode="tel"
+                                        placeholder="09XXXXXXXXX"
+                                        value={form.contact_number}
+                                        onChange={handleChange}
+                                        className={fieldClass}
+                                        required={isResident}
+                                        maxLength={11}
+                                        minLength={11}
+                                    />
+                                </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid items-start gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="household_number">
+                                    <Label htmlFor="household_number" className={labelClass}>
                                         Household Number (for residents only)
                                     </Label>
                                     <Input
@@ -203,6 +266,7 @@ const AddUser = () => {
                                         placeholder="e.g. 101"
                                         value={form.household_number}
                                         onChange={handleChange}
+                                        className={fieldClass}
                                         required={form.role === 'resident'}
                                         max="999"
                                         min="1"
@@ -210,7 +274,7 @@ const AddUser = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="zone">
+                                    <Label htmlFor="zone" className={labelClass}>
                                         Zone (for residents only)
                                     </Label>
                                     <select
@@ -219,7 +283,7 @@ const AddUser = () => {
                                         value={form.zone}
                                         onChange={handleChange}
                                         required={form.role === 'resident'}
-                                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className={nativeSelectClass}
                                     >
                                         <option value="">Select zone...</option>
                                         {[1, 2, 3, 4, 5, 6].map(p => (
@@ -227,49 +291,36 @@ const AddUser = () => {
                                         ))}
                                     </select>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="address">
-                                        Address (for residents only)
-                                    </Label>
-                                    <Input
-                                        id="address"
-                                        name="address"
-                                        placeholder="Don jose st."
-                                        value={form.address}
-                                        onChange={handleChange}
-                                        required={form.role === 'resident'}
-                                    />
-                                </div>
+                            </div>
 
+                            <div className="space-y-2">
+                                <Label htmlFor="address" className={labelClass}>
+                                    Address (for residents only)
+                                </Label>
+                                <Input
+                                    id="address"
+                                    name="address"
+                                    placeholder="Don jose st."
+                                    value={form.address}
+                                    onChange={handleChange}
+                                    className={fieldClass}
+                                    required={form.role === 'resident'}
+                                />
                             </div>
 
                             <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 pt-4">
-                                <ConfirmDialog
-                                    title="Save user?"
-                                    description="Confirm to save this user."
-                                    actionText="Save"
-                                    actionVariant="success"
-                                    onConfirm={() => {
-                                        if (formRef.current?.checkValidity()) {
-                                            formRef.current.requestSubmit()
-                                        } else {
-                                            formRef.current?.reportValidity()
-                                        }
-                                    }}
+                                <Button
+                                    type="submit"
+                                    className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white"
+                                    disabled={loading || !isFormReady}
                                 >
-                                    <Button
-                                        type="button"
-                                        className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white"
-                                        disabled={loading || !isFormReady}
-                                    >
-                                        {loading ? 'Saving...' : 'Save User'}
-                                    </Button>
-                                </ConfirmDialog>
+                                    {loading ? 'Saving...' : 'Save User'}
+                                </Button>
 
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    className="w-full sm:w-auto"
+                                    className="w-full sm:w-auto border-gray-300 bg-gray-200 hover:bg-gray-300"
                                     onClick={() => navigate(-1)}
                                 >
                                     Cancel
@@ -280,6 +331,18 @@ const AddUser = () => {
                 </Card>
 
             </div>
+            <ConfirmDialog
+                open={confirmOpen}
+                onOpenChange={setConfirmOpen}
+                title="Create account?"
+                description={passwordMode === 'generate'
+                    ? 'This will create the account and send a verification email with a temporary password.'
+                    : 'This will create the account and send a verification email.'}
+                actionText="Create account"
+                actionVariant="default"
+                isLoading={loading}
+                onConfirm={saveUser}
+            />
         </Layout>
     )
 }

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { Pagination } from '@/components/ui/pagination'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Home, Plus, Search, Hourglass, ClockFading, CircleCheck, FileText } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
@@ -24,6 +25,8 @@ const Reports = () => {
     const { user } = useAuth()
     const [searchParams, setSearchParams] = useSearchParams()
     const [selectedZone, setSelectedZone] = useState('all');
+    const [pendingStatus, setPendingStatus] = useState(null)
+    const [statusConfirmOpen, setStatusConfirmOpen] = useState(false)
     const statusFilter = searchParams.get('status')
 
     useEffect(() => {
@@ -66,6 +69,18 @@ const Reports = () => {
         catch (error) {
             console.log('Error updating status:', error)
             toast.error('Failed to update report status')
+        }
+    }
+
+    const requestStatusUpdate = (reportId, currentStatus, newStatus) => {
+        if (newStatus === currentStatus) return
+        setPendingStatus({ reportId, currentStatus, newStatus })
+        setStatusConfirmOpen(true)
+    }
+
+    const confirmStatusUpdate = async () => {
+        if (pendingStatus) {
+            await handleStatusUpdate(pendingStatus.reportId, pendingStatus.newStatus)
         }
     }
 
@@ -316,11 +331,9 @@ const Reports = () => {
                                                         <TableCell label="Status" className="text-center">
                                                             {r.status !== 'resolved' ? (
                                                                 <select
-                                                                    value={r.status}
+                                                                    value={pendingStatus?.reportId === r.id ? pendingStatus.newStatus : r.status}
                                                                     onClick={(e) => e.stopPropagation()}
-                                                                    onChange={(e) =>
-                                                                        handleStatusUpdate(r.id, e.target.value)
-                                                                    }
+                                                                    onChange={(e) => requestStatusUpdate(r.id, r.status, e.target.value)}
                                                                     className={`${statusStyle.bg} ${statusStyle.color} text-center w-[133px] border border-transparent px-2 py-1 text-xs font-medium focus:outline-none`}
                                                                 >
                                                                     {r.status === 'pending' && (
@@ -371,6 +384,18 @@ const Reports = () => {
                 </Card>
 
             </div>
+            <ConfirmDialog
+                open={statusConfirmOpen}
+                onOpenChange={(open) => {
+                    setStatusConfirmOpen(open)
+                    if (!open) setPendingStatus(null)
+                }}
+                title="Change report status?"
+                description={`This will change the report status to ${pendingStatus?.newStatus || 'the selected status'}.`}
+                actionText="Update status"
+                actionVariant="default"
+                onConfirm={confirmStatusUpdate}
+            />
         </Layout >
     )
 }

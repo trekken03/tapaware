@@ -17,6 +17,7 @@ const ConcernDetail = () => {
     const [loading, setLoading] = useState(true)
     const [replyMessage, setReplyMessage] = useState('')
     const [sending, setSending] = useState(false)
+    const [replyConfirmOpen, setReplyConfirmOpen] = useState(false)
 
     useEffect(() => {
         fetchConcern()
@@ -33,13 +34,17 @@ const ConcernDetail = () => {
         }
     }
 
-    const handleReply = async (e) => {
+    const handleReply = (e) => {
         e.preventDefault()
         if (!replyMessage.trim()) {
             toast.error('Please write a reply before sending')
             return
         }
 
+        setReplyConfirmOpen(true)
+    }
+
+    const sendReply = async () => {
         setSending(true)
         try {
             const res = await API.put(`/concerns/${id}/reply`, { reply_message: replyMessage })
@@ -239,6 +244,16 @@ const ConcernDetail = () => {
                         </CardContent>
                     </Card>
                 )}
+                <ConfirmDialog
+                    open={replyConfirmOpen}
+                    onOpenChange={setReplyConfirmOpen}
+                    title="Send reply?"
+                    description="This will send your reply to the person who submitted this concern."
+                    actionText="Send reply"
+                    actionVariant="default"
+                    isLoading={sending}
+                    onConfirm={sendReply}
+                />
             </div>
         </Layout>
     )

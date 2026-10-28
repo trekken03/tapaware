@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Droplets, Home } from 'lucide-react'
@@ -17,6 +18,7 @@ const AddTdsReading = () => {
     const { user } = useAuth()
 
     const [loading, setLoading] = useState(false)
+    const [confirmOpen, setConfirmOpen] = useState(false)
     const [households, setHouseholds] = useState([])
     const [householdInfo, setHouseholdInfo] = useState(null)
     const [form, setForm] = useState({
@@ -57,9 +59,12 @@ const AddTdsReading = () => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault()
+        setConfirmOpen(true)
+    }
 
+    const saveReading = async () => {
         setLoading(true)
 
         try {
@@ -207,6 +212,16 @@ const AddTdsReading = () => {
                 </Card>
 
             </div>
+            <ConfirmDialog
+                open={confirmOpen}
+                onOpenChange={setConfirmOpen}
+                title="Save reading?"
+                description="This will save the TDS reading for the selected household."
+                actionText="Save reading"
+                actionVariant="default"
+                isLoading={loading}
+                onConfirm={saveReading}
+            />
         </Layout>
     )
 }

@@ -11,7 +11,7 @@ const escapeHtml = (value) => String(value)
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-const sendVerificationEmail = async (user) => {
+const sendVerificationEmail = async (user, temporaryPassword) => {
     try {
         const token = crypto.randomBytes(32).toString('hex');
         const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
@@ -30,6 +30,13 @@ const sendVerificationEmail = async (user) => {
         const safeName = escapeHtml(user.name);
         const safeRole = escapeHtml(user.role);
         const safeLink = escapeHtml(verificationLink);
+        const temporaryPasswordSection = temporaryPassword
+            ? `<div style="margin:0 0 24px;padding:16px;background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;">
+                        <p style="margin:0 0 8px;line-height:1.5;font-weight:bold;">Your temporary password:</p>
+                        <p style="margin:0;padding:12px;background-color:#ffffff;border-radius:4px;font-family:monospace;font-size:20px;letter-spacing:2px;">${escapeHtml(temporaryPassword)}</p>
+                        <p style="margin:12px 0 0;line-height:1.5;font-weight:bold;">Please change it as soon as you log in: go to My Account, then Change Password.</p>
+                    </div>`
+            : '';
         const result = await sendEmail({
             to: user.email,
             subject: 'Verify your TapAware account',
@@ -39,6 +46,7 @@ const sendVerificationEmail = async (user) => {
                         <h1 style="margin:0 0 20px;color:#0a1a33;font-size:24px;">Verify your TapAware account</h1>
                         <p style="margin:0 0 16px;line-height:1.5;">Hello ${safeName}, an account has been registered under your email in TapAware.</p>
                         <p style="margin:0 0 24px;line-height:1.5;">Account role: <strong>${safeRole}</strong></p>
+                        ${temporaryPasswordSection}
                         <p style="margin:0 0 24px;">
                             <a href="${safeLink}" style="display:inline-block;padding:12px 20px;background-color:#1d4ed8;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Verify my email</a>
                         </p>

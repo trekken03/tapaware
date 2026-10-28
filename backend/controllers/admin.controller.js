@@ -1,10 +1,11 @@
 const db = require('../models/db');
 const auditLog = require('../utils/auditLogger');
 const sendVerificationEmail = require('../utils/emailVerification');
+const normalizeContactNumber = require('../utils/contactNumber');
 
 exports.getAllUsers = async (req, res) => {
     try {
-        const [rows] = await db.query(`Select u.id,u.name,u.email,u.role,u.household_id,u.email_verified,
+        const [rows] = await db.query(`Select u.id,u.name,u.email,u.role,u.household_id,u.contact_number,u.email_verified,
             h.household_number,h.zone,h.address,u.created_at from users u left join households h on u.household_id = h.id
             where u.deleted_at is null
             order by u.created_at desc`);
@@ -324,13 +325,22 @@ exports.updateUserInfo = async (req, res) => {
 };
 exports.updateUserInfo = async (req, res) => {
     const { id } = req.params;
-    const { name, email, household_number, zone, transfer_data, address } = req.body;
+    const { name, email, household_number, zone, transfer_data, address, contact_number } = req.body;
     const currentUser = req.user;
     const addressProvided = Object.prototype.hasOwnProperty.call(req.body, 'address');
     const normalizedAddress = typeof address === 'string' ? address.trim() : '';
+    const contactNumberProvided = Object.prototype.hasOwnProperty.call(req.body, 'contact_number');
+    const contactNumberPresent = typeof contact_number === 'string' && contact_number.trim() !== '';
+    const normalizedContactNumber = contactNumberPresent ? normalizeContactNumber(contact_number) : null;
 
     if (addressProvided && (typeof address !== 'string' || normalizedAddress.length > 250)) {
         return res.status(400).json({ message: 'Address must be 250 characters or fewer' });
+    }
+    if (contactNumberProvided && (
+        (contact_number != null && typeof contact_number !== 'string') ||
+        (contactNumberPresent && !normalizedContactNumber)
+    )) {
+        return res.status(400).json({ message: 'Enter a valid Philippine mobile number in the format 09XXXXXXXXX.' });
     }
 
     try {
@@ -379,8 +389,8 @@ exports.updateUserInfo = async (req, res) => {
         }
 
         await db.query(
-            'UPDATE users SET name = ?, email = ?, household_id = ? WHERE id = ?',
-            [name, email, finalHouseholdId, id]
+            'UPDATE users SET name = ?, email = ?, household_id = ?, contact_number = ? WHERE id = ?',
+            [name, email, finalHouseholdId, contactNumberProvided ? normalizedContactNumber : existing[0].contact_number, id]
         );
 
         if (existing[0].role === 'resident' && finalHouseholdId) {
@@ -527,7 +537,7 @@ exports.getUserById = async (req, res) => {
 
     try {
         const [[user]] = await db.query(
-            `SELECT u.id, u.name, u.email, u.role, u.household_id, u.created_at,
+            `SELECT u.id, u.name, u.email, u.role, u.household_id, u.contact_number, u.created_at,
             h.household_number, h.zone, h.address
             FROM users u LEFT JOIN households h ON u.household_id = h.id
             WHERE u.id = ? AND u.deleted_at IS NULL`,

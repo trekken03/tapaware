@@ -21,11 +21,13 @@ const EditUser = () => {
 
 
     const [loading, setLoading] = useState(false)
+    const [confirmOpen, setConfirmOpen] = useState(false)
     const [error, setError] = useState('')
     const [transferChoice, setTransferChoice] = useState('moved')
     const [form, setForm] = useState({
         name: existingUser?.name || '',
         email: existingUser?.email || '',
+        contact_number: existingUser?.contact_number || '',
         household_number: existingUser?.household_number || '',
         zone: existingUser?.zone || '',
         address: existingUser?.address || ''
@@ -57,9 +59,20 @@ const EditUser = () => {
         (form.household_number?.toString() !== existingUser.household_number?.toString() ||
             form.zone?.toString() !== existingUser.zone?.toString())
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault()
         setError('')
+        const normalizedPhone = form.contact_number.trim().replace(/[\s\-()]/g, '').replace(/^\+?63/, '0')
+        if (form.contact_number.trim() && !/^09\d{9}$/.test(normalizedPhone)) {
+            const message = 'Enter a valid Philippine mobile number in the format 09XXXXXXXXX.'
+            setError(message)
+            toast.error(message)
+            return
+        }
+        setConfirmOpen(true)
+    }
+
+    const saveUser = async () => {
         setLoading(true)
 
         try {
@@ -104,6 +117,7 @@ const EditUser = () => {
     const hasChanges =
         form.name !== (existingUser?.name || '') ||
         form.email !== (existingUser?.email || '') ||
+        form.contact_number !== (existingUser?.contact_number || '') ||
         form.household_number?.toString() !== (existingUser?.household_number?.toString() || '') ||
         form.zone?.toString() !== (existingUser?.zone?.toString() || '') ||
         form.address !== (existingUser?.address || '')
@@ -188,6 +202,19 @@ const EditUser = () => {
                                 </div>
 
                                 <div className="space-y-2">
+                                    <Label htmlFor="contact_number">Contact number</Label>
+                                    <Input
+                                        id="contact_number"
+                                        name="contact_number"
+                                        type="tel"
+                                        inputMode="tel"
+                                        placeholder="09XXXXXXXXX"
+                                        value={form.contact_number}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
                                     <Label htmlFor="household_number">Household No.</Label>
                                     <Input
                                         id="household_number"
@@ -266,21 +293,13 @@ const EditUser = () => {
                             )}
 
                             <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 pt-4">
-                                <ConfirmDialog
-                                    title="Save?"
-                                    description="Confirm to save the edit."
-                                    actionText="Save"
-                                    actionVariant="success"
-                                    onConfirm={handleSubmit}
+                                <Button
+                                    type="submit"
+                                    className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white"
+                                    disabled={loading || !hasChanges}
                                 >
-                                    <Button
-
-                                        className="w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white"
-                                        disabled={loading || !hasChanges}
-                                    >
-                                        {loading ? 'Saving...' : 'Save Changes'}
-                                    </Button>
-                                </ConfirmDialog>
+                                    {loading ? 'Saving...' : 'Save Changes'}
+                                </Button>
 
                                 {hasChanges && (
                                     <ConfirmDialog
@@ -319,6 +338,16 @@ const EditUser = () => {
                 </Card>
 
             </div>
+            <ConfirmDialog
+                open={confirmOpen}
+                onOpenChange={setConfirmOpen}
+                title="Save changes?"
+                description="This will update the user's account information."
+                actionText="Save"
+                actionVariant="default"
+                isLoading={loading}
+                onConfirm={saveUser}
+            />
         </Layout>
     )
 }

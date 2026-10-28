@@ -4,7 +4,7 @@ import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { ArrowLeft, User, Pencil, Trash2, Home, FileText, Droplets, ClipboardList, Mail, MapPin } from 'lucide-react'
+import { ArrowLeft, User, Pencil, Trash2, Home, FileText, Droplets, ClipboardList, Mail, MapPin, Phone } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
 
@@ -143,6 +143,12 @@ const UserDetail = () => {
                                         <Mail size={14} className="text-gray-400" />
                                         {user.email}
                                     </div>
+                                    {user.contact_number && (
+                                        <div className="flex items-center gap-1.5">
+                                            <Phone size={14} className="text-gray-400" />
+                                            {user.contact_number}
+                                        </div>
+                                    )}
                                     <div className="flex items-center gap-1.5">
                                         <ClipboardList size={14} className="text-gray-400" />
                                         Joined {new Date(user.created_at).toLocaleDateString('en-US', {

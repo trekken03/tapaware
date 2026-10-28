@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { User, Save, KeyRound, ArrowLeft, Home, MapPin, Eye, EyeOff } from 'lucide-react'
@@ -19,6 +20,8 @@ const Profile = () => {
 
     const [loading, setLoading] = useState(false)
     const [passwordLoading, setPasswordLoading] = useState(false)
+    const [profileConfirmOpen, setProfileConfirmOpen] = useState(false)
+    const [passwordConfirmOpen, setPasswordConfirmOpen] = useState(false)
 
     const [form, setForm] = useState({
         name: user?.name || '',
@@ -40,8 +43,12 @@ const Profile = () => {
         setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value })
     }
 
-    const handleUpdateProfile = async (e) => {
+    const handleUpdateProfile = (e) => {
         e.preventDefault()
+        setProfileConfirmOpen(true)
+    }
+
+    const saveProfile = async () => {
         setLoading(true)
 
         try {
@@ -55,7 +62,7 @@ const Profile = () => {
         }
     }
 
-    const handleChangePassword = async (e) => {
+    const handleChangePassword = (e) => {
         e.preventDefault()
 
         if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -68,8 +75,11 @@ const Profile = () => {
             return
         }
 
-        setPasswordLoading(true)
+        setPasswordConfirmOpen(true)
+    }
 
+    const savePassword = async () => {
+        setPasswordLoading(true)
         try {
             await API.put('/auth/change-password', {
                 currentPassword: passwordForm.currentPassword,
@@ -338,6 +348,26 @@ const Profile = () => {
                 </div>
 
             </div>
+            <ConfirmDialog
+                open={profileConfirmOpen}
+                onOpenChange={setProfileConfirmOpen}
+                title="Save changes?"
+                description="This will update your account profile."
+                actionText="Save"
+                actionVariant="default"
+                isLoading={loading}
+                onConfirm={saveProfile}
+            />
+            <ConfirmDialog
+                open={passwordConfirmOpen}
+                onOpenChange={setPasswordConfirmOpen}
+                title="Change password?"
+                description="This will replace your current account password."
+                actionText="Change Password"
+                actionVariant="default"
+                isLoading={passwordLoading}
+                onConfirm={savePassword}
+            />
         </Layout>
     )
 }

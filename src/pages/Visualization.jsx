@@ -3,6 +3,7 @@ import Layout from '@/components/Layout'
 import DateRangePicker from '@/components/DateRangePicker'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { BarChart3 } from 'lucide-react'
 import { Download } from 'lucide-react'
@@ -81,8 +82,12 @@ const Visualization = () => {
 
     const [loading, setLoading] = useState(true)
     const [isExporting, setIsExporting] = useState(false)
+    const [isPdfReady, setIsPdfReady] = useState(false)
+    const [loadedRangeKey, setLoadedRangeKey] = useState(null)
+    const [pdfConfirmOpen, setPdfConfirmOpen] = useState(false)
     const [exportError, setExportError] = useState('')
     const [dateRange, setDateRange] = useState(getStoredOrDefaultDates)
+    const fetchRequestId = useRef(0)
     // Refs to the actual rendered chart cards, so the PDF can screenshot
     // exactly what's on screen instead of redrawing an approximation.
     const zoneChartRef = useRef(null)
@@ -331,7 +336,18 @@ const Visualization = () => {
 
     }
 
+    const dateRangeKey = `${dateRange.from}:${dateRange.to}`
+    const updateDateRange = (nextDateRange) => {
+        setIsPdfReady(false)
+        setLoadedRangeKey(null)
+        setDateRange(nextDateRange)
+    }
+
     const fetchData = async () => {
+        const requestId = fetchRequestId.current + 1
+        fetchRequestId.current = requestId
+        setIsPdfReady(false)
+        setLoadedRangeKey(null)
         setLoading(true)
         try {
             const params = { from: dateRange.from, to: dateRange.to }
@@ -345,6 +361,7 @@ const Visualization = () => {
                 API.get('/visualization/tds-by-zone', { params }),
 
             ])
+            if (requestId !== fetchRequestId.current) return
             setByIssue(issueRes.data)
             setByZone(zoneRes.data)
             setByStatus(statusRes.data)
@@ -352,12 +369,16 @@ const Visualization = () => {
             setTrendingIssues(trendingRes.data)
             setTrendingByTime(timeRes.data)
             setTdsByZone(tdsByZoneRes.data)
+            setLoadedRangeKey(dateRangeKey)
 
         } catch (error) {
+            if (requestId !== fetchRequestId.current) return
             console.log('Error fetching visualization:', error)
             toast.error('Failed to load visualization data')
         } finally {
-            setLoading(false)
+            if (requestId === fetchRequestId.current) {
+                setLoading(false)
+            }
         }
     }
     useEffect(() => {
@@ -367,6 +388,25 @@ const Visualization = () => {
     useEffect(() => {
         localStorage.setItem(DATE_RANGE_STORAGE_KEY, JSON.stringify(dateRange))
     }, [dateRange])
+
+    useEffect(() => {
+        if (loading || loadedRangeKey !== dateRangeKey) {
+            setIsPdfReady(false)
+            return undefined
+        }
+
+        let secondFrame
+        const firstFrame = requestAnimationFrame(() => {
+            secondFrame = requestAnimationFrame(() => setIsPdfReady(true))
+        })
+
+        return () => {
+            cancelAnimationFrame(firstFrame)
+            if (secondFrame !== undefined) cancelAnimationFrame(secondFrame)
+        }
+    }, [byIssue, byZone, byStatus, tdsTrend, trendingIssues, trendingByTime, tdsByZone, dateRangeKey, loadedRangeKey, loading])
+
+    const selectedDateRangeLabel = `${new Date(`${dateRange.from}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} – ${new Date(`${dateRange.to}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
 
 
 
@@ -422,19 +462,20 @@ const Visualization = () => {
                     <div className="flex flex-wrap items-end gap-3">
                         <Button
                             className="bg-white text-black border-black hover:bg-gray-100 hover:cursor-pointer font-medium"
-                            onClick={() => setDateRange(getLast30Days())}
+                            onClick={() => updateDateRange(getLast30Days())}
                         >
                             Last 30 days
                         </Button>
-                        <DateRangePicker dateRange={dateRange} setDateRange={setDateRange} />
+                        <DateRangePicker dateRange={dateRange} setDateRange={updateDateRange} />
 
                         <Button
-                            onClick={handleDownloadPdf}
-                            disabled={isExporting}
+                            onClick={() => setPdfConfirmOpen(true)}
+                            disabled={isExporting || !isPdfReady}
+                            title={!isPdfReady ? 'PDF download is disabled until data for the selected date range has loaded and all visual sections have rendered.' : undefined}
                             className="bg-blue-900 hover:bg-blue-700 text-white flex items-center gap-2"
                         >
                             <Download size={16} />
-                            {isExporting ? 'Preparing PDF....' : 'Download PDF'}
+                            {isExporting ? 'Preparing PDF....' : isPdfReady ? 'Download PDF' : 'Preparing data...'}
                         </Button>
                     </div>
                 </div>
@@ -466,6 +507,7 @@ const Visualization = () => {
                                                 data={byStatus}
                                                 dataKey="count"
                                                 nameKey="status"
+                                                isAnimationActive={false}
                                                 cx="50%"
                                                 cy="50%"
                                                 outerRadius={90}
@@ -507,6 +549,7 @@ const Visualization = () => {
                                             data={byIssue}
                                             dataKey="count"
                                             nameKey="issue_type"
+                                            isAnimationActive={false}
                                             className="transition-all duration-300 hover:-translate-y-2 "
                                             cx="50%"
                                             cy="50%"
@@ -720,6 +763,16 @@ const Visualization = () => {
                 </div>
 
             </div>
+            <ConfirmDialog
+                open={pdfConfirmOpen}
+                onOpenChange={setPdfConfirmOpen}
+                title="Download PDF report?"
+                description={`This will download the visualization report for ${selectedDateRangeLabel}.`}
+                actionText="Download PDF"
+                actionVariant="default"
+                isLoading={isExporting}
+                onConfirm={handleDownloadPdf}
+            />
             {/* Trending issue per zone */}
             <Card className="mt-6">
                 <CardHeader>

@@ -26,6 +26,8 @@ const AdminPanel = () => {
     const [concerns, setConcerns] = useState([])
     const [loading, setLoading] = useState(true)
     const [resendingUserId, setResendingUserId] = useState(null)
+    const [pendingAction, setPendingAction] = useState(null)
+    const [actionConfirmOpen, setActionConfirmOpen] = useState(false)
     const [searchParams, setSearchParams] = useSearchParams()
     const activeTab = searchParams.get('tab') || 'users'
     const [searchTerm, setSearchTerm] = useState('')
@@ -64,6 +66,41 @@ const AdminPanel = () => {
             console.log('Error updating role:', error)
         }
     }
+
+    const requestActionConfirmation = (action) => {
+        setPendingAction(action)
+        setActionConfirmOpen(true)
+    }
+
+    const confirmPendingAction = async () => {
+        if (!pendingAction) return
+
+        if (pendingAction.type === 'role') {
+            await handleRoleUpdate(pendingAction.userId, pendingAction.value)
+        } else if (pendingAction.type === 'flag-status') {
+            await handleFlagStatusUpdate(pendingAction.flagId, pendingAction.value)
+        } else if (pendingAction.type === 'resend-verification') {
+            await handleResendVerification(pendingAction.user)
+        }
+    }
+
+    const actionConfirmationDetails = pendingAction?.type === 'role'
+        ? {
+            title: 'Change user role?',
+            description: `This will change the selected user's role to ${pendingAction.value}.`,
+            actionText: 'Change role',
+        }
+        : pendingAction?.type === 'flag-status'
+            ? {
+                title: 'Change flag status?',
+                description: `This will change the flagged household status to ${pendingAction.value}.`,
+                actionText: 'Update status',
+            }
+            : {
+                title: 'Resend verification?',
+                description: `This will send a verification email to ${pendingAction?.user?.email || 'the user'}.`,
+                actionText: 'Resend verification',
+            }
     const handleFlagStatusUpdate = async (flagId, newStatus) => {
         try {
             await API.put(`/admin/flags/${flagId}/status`, { status: newStatus })
@@ -117,7 +154,7 @@ const AdminPanel = () => {
             variant="outline"
             size="sm"
             className="whitespace-nowrap text-amber-700 border-amber-300 hover:bg-amber-50"
-            onClick={() => handleResendVerification(u)}
+            onClick={() => requestActionConfirmation({ type: 'resend-verification', user: u })}
             disabled={resendingUserId === u.id}
         >
             {resendingUserId === u.id ? 'Sending...' : 'Resend verification'}
@@ -418,8 +455,8 @@ const AdminPanel = () => {
                                                                 </span>
                                                             ) : (
                                                                 <select
-                                                                    value={u.role}
-                                                                    onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
+                                                                    value={pendingAction?.type === 'role' && pendingAction.userId === u.id ? pendingAction.value : u.role}
+                                                                    onChange={(e) => requestActionConfirmation({ type: 'role', userId: u.id, value: e.target.value })}
                                                                     className={`${roleStyle.bg} ${roleStyle.color} border-0 px-2 py-1 text-xs font-semibold cursor-pointer focus:outline-none`}
                                                                 >
                                                                     <option value="resident">Resident</option>
@@ -556,8 +593,8 @@ const AdminPanel = () => {
                                                     </TableCell>
                                                     <TableCell label="Status" onClick={(e) => e.stopPropagation()}>
                                                         <select
-                                                            value={f.status}
-                                                            onChange={(e) => handleFlagStatusUpdate(f.id, e.target.value)}
+                                                            value={pendingAction?.type === 'flag-status' && pendingAction.flagId === f.id ? pendingAction.value : f.status}
+                                                            onChange={(e) => requestActionConfirmation({ type: 'flag-status', flagId: f.id, value: e.target.value })}
                                                             className="bg-red-100 text-red-700 border-0 px-2 py-1 text-xs font-semibold capitalize cursor-pointer focus:outline-none"
                                                         >
                                                             <option value="active">Active</option>
@@ -633,6 +670,19 @@ const AdminPanel = () => {
                 )}
 
             </div>
+            <ConfirmDialog
+                open={actionConfirmOpen}
+                onOpenChange={(open) => {
+                    setActionConfirmOpen(open)
+                    if (!open) setPendingAction(null)
+                }}
+                title={actionConfirmationDetails.title}
+                description={actionConfirmationDetails.description}
+                actionText={actionConfirmationDetails.actionText}
+                actionVariant="default"
+                isLoading={resendingUserId !== null}
+                onConfirm={confirmPendingAction}
+            />
         </Layout>
     )
 }
