@@ -238,17 +238,19 @@ const AdminPanel = () => {
 
     const userActions = (u) => (
         u.id !== currentUser.id ? (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-1 sm:flex-nowrap sm:gap-2">
                 {resendVerificationButton(u)}
+
                 <Button
                     variant="outline"
                     size="sm"
-                    className="text-blue-600 border-blue-200  hover:bg-blue-50"
+                    className="h-7 px-2 text-xs text-blue-600 border-blue-200 hover:bg-blue-50 sm:h-9 sm:px-3 sm:text-sm"
                     onClick={() => navigate(`/admin/edit-user/${u.id}`, { state: u })}
                 >
-                    <Pencil size={14} className='mr-1' />
+                    <Pencil size={12} className="mr-1 sm:h-[14px] sm:w-[14px]" />
                     Edit
                 </Button>
+
                 <ConfirmDialog
                     title={`Archive user ${u.name}?`}
                     description="Their account will be deactivated and can be restored later from the Archive."
@@ -259,15 +261,15 @@ const AdminPanel = () => {
                     <Button
                         variant="outline"
                         size="sm"
-                        className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                        className="h-7 gap-1 px-2 text-xs text-red-600 border-red-200 hover:bg-red-50 sm:h-9 sm:px-3 sm:text-sm"
                     >
-                        <Trash2 size={14} />
+                        <Trash2 size={12} className="sm:h-[14px] sm:w-[14px]" />
                         Archive
                     </Button>
                 </ConfirmDialog>
             </div>
         ) : null
-    )
+    );
 
     return (
         <Layout>
@@ -391,7 +393,11 @@ const AdminPanel = () => {
                                                     <TableCell label="Household">{u.household_number || '—'}</TableCell>
                                                     <TableCell label="Zone">{u.zone || '—'}</TableCell>
                                                     <TableCell label="Date Joined" className="whitespace-nowrap">{formatDate(u.created_at)}</TableCell>
-                                                    <TableCell label="Actions" onClick={(e) => e.stopPropagation()}>
+                                                    <TableCell
+                                                        label="Actions"
+                                                        className="max-w-[180px] sm:max-w-none"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
                                                         {userActions(u)}
                                                     </TableCell>
                                                 </TableRow>
