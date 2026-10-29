@@ -54,8 +54,11 @@ const getTimeBucket = (timeString) => {
     return 'night';
 };
 
+const MAX_BACKDATE_DAYS = 30;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 exports.submitReport = async (req, res) => {
-    const { household_id, user_id, issue_type, other_issue, description, occurred_time } = req.body;
+    const { household_id, user_id, issue_type, other_issue, description, occurred_time, occurred_date } = req.body;
 
     const isPositiveInteger = (value) => {
         if (typeof value === 'number') {
@@ -98,6 +101,39 @@ exports.submitReport = async (req, res) => {
             return res.status(400).json({ message: 'Please enter a valid time.' });
         }
 
+        // occurred_date is optional; without it the report uses the legacy
+        // "same day it was filed" behaviour and occurred_on stays NULL.
+        const dateProvided = occurred_date !== undefined && occurred_date !== null;
+        if (dateProvided) {
+            const dateMatch = typeof occurred_date === 'string' && /^(\d{4})-(\d{2})-(\d{2})$/.exec(occurred_date);
+            const occurredDay = dateMatch
+                ? new Date(Date.UTC(Number(dateMatch[1]), Number(dateMatch[2]) - 1, Number(dateMatch[3])))
+                : null;
+            if (
+                !occurredDay ||
+                occurredDay.getUTCFullYear() !== Number(dateMatch[1]) ||
+                occurredDay.getUTCMonth() !== Number(dateMatch[2]) - 1 ||
+                occurredDay.getUTCDate() !== Number(dateMatch[3])
+            ) {
+                return res.status(400).json({ message: 'Please enter a valid date.' });
+            }
+
+            // 1-day tolerance either way covers residents whose local date differs from UTC.
+            const serverNow = new Date();
+            const todayUtc = Date.UTC(serverNow.getUTCFullYear(), serverNow.getUTCMonth(), serverNow.getUTCDate());
+            const dayOffset = Math.round((occurredDay.getTime() - todayUtc) / DAY_MS);
+            if (dayOffset > 1) {
+                return res.status(400).json({ message: 'The date cannot be in the future.' });
+            }
+            if (dayOffset < -(MAX_BACKDATE_DAYS + 1)) {
+                return res.status(400).json({ message: `Reports can only be filed for issues that happened within the last ${MAX_BACKDATE_DAYS} days.` });
+            }
+
+            if (typeof occurred_time !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(occurred_time)) {
+                return res.status(400).json({ message: 'Please enter the time it happened.' });
+            }
+        }
+
     const normalizedIssueType = issue_type === 'other' ? 'other' : issue_type;
 
     const cleanOtherIssue =
@@ -118,15 +154,16 @@ exports.submitReport = async (req, res) => {
 
         const [result] = await db.query(
             `INSERT INTO reports
-        (household_id, user_id, issue_type, other_issue, description, occurred_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+        (household_id, user_id, issue_type, other_issue, description, occurred_at, occurred_on)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
                 household_id,
                 user_id,
                 normalizedIssueType,
                 cleanOtherIssue,
                 finalDescription,
-                finalOccurredTime
+                finalOccurredTime,
+                dateProvided ? occurred_date : null
             ]
         );
         await auditLog({
@@ -212,6 +249,7 @@ exports.submitReport = async (req, res) => {
         <p>A new water quality report has been submitted.</p>
         <p><strong>Issue Type:</strong> ${issueLabel}</p>
         <p><strong>Description:</strong> ${finalDescription || 'No description provided'}</p>
+        ${dateProvided ? `<p><strong>When it happened:</strong> ${occurred_date} at ${occurred_time}</p>` : ''}
         <p><strong>Household ID:</strong> ${household_id}</p>
         <p>Log in to TapAware to view full details and update its status.</p>
     `
@@ -311,6 +349,7 @@ exports.getReportById = async (req, res) => {
     try {
         const [[report]] = await db.query(
             `SELECT reports.*,
+            DATE_FORMAT(reports.occurred_on, '%Y-%m-%d') AS occurred_on_text,
             households.household_number,
             households.owner_name,
             households.zone,

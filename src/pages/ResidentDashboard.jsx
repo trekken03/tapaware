@@ -156,7 +156,7 @@ const ResidentDashboard = () => {
                                     {latestTds ? (
                                         <div className="mt-1 flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                                             <div>
-                                                <p className="text-xs text-slate-500">Current TDS Reading</p>
+                                                <p className="text-xs text-slate-500">Most Recent TDS Reading</p>
                                                 <p className="text-3xl font-bold text-green-600">
                                                     {parseFloat(latestTds.tds_value).toFixed(2)}
                                                 </p>
@@ -268,7 +268,7 @@ const ResidentDashboard = () => {
                                         onClick={() => navigate('/reports/add')}
                                     >
                                         <Plus size={16} />
-                                        Submit Report
+                                        Create Report
                                     </Button>
                                 </div>
 

@@ -26,7 +26,6 @@ const AddUser = () => {
         name: '',
         email: '',
         password: '',
-        contact_number: '',
         role: 'resident',
         household_number: '',
         zone: '',
@@ -49,20 +48,11 @@ const AddUser = () => {
             }
         }
 
-        if (name === "contact_number") {
-
-            if (!/^\d{0,11}$/.test(value)) {
-                return;
-            }
-        }
-
         setForm({ ...form, [name]: value });
     }
 
 
     const isResident = form.role === 'resident'
-    const normalizePhone = (value) => value.trim().replace(/[\s\-()]/g, '').replace(/^\+?63/, '0')
-    const normalizedPhone = normalizePhone(form.contact_number)
     const isFormReady =
         form.email.trim() !== '' &&
         (passwordMode === 'generate' || form.password.trim() !== '') &&
@@ -72,14 +62,6 @@ const AddUser = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        if (form.contact_number.trim() && !/^09\d{9}$/.test(normalizedPhone)) {
-            toast.error('Enter a valid Philippine mobile number in the format 09XXXXXXXXX.')
-            return
-        }
-        if (isResident && !normalizedPhone) {
-            toast.error('Contact number is required for residents.')
-            return
-        }
         if (passwordMode === 'manual' && form.password.length < 8) {
             toast.error('Password too short! must be at least 8 characters long!')
             return
@@ -97,7 +79,6 @@ const AddUser = () => {
                 ...(passwordMode === 'manual' ? { password: form.password } : {}),
                 password_mode: passwordMode,
                 role: form.role,
-                contact_number: normalizedPhone || null,
                 household_number: form.role === 'resident' && form.household_number ? parseInt(form.household_number, 10) : null,
                 zone: form.role === 'resident' && form.zone ? parseInt(form.zone, 10) : null,
                 address: form.role === 'resident' ? form.address : null
@@ -219,7 +200,7 @@ const AddUser = () => {
                                 </div>
                             </div>
 
-                            {/* Row 2: Role | Contact number */}
+                            {/* Row 2: Role */}
                             <div className="grid items-start gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="role" className={labelClass}>Role</Label>
@@ -234,23 +215,6 @@ const AddUser = () => {
                                         <option value="staff">Staff</option>
                                         <option value="admin">Admin</option>
                                     </select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="contact_number" className={labelClass}>Contact number</Label>
-                                    <Input
-                                        id="contact_number"
-                                        name="contact_number"
-                                        type="tel"
-                                        inputMode="tel"
-                                        placeholder="09XXXXXXXXX"
-                                        value={form.contact_number}
-                                        onChange={handleChange}
-                                        className={fieldClass}
-                                        required={isResident}
-                                        maxLength={11}
-                                        minLength={11}
-                                    />
                                 </div>
                             </div>
 

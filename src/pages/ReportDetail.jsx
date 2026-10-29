@@ -113,6 +113,21 @@ const ReportDetail = () => {
         })
     }
 
+    // occurred_on_text is a plain "YYYY-MM-DD" string; build the Date from its parts
+    // so it can't shift a day across timezones. NULL means it happened the day it was filed.
+    const formatOccurredDate = () => {
+        let date
+        if (report.occurred_on_text) {
+            const [year, month, day] = report.occurred_on_text.split('-').map(Number)
+            date = new Date(year, month - 1, day)
+        } else {
+            date = new Date(report.created_at)
+        }
+        return date.toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric',
+        })
+    }
+
     const handleBack = () => {
         console.log('location.state:', location.state)
 
@@ -203,6 +218,12 @@ const ReportDetail = () => {
                                     {new Date(report.created_at).toLocaleDateString('en-US', {
                                         month: 'short', day: 'numeric', year: 'numeric',
                                     })}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-gray-500">When it happened</p>
+                                <p className="font-semibold text-gray-900">
+                                    {formatOccurredDate()} at {formatOccurredTime(report.occurred_at)}
                                 </p>
                             </div>
                             <div className="sm:col-span-2">

@@ -5,7 +5,6 @@ const auditLog = require('../utils/auditLogger');
 const crypto = require('crypto');
 const sendEmail = require('../utils/emailSender');
 const sendVerificationEmail = require('../utils/emailVerification');
-const normalizeContactNumber = require('../utils/contactNumber');
 const {
     authCookieOptions,
     csrfCookieOptions,
@@ -17,23 +16,13 @@ const {
 
 
 exports.register = async (req, res) => {
-    const { name, email, role, household_id, household_number, zone, address, password, contact_number } = req.body;
+    const { name, email, role, household_id, household_number, zone, address, password } = req.body;
     const passwordMode = req.body.password_mode || 'manual';
     const currentUser = req.user;
 
     try {
         if (!['generate', 'manual'].includes(passwordMode)) {
             return res.status(400).json({ message: 'Password mode must be generate or manual.' });
-        }
-
-        const contactNumberPresent = typeof contact_number === 'string' && contact_number.trim() !== '';
-        const normalizedContactNumber = contactNumberPresent ? normalizeContactNumber(contact_number) : null;
-        if (
-            (contact_number != null && typeof contact_number !== 'string') ||
-            (contactNumberPresent && !normalizedContactNumber) ||
-            (role === 'resident' && !normalizedContactNumber)
-        ) {
-            return res.status(400).json({ message: 'Enter a valid Philippine mobile number in the format 09XXXXXXXXX.' });
         }
 
         const [existing] = await db.query(
@@ -110,8 +99,8 @@ exports.register = async (req, res) => {
         }
 
         const [result] = await db.query(
-            'INSERT INTO users(name, email, role, household_id, contact_number, password, email_verified) VALUES (?,?,?,?,?,?,0)',
-            [name, email, role, finalHouseholdId, normalizedContactNumber, hashedPassword]
+            'INSERT INTO users(name, email, role, household_id, password, email_verified) VALUES (?,?,?,?,?,0)',
+            [name, email, role, finalHouseholdId, hashedPassword]
         );
 
         const { emailSent } = await sendVerificationEmail(

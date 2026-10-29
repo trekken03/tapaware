@@ -27,7 +27,6 @@ const EditUser = () => {
     const [form, setForm] = useState({
         name: existingUser?.name || '',
         email: existingUser?.email || '',
-        contact_number: existingUser?.contact_number || '',
         household_number: existingUser?.household_number || '',
         zone: existingUser?.zone || '',
         address: existingUser?.address || ''
@@ -49,13 +48,6 @@ const EditUser = () => {
                 return;
             }
         }
-
-        if (name === "contact_number") {
-
-            if (!/^\d{0,11}$/.test(value)) {
-                return;
-            }
-        }
         setForm({
             ...form, [name]: value
         })
@@ -69,13 +61,6 @@ const EditUser = () => {
     const handleSubmit = (e) => {
         e.preventDefault()
         setError('')
-        const normalizedPhone = form.contact_number.trim().replace(/[\s\-()]/g, '').replace(/^\+?63/, '0')
-        if (form.contact_number.trim() && !/^09\d{9}$/.test(normalizedPhone)) {
-            const message = 'Enter a valid Philippine mobile number in the format 09XXXXXXXXX.'
-            setError(message)
-            toast.error(message)
-            return
-        }
         setConfirmOpen(true)
     }
 
@@ -128,7 +113,6 @@ const EditUser = () => {
     const hasChanges =
         form.name !== (existingUser?.name || '') ||
         form.email !== (existingUser?.email || '') ||
-        form.contact_number !== (existingUser?.contact_number || '') ||
         form.household_number?.toString() !== (existingUser?.household_number?.toString() || '') ||
         form.zone?.toString() !== (existingUser?.zone?.toString() || '') ||
         form.address !== (existingUser?.address || '')
@@ -215,21 +199,6 @@ const EditUser = () => {
                                             Changing this email marks the account as unverified and sends a verification link to the new address. The user cannot log in until they verify it.
                                         </p>
                                     )}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="contact_number">Contact number</Label>
-                                    <Input
-                                        id="contact_number"
-                                        name="contact_number"
-                                        type="tel"
-                                        inputMode="tel"
-                                        placeholder="09XXXXXXXXX"
-                                        value={form.contact_number}
-                                        onChange={handleChange}
-                                        minLength={11}
-                                        maxLength={11}
-                                    />
                                 </div>
 
                                 <div className="space-y-2">
