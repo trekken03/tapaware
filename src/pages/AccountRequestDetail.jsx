@@ -372,7 +372,7 @@ const AccountRequestDetail = () => {
                                             className="h-11 w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white hover:cursor-pointer"
                                             disabled={!checks.can_approve || working}
                                         >
-                                            {needsHousehold ? 'Approve and create household' : 'Approve'}
+                                            {needsHousehold ? 'Approve' : 'Approve'}
                                         </Button>
                                     </ConfirmDialog>
                                     {!checks.can_approve && (
