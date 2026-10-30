@@ -144,6 +144,7 @@ CREATE TABLE account_requests (
     reject_reason VARCHAR(500) NULL,
     created_user_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    review_snapshot TEXT NULL,
     FOREIGN KEY (created_user_id) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_account_requests_status (status),
     INDEX idx_account_requests_email (email)

@@ -112,7 +112,6 @@ const evaluateRequest = async (request, conn = db) => {
     const blockers = [];
     if (request.status !== 'pending') blockers.push(ALREADY_PROCESSED);
     if (household.state === 'occupied') blockers.push('This household already has a resident account.');
-    if (household.state === 'not_found') blockers.push('Household not found. Add it under Households first, then approve.');
     if (household.state === 'archived') blockers.push('That household is archived. Restore it from the Archive first.');
     if (emailCheck.state === 'taken') blockers.push('That email is already registered.');
     if (emailCheck.state === 'archived_account') blockers.push('That email belongs to an archived account. Restore it from the Archive instead.');
@@ -123,9 +122,40 @@ const evaluateRequest = async (request, conn = db) => {
         name_matches_owner: nameMatchesOwner,
         other_pending_for_household: Number(otherPending),
         possible_matches: possibleMatches,
-        can_approve: blockers.length === 0,
+        // A missing household is no longer a blocker: approve can create it,
+        // but only when the admin confirms with create_household === true.
+        can_approve: request.status === 'pending'
+            && emailCheck.state === 'available'
+            && (household.state === 'vacant' || household.state === 'not_found'),
+        needs_household_creation: request.status === 'pending'
+            && household.state === 'not_found'
+            && emailCheck.state === 'available',
         blockers,
     };
+};
+
+// Only these evaluation fields are stored with the decision and sent back from it.
+const SNAPSHOT_FIELDS = [
+    'household', 'email', 'name_matches_owner', 'other_pending_for_household',
+    'possible_matches', 'can_approve', 'needs_household_creation', 'blockers',
+];
+
+const buildSnapshot = (checks, householdCreated) => {
+    const snapshot = {};
+    for (const field of SNAPSHOT_FIELDS) snapshot[field] = checks[field];
+    snapshot.captured_at = new Date().toISOString();
+    snapshot.household_created = householdCreated;
+    return JSON.stringify(snapshot);
+};
+
+const parseSnapshot = (text) => {
+    if (!text) return null;
+    try {
+        const parsed = JSON.parse(text);
+        return parsed && typeof parsed === 'object' && parsed.household && parsed.email ? parsed : null;
+    } catch {
+        return null;
+    }
 };
 
 exports.submitRequest = async (req, res) => {
@@ -215,12 +245,150 @@ exports.getRequestById = async (req, res) => {
             return res.status(404).json({ message: 'Request not found' });
         }
 
-        const checks = await evaluateRequest(request);
-        res.json({ request, checks });
+        // The stored snapshot is internal; only fields parsed from it are sent.
+        const { review_snapshot: reviewSnapshot, ...publicRequest } = request;
+
+        if (request.status === 'pending') {
+            const checks = await evaluateRequest(request);
+            return res.json({ request: publicRequest, checks, checks_source: 'live', checks_as_of: null, household_created: null });
+        }
+
+        // A processed request shows the checks as they were when it was
+        // reviewed; approving changes the data a live evaluation would read.
+        const snapshot = parseSnapshot(reviewSnapshot);
+        if (!snapshot) {
+            return res.json({ request: publicRequest, checks: null, checks_source: 'none', checks_as_of: null, household_created: null });
+        }
+
+        const checks = {};
+        for (const field of SNAPSHOT_FIELDS) checks[field] = snapshot[field];
+        checks.possible_matches = Array.isArray(checks.possible_matches) ? checks.possible_matches : [];
+        checks.blockers = Array.isArray(checks.blockers) ? checks.blockers : [];
+
+        res.json({
+            request: publicRequest,
+            checks,
+            checks_source: 'snapshot',
+            checks_as_of: snapshot.captured_at || null,
+            household_created: snapshot.household_created === true
+        });
     }
     catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// The database part of approve, in one transaction. Returns { error } for an
+// expected refusal, or the approval result; unexpected errors are thrown.
+const runApproval = async (id, currentUser, createHousehold) => {
+    const conn = await db.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        // Lock the request (and the household it points to) so two admins
+        // approving at the same time cannot both succeed.
+        const [[request]] = await conn.query('SELECT * FROM account_requests WHERE id = ? FOR UPDATE', [id]);
+        if (!request) {
+            await conn.rollback();
+            return { error: { status: 404, message: 'Request not found' } };
+        }
+        if (request.status !== 'pending') {
+            await conn.rollback();
+            return { error: { status: 400, message: ALREADY_PROCESSED } };
+        }
+
+        await conn.query(
+            'SELECT id FROM households WHERE household_number = ? AND zone = ? FOR UPDATE',
+            [request.household_number, request.zone]
+        );
+
+        // Taken before anything changes; this is what gets saved with the decision.
+        let checks = await evaluateRequest(request, conn);
+        if (!checks.can_approve) {
+            await conn.rollback();
+            return { error: { status: 400, message: checks.blockers[0] } };
+        }
+        if (checks.household.state === 'not_found' && !createHousehold) {
+            await conn.rollback();
+            return { error: { status: 400, message: 'This household is not in the system yet. Confirm that it should be created.' } };
+        }
+
+        const temporaryPassword = generatePassword();
+        const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+
+        let householdId;
+        let createdHousehold = false;
+        if (checks.household.state === 'not_found') {
+            try {
+                const [newHousehold] = await conn.query(
+                    'INSERT INTO households(household_number, zone, owner_name, address) VALUES (?,?,?,?)',
+                    [request.household_number, request.zone, request.full_name, request.address]
+                );
+                householdId = newHousehold.insertId;
+                createdHousehold = true;
+            } catch (error) {
+                if (error.code !== 'ER_DUP_ENTRY') throw error;
+
+                // Someone else added it a moment ago. Check again against
+                // committed data (this transaction's own reads would not see it).
+                const recheck = await evaluateRequest(request);
+                if (recheck.household.state !== 'vacant' || !recheck.can_approve) {
+                    await conn.rollback();
+                    return { error: { status: 400, message: recheck.blockers[0] || 'This household already has a resident account.' } };
+                }
+                await conn.query('SELECT id FROM households WHERE id = ? FOR UPDATE', [recheck.household.id]);
+                householdId = recheck.household.id;
+                checks = recheck;
+            }
+        } else {
+            householdId = checks.household.id;
+        }
+
+        let newUserId;
+        try {
+            const [result] = await conn.query(
+                'INSERT INTO users(name, email, role, household_id, password, email_verified) VALUES (?,?,?,?,?,0)',
+                [request.full_name, request.email, 'resident', householdId, hashedPassword]
+            );
+            newUserId = result.insertId;
+        } catch (error) {
+            // Never leave behind a household this request created. (The
+            // rollback below would undo it too; this makes it explicit.)
+            if (createdHousehold) {
+                try {
+                    await conn.query('DELETE FROM households WHERE id = ?', [householdId]);
+                } catch (deleteError) {
+                    console.error(deleteError);
+                }
+            }
+            throw error;
+        }
+
+        // A newly created household already has the right owner name.
+        if (!createdHousehold) {
+            await conn.query(
+                'UPDATE households SET owner_name = ? WHERE id = ?',
+                [request.full_name, householdId]
+            );
+        }
+
+        await conn.query(
+            `UPDATE account_requests
+             SET status = 'approved', reviewed_by = ?, reviewed_at = NOW(), created_user_id = ?, review_snapshot = ?
+             WHERE id = ?`,
+            [currentUser.name, newUserId, buildSnapshot(checks, createdHousehold), id]
+        );
+
+        await conn.commit();
+        return { request, newUserId, temporaryPassword, householdId, createdHousehold };
+    }
+    catch (error) {
+        try { await conn.rollback(); } catch (rollbackError) { console.error(rollbackError); }
+        throw error;
+    }
+    finally {
+        conn.release();
     }
 };
 
@@ -230,76 +398,33 @@ exports.approveRequest = async (req, res) => {
         return res.status(400).json({ message: 'Invalid request ID.' });
     }
     const currentUser = req.user;
+    const createHousehold = req.body?.create_household === true;
 
-    let conn;
-    let request;
-    let newUserId;
-    let temporaryPassword;
-
-    try {
-        conn = await db.getConnection();
-        await conn.beginTransaction();
-
-        // Lock the request (and the household it points to) so two admins
-        // approving at the same time cannot both succeed.
-        const [[locked]] = await conn.query('SELECT * FROM account_requests WHERE id = ? FOR UPDATE', [id]);
-        if (!locked) {
-            await conn.rollback();
-            return res.status(404).json({ message: 'Request not found' });
+    let outcome;
+    // Two approvals creating the same missing household can deadlock on its
+    // key; MySQL rolls one back, and its single retry then sees the other's
+    // household and is blocked by it.
+    for (let attempt = 1; attempt <= 2 && !outcome; attempt += 1) {
+        try {
+            outcome = await runApproval(id, currentUser, createHousehold);
+        } catch (error) {
+            if (error.code === 'ER_LOCK_DEADLOCK' && attempt === 1) continue;
+            if (error.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ message: 'That email is already registered.' });
+            }
+            console.error(error);
+            return res.status(500).json({ message: 'Server error' });
         }
-        if (locked.status !== 'pending') {
-            await conn.rollback();
-            return res.status(400).json({ message: ALREADY_PROCESSED });
-        }
-        request = locked;
-
-        await conn.query(
-            'SELECT id FROM households WHERE household_number = ? AND zone = ? FOR UPDATE',
-            [request.household_number, request.zone]
-        );
-
-        const checks = await evaluateRequest(request, conn);
-        if (!checks.can_approve) {
-            await conn.rollback();
-            return res.status(400).json({ message: checks.blockers[0] });
-        }
-
-        temporaryPassword = generatePassword();
-        const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
-
-        const [result] = await conn.query(
-            'INSERT INTO users(name, email, role, household_id, password, email_verified) VALUES (?,?,?,?,?,0)',
-            [request.full_name, request.email, 'resident', checks.household.id, hashedPassword]
-        );
-        newUserId = result.insertId;
-
-        await conn.query(
-            'UPDATE households SET owner_name = ? WHERE id = ?',
-            [request.full_name, checks.household.id]
-        );
-
-        await conn.query(
-            `UPDATE account_requests
-             SET status = 'approved', reviewed_by = ?, reviewed_at = NOW(), created_user_id = ?
-             WHERE id = ?`,
-            [currentUser.name, newUserId, id]
-        );
-
-        await conn.commit();
     }
-    catch (error) {
-        if (conn) {
-            try { await conn.rollback(); } catch (rollbackError) { console.error(rollbackError); }
-        }
-        if (error.code === 'ER_DUP_ENTRY') {
-            return res.status(400).json({ message: 'That email is already registered.' });
-        }
-        console.error(error);
-        return res.status(500).json({ message: 'Server error' });
+
+    if (outcome.error) {
+        return res.status(outcome.error.status).json({ message: outcome.error.message });
     }
-    finally {
-        if (conn) conn.release();
-    }
+
+    const { request, newUserId, temporaryPassword, householdId, createdHousehold } = outcome;
+    const householdNote = createdHousehold
+        ? ` Household #${request.household_number}, Zone ${request.zone} was created.`
+        : '';
 
     try {
         await auditLog({
@@ -309,9 +434,22 @@ exports.approveRequest = async (req, res) => {
             action: 'APPROVE_ACCOUNT_REQUEST',
             table_affected: 'account_requests',
             record_id: id,
-            details: `Approved account request #${id}: household #${request.household_number}, Zone ${request.zone}, ${request.email} (user #${newUserId})`,
+            details: `Approved account request #${id}: household #${request.household_number}, Zone ${request.zone}, ${request.email} (user #${newUserId})${createdHousehold ? ', household created' : ''}`,
             ip_address: req.ip
         });
+
+        if (createdHousehold) {
+            await auditLog({
+                user_id: currentUser.id,
+                user_name: currentUser.name,
+                user_role: currentUser.role,
+                action: 'ADD_HOUSEHOLD',
+                table_affected: 'households',
+                record_id: householdId,
+                details: `Created from account request #${id}: household ${request.household_number}, zone ${request.zone}`,
+                ip_address: req.ip
+            });
+        }
 
         const { emailSent } = await sendVerificationEmail(
             { id: newUserId, name: request.full_name, email: request.email, role: 'resident' },
@@ -321,19 +459,21 @@ exports.approveRequest = async (req, res) => {
 
         res.json({
             message: emailSent
-                ? `Account created. A verification email with a temporary password was sent to ${request.email}.`
-                : 'The account was created, but the verification email could not be sent. The password was not shown to anyone. Use Resend verification from the Admin Panel and have the user use Forgot password after verifying.',
+                ? `Account created.${householdNote} A verification email with a temporary password was sent to ${request.email}.`
+                : `The account was created, but the verification email could not be sent.${householdNote} The password was not shown to anyone. Use Resend verification from the Admin Panel and have the user use Forgot password after verifying.`,
             emailSent,
-            user_id: newUserId
+            user_id: newUserId,
+            household_created: createdHousehold
         });
     }
     catch (error) {
         // The account already exists at this point, so report it as created.
         console.error(error);
         res.json({
-            message: 'The account was created, but the verification email could not be sent. Use Resend verification from the Admin Panel and have the user use Forgot password after verifying.',
+            message: `The account was created, but the verification email could not be sent.${householdNote} Use Resend verification from the Admin Panel and have the user use Forgot password after verifying.`,
             emailSent: false,
-            user_id: newUserId
+            user_id: newUserId,
+            household_created: createdHousehold
         });
     }
 };
@@ -367,12 +507,20 @@ exports.rejectRequest = async (req, res) => {
             return res.status(400).json({ message: ALREADY_PROCESSED });
         }
 
+        // Record the checks as they are now. Rejecting must never fail because of this.
+        let reviewSnapshot = null;
+        try {
+            reviewSnapshot = buildSnapshot(await evaluateRequest(request), false);
+        } catch (error) {
+            console.error('Could not record review checks:', error.message);
+        }
+
         // The status condition makes a second, simultaneous reject a no-op.
         const [result] = await db.query(
             `UPDATE account_requests
-             SET status = 'rejected', reviewed_by = ?, reviewed_at = NOW(), reject_code = ?, reject_reason = ?
+             SET status = 'rejected', reviewed_by = ?, reviewed_at = NOW(), reject_code = ?, reject_reason = ?, review_snapshot = ?
              WHERE id = ? AND status = 'pending'`,
-            [currentUser.name, reasonCode, note || null, id]
+            [currentUser.name, reasonCode, note || null, reviewSnapshot, id]
         );
         if (result.affectedRows === 0) {
             return res.status(400).json({ message: ALREADY_PROCESSED });

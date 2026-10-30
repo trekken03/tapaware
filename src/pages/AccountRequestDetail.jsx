@@ -45,6 +45,7 @@ const CHECK_STYLES = {
     ok: { Icon: CheckCircle2, className: 'text-green-600' },
     bad: { Icon: XCircle, className: 'text-red-600' },
     warn: { Icon: AlertTriangle, className: 'text-amber-600' },
+    info: { Icon: Info, className: 'text-amber-600' },
 }
 
 const CheckLine = ({ tone, children }) => {
@@ -64,7 +65,7 @@ const DetailRow = ({ label, children }) => (
     </div>
 )
 
-const buildChecks = (request, checks) => {
+const buildChecks = (request, checks, householdCreated) => {
     const lines = []
     const { household } = checks
     const where = `Household #${request.household_number}, Zone ${request.zone}`
@@ -81,8 +82,13 @@ const buildChecks = (request, checks) => {
         })
     } else if (household.state === 'archived') {
         lines.push({ tone: 'bad', text: <>{where} is archived. Restore it from the Archive first.</> })
+    } else if (householdCreated) {
+        lines.push({ tone: 'info', text: 'This household was not in the system. It was created when this request was approved.' })
     } else {
-        lines.push({ tone: 'bad', text: <>{where} was not found. Add it under Households first.</> })
+        lines.push({
+            tone: 'warn',
+            text: <>{where} isn't in the system yet. Approving will create it, with the owner name and address from this request.</>,
+        })
     }
 
     if (checks.name_matches_owner === true) {
@@ -146,7 +152,10 @@ const AccountRequestDetail = () => {
     const handleApprove = async () => {
         setWorking(true)
         try {
-            const res = await API.post(`/account-requests/${id}/approve`)
+            const res = await API.post(
+                `/account-requests/${id}/approve`,
+                data?.checks?.needs_household_creation ? { create_household: true } : undefined
+            )
             showResult(res.data)
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to approve the request')
@@ -204,9 +213,11 @@ const AccountRequestDetail = () => {
         )
     }
 
-    const { request, checks } = data
+    const { request, checks, checks_source: checksSource, checks_as_of: checksAsOf, household_created: householdCreated } = data
     const isPending = request.status === 'pending'
-    const checkLines = buildChecks(request, checks)
+    const isSnapshot = checksSource === 'snapshot'
+    const needsHousehold = isPending && checks?.needs_household_creation === true
+    const checkLines = checks ? buildChecks(request, checks, householdCreated === true) : []
     const rejectOption = REJECT_OPTIONS.find(o => o.code === request.reject_code)
     const selectedReject = REJECT_OPTIONS.find(o => o.code === reasonCode)
 
@@ -242,26 +253,42 @@ const AccountRequestDetail = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Checks */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-base font-semibold">
-                                <ListChecks size={18} className="text-blue-600" />
-                                Checks
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <ul className="space-y-3">
-                                {checkLines.map((line, index) => (
-                                    <CheckLine key={index} tone={line.tone}>{line.text}</CheckLine>
-                                ))}
-                            </ul>
-                        </CardContent>
-                    </Card>
+                    {/* Checks: live while pending, saved with the decision afterwards */}
+                    {checks ? (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                                    <ListChecks size={18} className="text-blue-600" />
+                                    {isSnapshot ? 'Checks at time of review' : 'Checks'}
+                                </CardTitle>
+                                {isSnapshot && (
+                                    <div className="space-y-0.5 text-xs text-gray-500">
+                                        {checksAsOf && <p>As of {formatDateTime(checksAsOf)}</p>}
+                                        <p>Recorded when this request was reviewed. Current records may have changed since.</p>
+                                    </div>
+                                )}
+                            </CardHeader>
+                            <CardContent>
+                                <ul className="space-y-3">
+                                    {checkLines.map((line, index) => (
+                                        <CheckLine key={index} tone={line.tone}>{line.text}</CheckLine>
+                                    ))}
+                                </ul>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <Card>
+                            <CardContent className="pt-2">
+                                <p className="text-sm text-gray-500">
+                                    Checks were not recorded for this request (it was reviewed before this record-keeping was added).
+                                </p>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
 
                 {/* Possible matches */}
-                {checks.possible_matches.length > 0 && (
+                {checks && checks.possible_matches.length > 0 && (
                     <Card className="mt-6">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-base font-semibold">
@@ -270,6 +297,12 @@ const AccountRequestDetail = () => {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
+                            {checks.needs_household_creation && (
+                                <div className="mb-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                                    <AlertTriangle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+                                    <p className="min-w-0">Check these before approving. Approving will create a new household if none of them is the right one.</p>
+                                </div>
+                            )}
                             <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200">
                                 {checks.possible_matches.map(match => (
                                     <li key={match.id} className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
@@ -313,16 +346,24 @@ const AccountRequestDetail = () => {
                             <div className="space-y-6">
                                 <div className="flex items-start gap-2 rounded-lg border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">
                                     <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
-                                    <p className="min-w-0 break-words">
-                                        Approving creates a resident account linked to this household, sets the household's owner name to <strong>{request.full_name}</strong>, and emails a temporary password and a verification link to <strong className="break-all">{request.email}</strong>.
-                                    </p>
+                                    {needsHousehold ? (
+                                        <p className="min-w-0 break-words">
+                                            Approving creates a new household (#{request.household_number}, Zone {request.zone}, owner <strong>{request.full_name}</strong>, address {request.address}), a resident account linked to it, and emails a temporary password and a verification link to <strong className="break-all">{request.email}</strong>.
+                                        </p>
+                                    ) : (
+                                        <p className="min-w-0 break-words">
+                                            Approving creates a resident account linked to this household, sets the household's owner name to <strong>{request.full_name}</strong>, and emails a temporary password and a verification link to <strong className="break-all">{request.email}</strong>.
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="flex flex-col gap-2">
                                     <ConfirmDialog
                                         title="Approve this request?"
-                                        description={`This creates an unverified resident account for ${request.full_name}, links it to household #${request.household_number}, Zone ${request.zone}, and emails a temporary password and a verification link to ${request.email}.`}
-                                        actionText="Approve"
+                                        description={needsHousehold
+                                            ? `This household is not in the system. Approving will create Household #${request.household_number}, Zone ${request.zone} and a resident account for ${request.full_name}, and email a temporary password and a verification link to ${request.email}.`
+                                            : `This creates an unverified resident account for ${request.full_name}, links it to household #${request.household_number}, Zone ${request.zone}, and emails a temporary password and a verification link to ${request.email}.`}
+                                        actionText={needsHousehold ? 'Approve and create household' : 'Approve'}
                                         actionVariant="default"
                                         isLoading={working}
                                         onConfirm={handleApprove}
@@ -331,7 +372,7 @@ const AccountRequestDetail = () => {
                                             className="h-11 w-full sm:w-auto bg-blue-900 hover:bg-blue-700 text-white hover:cursor-pointer"
                                             disabled={!checks.can_approve || working}
                                         >
-                                            Approve
+                                            {needsHousehold ? 'Approve and create household' : 'Approve'}
                                         </Button>
                                     </ConfirmDialog>
                                     {!checks.can_approve && (
