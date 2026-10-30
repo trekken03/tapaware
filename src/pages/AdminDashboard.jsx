@@ -6,6 +6,8 @@ import { Droplets, Home, Flag, ClockFading, AlertTriangle, FileText, TrendingUp 
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
+import WeeklyOverview from '@/components/dashboard/WeeklyOverview'
+import ZoneRowDetails from '@/components/dashboard/ZoneRowDetails'
 
 
 const AdminDashboard = () => {
@@ -13,6 +15,7 @@ const AdminDashboard = () => {
     const [flagged, setFlagged] = useState([])
     const [tdsByZone, setTdsByZone] = useState([])
     const [loading, setLoading] = useState(true)
+    const [weekZones, setWeekZones] = useState(null)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -99,6 +102,8 @@ const AdminDashboard = () => {
                     })}
                 </div>
 
+                <WeeklyOverview onZones={setWeekZones} />
+
                 {/* TDS by Zone */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <Card>
@@ -114,27 +119,29 @@ const AdminDashboard = () => {
                             ) : (
                                 <div className="space-y-3">
                                     {tdsByZone.map((item) => (
-                                        <div
-                                            key={item.zone}
-                                            className="flex items-center justify-between pb-3"
-                                        >
-                                            <span className="text-sm font-medium text-gray-700">
-                                                Zone {item.zone}
-                                            </span>
-
-                                            <div className="flex items-center gap-2">
-                                                <span
-                                                    className={`text-lg font-bold ${tdsColors(
-                                                        parseFloat(item.average_tds)
-                                                    )}`}
-                                                >
-                                                    {parseFloat(item.average_tds).toFixed(2)}
+                                        <div key={item.zone}>
+                                            <div
+                                                className="flex items-center justify-between pb-3"
+                                            >
+                                                <span className="text-sm font-medium text-gray-700">
+                                                    Zone {item.zone}
                                                 </span>
 
-                                                <span className="text-xs text-gray-500">
-                                                    ppm
-                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <span
+                                                        className={`text-lg font-bold ${tdsColors(
+                                                            parseFloat(item.average_tds)
+                                                        )}`}
+                                                    >
+                                                        {parseFloat(item.average_tds).toFixed(2)}
+                                                    </span>
+
+                                                    <span className="text-xs text-gray-500">
+                                                        ppm
+                                                    </span>
+                                                </div>
                                             </div>
+                                            <ZoneRowDetails info={weekZones?.find((z) => String(z.zone) === String(item.zone))} />
                                         </div>
                                     ))}
                                 </div>

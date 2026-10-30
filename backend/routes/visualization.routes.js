@@ -15,6 +15,7 @@ router.get('/tds-by-zone', visualizationController.getTdsByZone);
 router.get('/resident/summary', verifyToken, visualizationController.getResidentSummary);
 router.get('/trending-issues', verifyToken, requireRole('admin', 'staff'), visualizationController.getTrendingIssuesByZone);
 router.get('/trending-by-time', verifyToken, requireRole('admin', 'staff'), visualizationController.getTrendingIssuesByTime);
+router.get('/dashboard-week', verifyToken, requireRole('admin', 'staff'), visualizationController.getDashboardWeek);
 
 
 module.exports = router;
