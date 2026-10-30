@@ -5,6 +5,7 @@ const { verifyToken } = require('../middleware/auth.middleware');
 const { requireRole } = require('../middleware/role.middleware');
 const { verifyCsrf } = require('../middleware/csrf.middleware');
 
+router.get('/attention-counts', verifyToken, requireRole('admin'), adminController.getAttentionCounts);
 router.get('/users/archived', verifyToken, requireRole('admin'), adminController.getArchivedUsers);
 router.get('/users', verifyToken, requireRole('admin'), adminController.getAllUsers);
 router.post('/users/:id/resend-verification', verifyToken, verifyCsrf, requireRole('admin'), adminController.resendVerification);

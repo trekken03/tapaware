@@ -166,19 +166,21 @@ exports.submitRequest = async (req, res) => {
         return res.status(201).json({ message: NEUTRAL_MESSAGE });
     }
 
-    const fullName = asText(body.full_name);
+    const fullName = asText(body.full_name).normalize('NFC').replace(/\s+/g, ' ');
     const email = asText(body.email).toLowerCase();
     const householdInput = asText(body.household_number);
     const zoneInput = asText(body.zone);
     const address = asText(body.address);
 
-    if (fullName.length < 2 || fullName.length > 250) {
-        return res.status(400).json({ message: 'Please enter your full name.' });
+    if (fullName.length < 2 || fullName.length > 60
+        || !/^\p{L}[\p{L}\p{M} .'’-]*$/u.test(fullName)
+        || (fullName.match(/\p{L}/gu) || []).length < 2) {
+        return res.status(400).json({ message: 'Enter your full name using letters, spaces, hyphens, apostrophes or periods.' });
     }
     if (!isValidEmail(email) || email.length > 250) {
         return res.status(400).json({ message: 'Please enter a valid email address.' });
     }
-    if (!/^\d{1,6}$/.test(householdInput)) {
+    if (!/^\d{1,3}$/.test(householdInput) || parseInt(householdInput, 10) < 1) {
         return res.status(400).json({ message: 'Please enter a valid household number.' });
     }
     const householdNumber = String(parseInt(householdInput, 10));
