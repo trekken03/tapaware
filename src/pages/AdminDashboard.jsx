@@ -6,6 +6,7 @@ import { Droplets, Home, Flag, ClockFading, AlertTriangle, FileText, TrendingUp 
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
+import WeeklyOverview from '@/components/dashboard/WeeklyOverview'
 
 
 const AdminDashboard = () => {
@@ -98,6 +99,8 @@ const AdminDashboard = () => {
                         )
                     })}
                 </div>
+
+                <WeeklyOverview />
 
                 {/* TDS by Zone */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

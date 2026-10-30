@@ -5,6 +5,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Droplets, Home, Flag, ClockFading, AlertTriangle, FileText, TrendingUp } from 'lucide-react'
 import API from '@/services/api'
 import { useNavigate } from 'react-router-dom'
+import WeeklyOverview from '@/components/dashboard/WeeklyOverview'
 
 const StaffDashboard = () => {
     const [summary, setSummary] = useState(null)
@@ -94,6 +95,8 @@ const StaffDashboard = () => {
                         )
                     })}
                 </div>
+
+                <WeeklyOverview />
 
                 {/* TDS by Zone */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

@@ -1,4 +1,5 @@
 const db = require('../models/db');
+const { getAttentionCounts } = require('../utils/attentionCounts');
 
 exports.getSummary = async (req, res) => {
     try {
@@ -278,6 +279,127 @@ exports.getTrendingIssuesByTime = async (req, res) => {
 
         const [rows] = await db.query(query, params);
         res.json(rows);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Open reports older than this many days count as "needs follow-up".
+const FOLLOW_UP_DAYS = 3;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Manila calendar date as YYYY-MM-DD. Manila has no daylight saving, so stepping
+// back 24 hours always lands on the previous Manila day.
+const manilaDateKey = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit',
+});
+const manilaWeekday = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Manila', weekday: 'short' });
+
+const toDayKey = (value) => {
+    const date = value instanceof Date ? value : new Date(String(value).replace(' ', 'T'));
+    return isNaN(date) ? null : manilaDateKey.format(date);
+};
+
+// Highest count wins; ties go to the lower key in numeric-aware alphabetical order.
+const pickTop = (counts, keyName) => {
+    const entries = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], undefined, { numeric: true }));
+    return entries.length > 0 ? { [keyName]: entries[0][0], count: entries[0][1] } : null;
+};
+
+exports.getDashboardWeek = async (req, res) => {
+    try {
+        const now = new Date();
+        const dayKeys = [];
+        for (let i = 13; i >= 0; i--) {
+            dayKeys.push(manilaDateKey.format(new Date(now.getTime() - i * DAY_MS)));
+        }
+        const previousKeys = new Set(dayKeys.slice(0, 7));
+        const lastKeys = dayKeys.slice(7);
+        const lastKeySet = new Set(lastKeys);
+
+        const [reportRows] = await db.query(
+            `SELECT reports.created_at, reports.issue_type, households.zone
+            FROM reports JOIN households ON reports.household_id = households.id
+            WHERE reports.deleted_at IS NULL AND reports.created_at >= NOW() - INTERVAL 15 DAY`
+        );
+        const [readingRows] = await db.query(
+            `SELECT recorded_at FROM tds_readings
+            WHERE deleted_at IS NULL AND recorded_at >= NOW() - INTERVAL 15 DAY`
+        );
+        const [[followUp]] = await db.query(
+            `SELECT COUNT(*) as count FROM reports
+            WHERE deleted_at IS NULL AND status IN ('pending','investigating')
+            AND created_at < NOW() - INTERVAL ? DAY`,
+            [FOLLOW_UP_DAYS]
+        );
+        // Same query as getSummary, so this always matches the Flagged Households card.
+        const [[flaggedHousehold]] = await db.query(
+            `SELECT COUNT(DISTINCT household_id) as count
+            FROM recurring_flags WHERE status = 'active'`
+        );
+
+        const perDayCounts = Object.fromEntries(lastKeys.map((key) => [key, 0]));
+        const issueCounts = {};
+        const zoneCounts = {};
+        let reportsPrevious = 0;
+        for (const row of reportRows) {
+            const key = toDayKey(row.created_at);
+            if (lastKeySet.has(key)) {
+                perDayCounts[key] += 1;
+                issueCounts[row.issue_type] = (issueCounts[row.issue_type] || 0) + 1;
+                zoneCounts[row.zone] = (zoneCounts[row.zone] || 0) + 1;
+            } else if (previousKeys.has(key)) {
+                reportsPrevious += 1;
+            }
+        }
+
+        const countWindows = (rows, column) => {
+            let last7 = 0;
+            let previous7 = 0;
+            for (const row of rows) {
+                const key = toDayKey(row[column]);
+                if (lastKeySet.has(key)) last7 += 1;
+                else if (previousKeys.has(key)) previous7 += 1;
+            }
+            return { last7, previous7 };
+        };
+
+        const response = {
+            generated_at: now.toISOString(),
+            reports: {
+                last7: lastKeys.reduce((sum, key) => sum + perDayCounts[key], 0),
+                previous7: reportsPrevious,
+                per_day: lastKeys.map((key) => ({
+                    date: key,
+                    label: manilaWeekday.format(new Date(`${key}T12:00:00+08:00`)),
+                    count: perDayCounts[key],
+                })),
+                top_issue: pickTop(issueCounts, 'issue_type'),
+                busiest_zone: pickTop(zoneCounts, 'zone'),
+            },
+            tds_readings: countWindows(readingRows, 'recorded_at'),
+            follow_up: { count: Number(followUp.count), threshold_days: FOLLOW_UP_DAYS },
+            flagged_households: Number(flaggedHousehold.count),
+        };
+
+        if (req.user.role === 'admin') {
+            const [userRows] = await db.query(
+                `SELECT created_at FROM users
+                WHERE deleted_at IS NULL AND created_at >= NOW() - INTERVAL 15 DAY`
+            );
+            const attention = await getAttentionCounts();
+            response.admin = {
+                new_accounts: countWindows(userRows, 'created_at'),
+                concerns_new: attention.concerns_new,
+                account_requests_pending: attention.account_requests_pending,
+            };
+        }
+
+        res.set('Cache-Control', 'no-store');
+        res.json(response);
     }
     catch (error) {
         console.error(error);
