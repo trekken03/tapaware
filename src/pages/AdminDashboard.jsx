@@ -78,32 +78,31 @@ const AdminDashboard = () => {
                     <p className="text-gray-500 mt-1">Barangay Cabalantian Water Quality Overview</p>
                 </div>
 
-                {/* Stat cards: sized by the container, since the sidebar changes the width.
-                    Six in one row only when each card gets about 15.5rem. */}
-                <div className="@container">
-                <div className="grid grid-cols-1 gap-4 mb-8 @[30rem]:grid-cols-2 @[48rem]:grid-cols-3 @[98rem]:grid-cols-6">
-                    {statCards.map((stat) => {
-                        const Icon = stat.icon
-                        return (
-                            <Card key={stat.label} className={`cursor-pointer rounded-xl border ${stat.border} bg-gradient-to-b ${stat.gradient} shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg`} onClick={() => navigate(stat.path)}>
-                                <CardContent className="p-4">
-                                    <div className="flex items-start gap-3">
-                                        <div className={`flex size-11 shrink-0 items-center justify-center rounded-full ${stat.badge}`}>
-                                            <Icon size={20} className="text-white" />
+                {/* Stat cards */}
+                <div>
+                    <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                        {statCards.map((stat) => {
+                            const Icon = stat.icon
+                            return (
+                                <Card key={stat.label} className={`cursor-pointer rounded-xl border ${stat.border} bg-gradient-to-b ${stat.gradient} shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg`} onClick={() => navigate(stat.path)}>
+                                    <CardContent className="p-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className={`flex size-11 shrink-0 items-center justify-center rounded-full ${stat.badge}`}>
+                                                <Icon size={20} className="text-white" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className={`text-sm font-semibold ${stat.titleColor}`}>{stat.label}</p>
+                                                <p className={`mt-1 text-3xl font-bold ${stat.color}`}>
+                                                    {stat.value}
+                                                </p>
+                                                <p className="mt-1 text-xs text-gray-500">{stat.caption}</p>
+                                            </div>
                                         </div>
-                                        <div className="min-w-0">
-                                            <p className={`text-sm font-semibold ${stat.titleColor}`}>{stat.label}</p>
-                                            <p className={`mt-1 text-3xl font-bold ${stat.color}`}>
-                                                {stat.value}
-                                            </p>
-                                            <p className="mt-1 text-xs text-gray-500">{stat.caption}</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )
-                    })}
-                </div>
+                                    </CardContent>
+                                </Card>
+                            )
+                        })}
+                    </div>
                 </div>
 
                 <WeeklyOverview />
