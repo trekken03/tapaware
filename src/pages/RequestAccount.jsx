@@ -19,6 +19,24 @@ const selectClass =
 
 const emptyForm = { full_name: '', email: '', household_number: '', zone: '', address: '', website: '' }
 
+// Same rules the server enforces in accountRequest.controller.
+const NAME_PATTERN = /^\p{L}[\p{L}\p{M} .'’-]*$/u
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const tidyName = (value) => value.normalize('NFC').trim().replace(/\s+/g, ' ')
+const isValidName = (value) => {
+    const name = tidyName(value)
+    return name.length >= 2 && name.length <= 60
+        && NAME_PATTERN.test(name)
+        && (name.match(/\p{L}/gu) || []).length >= 2
+}
+const isValidEmail = (value) => {
+    const email = value.trim()
+    return email.length <= 250 && EMAIL_PATTERN.test(email)
+}
+const isValidHousehold = (value) => /^\d{1,3}$/.test(value) && parseInt(value, 10) >= 1
+const isValidAddress = (value) => value.trim().length >= 5
+const hintClass = 'text-xs text-red-600'
+
 const RequestAccount = () => {
     const navigate = useNavigate();
     const { isAuthenticated, loading: authLoading } = useAuth();
@@ -26,6 +44,7 @@ const RequestAccount = () => {
     const [consent, setConsent] = useState(false);
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [touched, setTouched] = useState({});
 
     useEffect(() => {
         if (!authLoading && isAuthenticated) {
@@ -34,17 +53,39 @@ const RequestAccount = () => {
     }, [authLoading, isAuthenticated, navigate]);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name } = e.target;
+        let { value } = e.target;
 
-        if (name === 'household_number' && !/^\d{0,6}$/.test(value)) {
-            return;
+        if (name === 'household_number') {
+            value = value.replace(/\D/g, '').slice(0, 3);
+        }
+        if (name === 'full_name') {
+            value = value.normalize('NFC')
+                .replace(/[^\p{L}\p{M} .'’-]/gu, '')
+                .replace(/^ +/, '')
+                .replace(/ {2,}/g, ' ')
+                .slice(0, 60);
         }
 
         setForm({ ...form, [name]: value });
     }
 
+    const handleBlur = (e) => {
+        const { name } = e.target;
+        setTouched((prev) => ({ ...prev, [name]: true }));
+    }
+
+    const nameInvalid = !isValidName(form.full_name)
+    const emailInvalid = !isValidEmail(form.email)
+    const householdInvalid = !isValidHousehold(form.household_number)
+    const addressInvalid = !isValidAddress(form.address)
+    const isFormValid = !nameInvalid && !emailInvalid && !householdInvalid
+        && form.zone !== '' && !addressInvalid && consent
+    const submitDisabled = loading || !isFormValid
+
     const handleSubmit = async (e) => {
         e.preventDefault()
+        if (submitDisabled) return
         setLoading(true)
 
         try {
@@ -52,6 +93,7 @@ const RequestAccount = () => {
             setSuccessMessage(res.data.message)
             setForm(emptyForm)
             setConsent(false)
+            setTouched({})
         } catch (err) {
             toast.error(err.response?.data?.message || 'Something went wrong')
         } finally {
@@ -112,12 +154,18 @@ const RequestAccount = () => {
                                             name="full_name"
                                             placeholder="e.g. Juan Dela Cruz"
                                             autoComplete="name"
-                                            maxLength={250}
+                                            maxLength={60}
                                             value={form.full_name}
                                             onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            aria-invalid={touched.full_name && nameInvalid ? true : undefined}
+                                            aria-describedby={touched.full_name && nameInvalid ? 'full_name-hint' : undefined}
                                             className={fieldClass}
                                             required
                                         />
+                                        {touched.full_name && nameInvalid && (
+                                            <p id="full_name-hint" className={hintClass}>Use letters, spaces, hyphens, apostrophes or periods only.</p>
+                                        )}
                                     </div>
 
                                     <div className="grid gap-2 content-start">
@@ -131,9 +179,15 @@ const RequestAccount = () => {
                                             maxLength={250}
                                             value={form.email}
                                             onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            aria-invalid={touched.email && emailInvalid ? true : undefined}
+                                            aria-describedby={touched.email && emailInvalid ? 'email-hint' : undefined}
                                             className={fieldClass}
                                             required
                                         />
+                                        {touched.email && emailInvalid && (
+                                            <p id="email-hint" className={hintClass}>Enter a valid email address.</p>
+                                        )}
                                     </div>
 
                                     <div className="grid gap-2 content-start">
@@ -141,16 +195,21 @@ const RequestAccount = () => {
                                         <Input
                                             id="household_number"
                                             name="household_number"
-                                            type="number"
+                                            type="text"
                                             inputMode="numeric"
-                                            min="1"
+                                            maxLength={3}
                                             placeholder="e.g. 101"
                                             value={form.household_number}
                                             onChange={handleChange}
-                                            aria-describedby="household-help"
+                                            onBlur={handleBlur}
+                                            aria-invalid={touched.household_number && householdInvalid ? true : undefined}
+                                            aria-describedby={touched.household_number && householdInvalid ? 'household-help household_number-hint' : 'household-help'}
                                             className={fieldClass}
                                             required
                                         />
+                                        {touched.household_number && householdInvalid && (
+                                            <p id="household_number-hint" className={hintClass}>Enter 1 to 3 digits.</p>
+                                        )}
                                     </div>
                                     <div className="grid gap-2 content-start">
                                         <Label htmlFor="zone">Zone</Label>
@@ -183,9 +242,15 @@ const RequestAccount = () => {
                                             maxLength={250}
                                             value={form.address}
                                             onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            aria-invalid={touched.address && addressInvalid ? true : undefined}
+                                            aria-describedby={touched.address && addressInvalid ? 'address-hint' : undefined}
                                             className={fieldClass}
                                             required
                                         />
+                                        {touched.address && addressInvalid && (
+                                            <p id="address-hint" className={hintClass}>Enter your street address.</p>
+                                        )}
                                     </div>
 
                                     {/* Honeypot: hidden from people, bots fill it in. */}
@@ -219,11 +284,15 @@ const RequestAccount = () => {
                             <CardFooter className="flex-col gap-2 border-t-0 bg-white p-0 pt-4">
                                 <Button
                                     type="submit"
-                                    className="w-full h-11 bg-blue-900 hover:bg-blue-700 text-white hover:cursor-pointer"
-                                    disabled={loading}
+                                    className="w-full h-11 bg-blue-900 hover:bg-blue-700 text-white hover:cursor-pointer disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-blue-900"
+                                    disabled={submitDisabled}
+                                    aria-describedby={!isFormValid ? 'submit-help' : undefined}
                                 >
                                     {loading ? 'Sending...' : 'Submit request'}
                                 </Button>
+                                {!isFormValid && (
+                                    <p id="submit-help" className="text-xs text-gray-500">Complete all fields to continue.</p>
+                                )}
                                 <Link
                                     to="/login"
                                     className="flex min-h-11 items-center text-sm text-center underline-offset-4 hover:underline hover:cursor-pointer"

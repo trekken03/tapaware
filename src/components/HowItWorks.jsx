@@ -21,6 +21,14 @@ const steps = [
     },
 ]
 
+// Same scroll the navbar's Contact link does on the landing page. The href stays as the fallback.
+const scrollToContact = (e) => {
+    const target = document.getElementById('contact')
+    if (!target) return
+    e.preventDefault()
+    target.scrollIntoView({ behavior: 'smooth' })
+}
+
 const HowItWorks = ({ isLoggedIn }) => (
     <section id="how-it-works" aria-labelledby="how-it-works-heading" className="bg-[#102765] py-20 text-white">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -46,6 +54,7 @@ const HowItWorks = ({ isLoggedIn }) => (
                     No account yet? You can still{' '}
                     <a
                         href="#contact"
+                        onClick={scrollToContact}
                         className="rounded-sm text-white underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                     >
                         send a concern

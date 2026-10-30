@@ -1,6 +1,7 @@
 const db = require('../models/db');
 const auditLog = require('../utils/auditLogger');
 const sendVerificationEmail = require('../utils/emailVerification');
+const { getAttentionCounts } = require('../utils/attentionCounts');
 
 exports.getAllUsers = async (req, res) => {
     try {
@@ -753,6 +754,16 @@ exports.getFlagById = async (req, res) => {
         );
 
         res.json({ ...flag, contributing_reports: contributingReports });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.getAttentionCounts = async (req, res) => {
+    try {
+        res.json(await getAttentionCounts());
     }
     catch (error) {
         console.error(error);

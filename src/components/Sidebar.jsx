@@ -95,6 +95,22 @@ const Sidebar = (props) => {
         }
     };
 
+    // Admin Panel dot: on while any concern is unreviewed or any account request is pending.
+    const [hasAdminAttention, setHasAdminAttention] = useState(false);
+
+    useEffect(() => {
+        if (user?.role !== 'admin') return;
+        let ignore = false;
+        API.get('/admin/attention-counts')
+            .then((res) => {
+                if (ignore) return;
+                const total = Number(res.data?.concerns_new || 0) + Number(res.data?.account_requests_pending || 0);
+                setHasAdminAttention(total > 0);
+            })
+            .catch(() => {});
+        return () => { ignore = true; };
+    }, [user?.role, location.pathname]);
+
     const markReportsSeen = () => {
         localStorage.setItem('reports_last_seen', new Date().toISOString());
         setHasNewReports(false);
@@ -178,6 +194,12 @@ const Sidebar = (props) => {
                                         {item.path === '/reports' && hasNewReports && (
                                             <SidebarMenuBadge className="top-1/2! -translate-y-1/2">
                                                 <span className="size-2 rounded-full bg-red-500" />
+                                            </SidebarMenuBadge>
+                                        )}
+                                        {item.path === '/admin' && user?.role === 'admin' && hasAdminAttention && (
+                                            <SidebarMenuBadge className="top-1/2! -translate-y-1/2">
+                                                <span className="size-2 rounded-full bg-red-500" />
+                                                <span className="sr-only">Items waiting for review</span>
                                             </SidebarMenuBadge>
                                         )}
                                     </SidebarMenuItem>
