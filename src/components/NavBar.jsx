@@ -148,6 +148,15 @@ const LandingNavbar = () => {
                         </>
                     )}
 
+                    {!user && !isLoginPage && (
+                        <Button
+                            onClick={() => navigate('/login')}
+                            className="bg-white hover:bg-cyan-50 text-[#143472] rounded-full"
+                        >
+                            Log in
+                        </Button>
+                    )}
+
                     {!user && !isRequestAccountPage && (
                         <Button
                             asChild
@@ -157,14 +166,7 @@ const LandingNavbar = () => {
                         </Button>
                     )}
 
-                    {!user && !isLoginPage && (
-                        <Button
-                            onClick={() => navigate('/login')}
-                            className="bg-white hover:bg-cyan-50 text-[#143472] rounded-full"
-                        >
-                            Log in
-                        </Button>
-                    )}
+
                 </div>
 
                 {/* Mobile toggle */}
@@ -251,6 +253,15 @@ const LandingNavbar = () => {
                             </>
                         )}
 
+                        {!user && !isLoginPage && (
+                            <Button
+                                onClick={() => { setIsOpen(false); navigate('/login') }}
+                                className="mt-2 bg-white hover:bg-cyan-50 text-[#143472] rounded-full"
+                            >
+                                Log in
+                            </Button>
+                        )}
+
                         {!user && !isRequestAccountPage && (
                             <Button
                                 asChild
@@ -260,14 +271,7 @@ const LandingNavbar = () => {
                             </Button>
                         )}
 
-                        {!user && !isLoginPage && (
-                            <Button
-                                onClick={() => { setIsOpen(false); navigate('/login') }}
-                                className="mt-2 bg-white hover:bg-cyan-50 text-[#143472] rounded-full"
-                            >
-                                Log in
-                            </Button>
-                        )}
+
                     </div>
                 </div>
             )}

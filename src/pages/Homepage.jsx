@@ -3,6 +3,7 @@ import LandingNavbar from '@/components/NavBar'
 import FooterLegalLinks from '@/components/legal/FooterLegalLinks'
 import WaterGauge, { getGaugeStatus } from '@/components/WaterGauge'
 import PokeMascot from '@/components/PokeMascot'
+import HowItWorks from '@/components/HowItWorks'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -352,6 +353,8 @@ const Homepage = () => {
                     </div>
                 </div>
             </section>
+
+            <HowItWorks isLoggedIn={!!user} />
 
             {/* ZONE GAUGES */}
             <section id="quality" className="relative overflow-hidden bg-[#e4f5fc] px-0 pb-32 pt-20">
