@@ -13,8 +13,9 @@ import SceneMascot from "@/components/SceneMascot";
 
 // 16px text and 44px height so phones don't zoom in and fingers hit the target.
 const fieldClass = 'h-11 text-base md:text-base'
+// Same box as <Input>: height, border, radius, background, padding, font size, focus ring.
 const selectClass =
-    'h-11 w-full rounded-lg border border-input bg-transparent px-2.5 text-base outline-none hover:cursor-pointer focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50'
+    'h-11 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base md:text-base transition-colors outline-none hover:cursor-pointer focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50'
 
 const emptyForm = { full_name: '', email: '', household_number: '', zone: '', address: '', website: '' }
 
@@ -69,8 +70,8 @@ const RequestAccount = () => {
             <LandingNavbar />
 
             <div className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center px-4 pt-24 pb-10">
-                <Card className="pointer-events-auto w-100 max-w-sm bg-white shadow-lg ">
-                    <div className="flex flex-col items-center mb-2 px-4">
+                <Card className="pointer-events-auto w-full sm:max-w-[34rem] bg-white shadow-lg p-6 sm:p-8 has-data-[slot=card-footer]:pb-6 sm:has-data-[slot=card-footer]:pb-8">
+                    <div className="flex flex-col items-center mb-2">
                         <div className="flex items-center justify-center gap-2">
                             <img
                                 src="/assets/logo.webp"
@@ -88,7 +89,7 @@ const RequestAccount = () => {
                     </div>
 
                     {successMessage ? (
-                        <CardContent className="pb-2">
+                        <CardContent className="px-0 pb-2">
                             <div className="flex flex-col items-center gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-5 text-center text-green-800">
                                 <MailCheck size={28} aria-hidden="true" />
                                 <p className="text-sm leading-relaxed">{successMessage}</p>
@@ -102,9 +103,9 @@ const RequestAccount = () => {
                         </CardContent>
                     ) : (
                         <form onSubmit={handleSubmit}>
-                            <CardContent>
-                                <div className="flex flex-col gap-4">
-                                    <div className="grid gap-2">
+                            <CardContent className="px-0">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div className="grid gap-2 content-start">
                                         <Label htmlFor="full_name">Full name</Label>
                                         <Input
                                             id="full_name"
@@ -119,7 +120,7 @@ const RequestAccount = () => {
                                         />
                                     </div>
 
-                                    <div className="grid gap-2">
+                                    <div className="grid gap-2 content-start">
                                         <Label htmlFor="email">Email address</Label>
                                         <Input
                                             id="email"
@@ -135,46 +136,44 @@ const RequestAccount = () => {
                                         />
                                     </div>
 
-                                    <div className="grid gap-4 grid-cols-2">
-                                        <div className="grid gap-2 content-start">
-                                            <Label htmlFor="household_number">Household number</Label>
-                                            <Input
-                                                id="household_number"
-                                                name="household_number"
-                                                type="number"
-                                                inputMode="numeric"
-                                                min="1"
-                                                placeholder="e.g. 101"
-                                                value={form.household_number}
-                                                onChange={handleChange}
-                                                aria-describedby="household-help"
-                                                className={fieldClass}
-                                                required
-                                            />
-                                        </div>
-                                        <div className="grid gap-2 content-start">
-                                            <Label htmlFor="zone">Zone</Label>
-                                            <select
-                                                id="zone"
-                                                name="zone"
-                                                value={form.zone}
-                                                onChange={handleChange}
-                                                aria-describedby="household-help"
-                                                className={selectClass}
-                                                required
-                                            >
-                                                <option value="">Select zone...</option>
-                                                {[1, 2, 3, 4, 5, 6].map(p => (
-                                                    <option key={p} value={p}>{p}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <p id="household-help" className="col-span-2 -mt-2 text-xs text-gray-500">
-                                            Enter them exactly as the barangay recorded them.
-                                        </p>
+                                    <div className="grid gap-2 content-start">
+                                        <Label htmlFor="household_number">Household number</Label>
+                                        <Input
+                                            id="household_number"
+                                            name="household_number"
+                                            type="number"
+                                            inputMode="numeric"
+                                            min="1"
+                                            placeholder="e.g. 101"
+                                            value={form.household_number}
+                                            onChange={handleChange}
+                                            aria-describedby="household-help"
+                                            className={fieldClass}
+                                            required
+                                        />
                                     </div>
+                                    <div className="grid gap-2 content-start">
+                                        <Label htmlFor="zone">Zone</Label>
+                                        <select
+                                            id="zone"
+                                            name="zone"
+                                            value={form.zone}
+                                            onChange={handleChange}
+                                            aria-describedby="household-help"
+                                            className={`${selectClass} ${form.zone === '' ? 'text-muted-foreground' : 'text-foreground'}`}
+                                            required
+                                        >
+                                            <option value="">Select zone...</option>
+                                            {[1, 2, 3, 4, 5, 6].map(p => (
+                                                <option key={p} value={p} className="text-foreground">{p}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <p id="household-help" className="sm:col-span-2 -mt-2 text-xs text-gray-500">
+                                        Enter them exactly as the barangay recorded them.
+                                    </p>
 
-                                    <div className="grid gap-2">
+                                    <div className="grid gap-2 sm:col-span-2">
                                         <Label htmlFor="address">Street address</Label>
                                         <Input
                                             id="address"
@@ -203,7 +202,7 @@ const RequestAccount = () => {
                                         />
                                     </div>
 
-                                    <label htmlFor="consent" className="flex min-h-11 items-start gap-3 text-sm text-gray-700 hover:cursor-pointer">
+                                    <label htmlFor="consent" className="sm:col-span-2 flex min-h-11 items-start gap-3 text-sm text-gray-700 hover:cursor-pointer">
                                         <input
                                             id="consent"
                                             type="checkbox"
@@ -217,7 +216,7 @@ const RequestAccount = () => {
                                 </div>
                             </CardContent>
 
-                            <CardFooter className="flex-col gap-2 border-t-0 bg-white">
+                            <CardFooter className="flex-col gap-2 border-t-0 bg-white p-0 pt-4">
                                 <Button
                                     type="submit"
                                     className="w-full h-11 bg-blue-900 hover:bg-blue-700 text-white hover:cursor-pointer"

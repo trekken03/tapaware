@@ -217,7 +217,7 @@ const AccountRequestDetail = () => {
 
                 <div className="grid gap-6 lg:grid-cols-2 ">
                     {/* Request */}
-                    <Card className="bg-black">
+                    <Card >
                         <CardHeader>
                             <div className="flex items-start justify-between gap-3 ">
                                 <CardTitle className="flex min-w-0 items-center gap-2 text-lg font-bold text-gray-900">
