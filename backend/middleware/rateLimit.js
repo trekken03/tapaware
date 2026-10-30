@@ -63,4 +63,10 @@ const concernLimiter = rateLimit({
     handler: logAndRespond('CONCERN_RATE_LIMIT_EXCEEDED', (req) => req.body?.name || 'Anonymous', 60 * 60 * 1000)
 });
 
-module.exports = { loginLimiter, forgotPasswordLimiter, verifyEmailLimiter, concernLimiter };
+const accountRequestLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 3,
+    message: { message: 'Too many requests from this device, please try again later' }
+});
+
+module.exports = { loginLimiter, forgotPasswordLimiter, verifyEmailLimiter, concernLimiter, accountRequestLimiter };

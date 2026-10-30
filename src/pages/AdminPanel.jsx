@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { Pagination } from '@/components/ui/pagination'
-import { Users, Flag, Plus, Search, Pencil, MessageSquare, UserStar, Trash2, ChevronDown } from 'lucide-react'
+import { Users, Flag, Plus, Search, Pencil, MessageSquare, UserStar, Trash2, ChevronDown, UserPlus } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
@@ -20,7 +20,23 @@ const formatDate = (date) => new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
 })
 
+const REQUEST_FILTERS = [
+    { key: 'pending', label: 'Pending' },
+    { key: 'approved', label: 'Approved' },
+    { key: 'rejected', label: 'Rejected' },
+    { key: 'all', label: 'All' },
+]
+
+const requestStatusClass = (status) => ({
+    pending: 'bg-amber-100 text-amber-800',
+    approved: 'bg-green-100 text-green-700',
+    rejected: 'bg-red-100 text-red-700',
+}[status] || 'bg-gray-100 text-gray-700')
+
 const AdminPanel = () => {
+    const [accountRequests, setAccountRequests] = useState([])
+    const [pendingRequestCount, setPendingRequestCount] = useState(0)
+    const [requestFilter, setRequestFilter] = useState('pending')
     const [users, setUsers] = useState([])
     const [flagged, setFlagged] = useState([])
     const [concerns, setConcerns] = useState([])
@@ -37,7 +53,19 @@ const AdminPanel = () => {
 
     useEffect(() => {
         fetchData()
+        fetchAccountRequests()
     }, [])
+
+    // Kept apart from fetchData so a failure here never breaks the other tabs.
+    const fetchAccountRequests = async () => {
+        try {
+            const res = await API.get('/account-requests')
+            setAccountRequests(res.data.requests || [])
+            setPendingRequestCount(Number(res.data.pending_count) || 0)
+        } catch (error) {
+            console.log('Error fetching account requests:', error)
+        }
+    }
 
     const fetchData = async () => {
         try {
@@ -182,6 +210,9 @@ const AdminPanel = () => {
     const filteredResidents = users.filter(u => u.role === 'resident' && matchesSearch(u))
     const filteredStaff = users.filter(u => u.role === 'staff' && matchesSearch(u))
     const filteredAdmin = users.filter(u => u.role === 'admin' && matchesSearch(u))
+    const filteredRequests = requestFilter === 'all'
+        ? accountRequests
+        : accountRequests.filter(r => r.status === requestFilter)
 
     // One page state serves every tab, since only one table is on screen at a time.
     const rowsForTab = {
@@ -190,6 +221,7 @@ const AdminPanel = () => {
         admin: filteredAdmin,
         flagged,
         concerns,
+        requests: filteredRequests,
     }[activeTab] || []
 
     const totalPages = Math.max(1, Math.ceil(rowsForTab.length / PAGE_SIZE))
@@ -200,6 +232,10 @@ const AdminPanel = () => {
     useEffect(() => {
         setCurrentPage(1)
     }, [searchTerm, activeTab])
+
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [requestFilter])
 
     useEffect(() => {
         if (currentPage > totalPages) {
@@ -300,6 +336,7 @@ const AdminPanel = () => {
                                 { key: 'admin', label: 'Admin Management' },
                                 { key: 'flagged', label: 'Flagged Households' },
                                 { key: 'concerns', label: 'Concerns' },
+                                { key: 'requests', label: pendingRequestCount > 0 ? `Account Requests (${pendingRequestCount})` : 'Account Requests' },
 
                             ].map(tab => (
                                 <option key={tab.key} value={tab.key}>{tab.label}</option>
@@ -316,6 +353,7 @@ const AdminPanel = () => {
                             { key: 'admin', label: 'Admin Management', icon: UserStar },
                             { key: 'flagged', label: 'Flagged Households', icon: Flag },
                             { key: 'concerns', label: 'Concerns', icon: MessageSquare },
+                            { key: 'requests', label: 'Account Requests', icon: UserPlus },
 
                         ].map(tab => {
                             const Icon = tab.icon
@@ -330,6 +368,11 @@ const AdminPanel = () => {
                                 >
                                     <Icon size={16} />
                                     {tab.label}
+                                    {tab.key === 'requests' && pendingRequestCount > 0 && (
+                                        <span className="rounded-full bg-amber-400 px-2 py-0.5 text-xs font-semibold text-amber-950">
+                                            {pendingRequestCount}
+                                        </span>
+                                    )}
                                 </button>
                             )
                         })}
@@ -664,6 +707,79 @@ const AdminPanel = () => {
                                                         </span>
                                                     </TableCell>
                                                     <TableCell label="Date" className="whitespace-nowrap">{formatDate(c.created_at)}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                    {paginationRow}
+                                </>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Account Requests tab */}
+                {activeTab === 'requests' && (
+                    <Card className="bg-white/80">
+                        <CardHeader>
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <CardTitle className="flex items-center gap-2">
+                                    <UserPlus size={20} className="text-blue-600" />
+                                    Account Requests ({filteredRequests.length})
+                                </CardTitle>
+                                <div className="flex flex-wrap gap-2">
+                                    {REQUEST_FILTERS.map(f => (
+                                        <button
+                                            key={f.key}
+                                            type="button"
+                                            onClick={() => setRequestFilter(f.key)}
+                                            className={`min-h-9 rounded-lg border px-3 py-1.5 text-sm font-medium hover:cursor-pointer transition-colors ${requestFilter === f.key
+                                                ? 'border-blue-900 bg-blue-900 text-white'
+                                                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {filteredRequests.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <UserPlus size={48} className="text-gray-300 mx-auto mb-4" />
+                                    <p className="text-gray-500">No requests.</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <Table className="md:min-w-[760px]">
+                                        <TableHeader className="bg-blue-800">
+                                            <TableRow>
+                                                <TableHead>No.</TableHead>
+                                                <TableHead>Name</TableHead>
+                                                <TableHead>Household</TableHead>
+                                                <TableHead>Zone</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Submitted</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {paginatedRows.map((r, index) => (
+                                                <TableRow
+                                                    key={r.id}
+                                                    className="cursor-pointer hover:bg-gray-50"
+                                                    onClick={() => navigate(`/admin/account-requests/${r.id}`)}
+                                                >
+                                                    <TableCell label="No.">{rowNumber(index)}</TableCell>
+                                                    <TableCell label="Name" className="font-semibold break-words">{r.full_name}</TableCell>
+                                                    <TableCell label="Household">#{r.household_number}</TableCell>
+                                                    <TableCell label="Zone">Zone {r.zone}</TableCell>
+                                                    <TableCell label="Status">
+                                                        <span className={`inline-block px-2 py-1 text-xs font-semibold capitalize ${requestStatusClass(r.status)}`}>
+                                                            {r.status}
+                                                        </span>
+                                                    </TableCell>
+                                                    <TableCell label="Submitted" className="whitespace-nowrap">{formatDate(r.created_at)}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
