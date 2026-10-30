@@ -157,6 +157,11 @@ const Login = () => {
                         </Button>
                     </CardFooter>
                 </form>
+                <Link
+                    to="/request-account"
+                    className="text-center inline-block text-sm underline-offset-4 hover:underline pb-4">
+                    Don't have an account? Request one
+                </Link>
             </Card>
 
         </div>

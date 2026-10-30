@@ -32,6 +32,7 @@ const sendVerificationEmail = async (user, temporaryPassword, variant = 'registe
         const safeEmail = escapeHtml(user.email);
         const safeLink = escapeHtml(verificationLink);
         const emailChanged = variant === 'email_changed';
+        const requestApproved = variant === 'request_approved';
         const temporaryPasswordSection = temporaryPassword
             ? `<div style="margin:0 0 24px;padding:16px;background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;">
                         <p style="margin:0 0 8px;line-height:1.5;font-weight:bold;">Your temporary password:</p>
@@ -48,7 +49,10 @@ const sendVerificationEmail = async (user, temporaryPassword, variant = 'registe
                         <h1 style="margin:0 0 20px;color:#0a1a33;font-size:24px;">${emailChanged ? 'Verify your new TapAware email' : 'Verify your TapAware account'}</h1>
                         ${emailChanged
                             ? `<p style="margin:0 0 16px;line-height:1.5;">Hello ${safeName}, an administrator changed the email address on your TapAware account to <strong>${safeEmail}</strong>. Please verify it to keep using your account. From now on, log in with this email address.</p>`
-                            : `<p style="margin:0 0 16px;line-height:1.5;">Hello ${safeName}, an account has been registered under your email in TapAware.</p>`}
+                            : requestApproved
+                                ? `<p style="margin:0 0 16px;line-height:1.5;">Hello ${safeName}, Barangay Cabalantian approved your TapAware account request.</p>
+                        <p style="margin:0 0 16px;line-height:1.5;">Verify your email with the button below first. You can only log in after verifying. Then log in with <strong>${safeEmail}</strong> and the temporary password below, and change the password right away in My Account.</p>`
+                                : `<p style="margin:0 0 16px;line-height:1.5;">Hello ${safeName}, an account has been registered under your email in TapAware.</p>`}
                         <p style="margin:0 0 24px;line-height:1.5;">Account role: <strong>${safeRole}</strong></p>
                         ${temporaryPasswordSection}
                         <p style="margin:0 0 24px;">

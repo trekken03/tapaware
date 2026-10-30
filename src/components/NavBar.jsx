@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Droplets, Menu, X, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { toast } from 'sonner'
@@ -21,6 +21,7 @@ const LandingNavbar = () => {
 
     const isLoginPage = location.pathname === '/login'
     const isOnLanding = location.pathname === '/'
+    const isRequestAccountPage = location.pathname === '/request-account'
     const isStaffOrAdmin = user?.role === 'staff' || user?.role === 'admin'
     const isResident = user?.role === 'resident'
 
@@ -147,6 +148,15 @@ const LandingNavbar = () => {
                         </>
                     )}
 
+                    {!user && !isRequestAccountPage && (
+                        <Button
+                            asChild
+                            className="rounded-full  bg-white text-[#143472] hover:bg-cyan-50 hover:cursor-pointer"
+                        >
+                            <Link to="/request-account">Request account</Link>
+                        </Button>
+                    )}
+
                     {!user && !isLoginPage && (
                         <Button
                             onClick={() => navigate('/login')}
@@ -241,10 +251,19 @@ const LandingNavbar = () => {
                             </>
                         )}
 
+                        {!user && !isRequestAccountPage && (
+                            <Button
+                                asChild
+                                className="mt-2 w-full rounded-full border-white/70 bg-white text-[#143472] hover:bg-cyan-50 hover:cursor-pointer"
+                            >
+                                <Link to="/request-account" onClick={() => setIsOpen(false)}>Request account</Link>
+                            </Button>
+                        )}
+
                         {!user && !isLoginPage && (
                             <Button
                                 onClick={() => { setIsOpen(false); navigate('/login') }}
-                                className="mt-2 bg-white hover:bg-cyan-50 text-[#143472]"
+                                className="mt-2 bg-white hover:bg-cyan-50 text-[#143472] rounded-full"
                             >
                                 Log in
                             </Button>

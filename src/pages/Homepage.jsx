@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Droplets, MapPin, Send, Mail, Users, ArrowDown, ChevronDown } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
 
@@ -252,6 +252,17 @@ const Homepage = () => {
                                 </Button>
                             )}
                         </div>
+
+                        {!user && (
+                            <p className="mt-5 text-sm">
+                                <Link
+                                    to="/request-account"
+                                    className="rounded-sm text-white underline-offset-4 [text-shadow:0_1px_3px_rgba(0,0,0,0.6)] hover:underline hover:cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                                >
+                                    Resident of Barangay Cabalantian? Request an account &rarr;
+                                </Link>
+                            </p>
+                        )}
                     </div>
 
                     {/* Right Side */}
@@ -467,6 +478,14 @@ const Homepage = () => {
                                             <Send size={16} />
                                             {submitting ? 'Sending...' : 'Submit Concern'}
                                         </Button>
+                                        <p className="text-center text-xs text-[#4776ae]">
+                                            <Link
+                                                to="/request-account"
+                                                className="rounded-sm underline-offset-4 hover:underline hover:cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#102765]"
+                                            >
+                                                Want to track your reports? Request an account
+                                            </Link>
+                                        </p>
                                     </form>
                                 </CardContent>
                             </Card>

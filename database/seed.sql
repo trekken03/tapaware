@@ -11,6 +11,7 @@ DELETE FROM recurring_flags;
 DELETE FROM reports;
 DELETE FROM tds_readings;
 DELETE FROM concerns;
+DELETE FROM account_requests;
 DELETE FROM users;
 DELETE FROM households;
 
