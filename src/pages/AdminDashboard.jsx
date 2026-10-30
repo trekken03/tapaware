@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
-import { Droplets, Home, Flag, ClockFading, AlertTriangle, FileText, TrendingUp } from 'lucide-react'
+import { Droplets, Home, Flag, ClockFading, AlertTriangle, FileText, TrendingUp, Users } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
@@ -42,6 +42,9 @@ const AdminDashboard = () => {
     const statCards = [
         { label: 'Total Reports', value: summary?.total_reports || 0, icon: FileText, color: 'text-blue-900', titleColor: 'text-blue-800', border: 'border-blue-300', gradient: 'from-white to-blue-100', badge: 'bg-blue-400', caption: 'Total Reports', path: '/reports' },
         { label: 'Total Households', value: summary?.total_households || 0, icon: Home, color: 'text-purple-700', titleColor: 'text-purple-700', border: 'border-purple-400', gradient: 'from-white to-purple-100', badge: 'bg-purple-700', caption: 'Households', path: '/households' },
+        ...(typeof summary?.total_users === 'number'
+            ? [{ label: 'Total Users', value: summary.total_users, icon: Users, color: 'text-teal-800', titleColor: 'text-teal-700', border: 'border-teal-400', gradient: 'from-white to-teal-50', badge: 'bg-teal-600', caption: 'Accounts', path: '/admin' }]
+            : []),
         { label: 'Flagged Households', value: summary?.flagged_households || 0, icon: Flag, color: 'text-red-600', titleColor: 'text-red-600', border: 'border-red-400', gradient: 'from-white to-red-50', badge: 'bg-red-500', caption: 'Households', path: '/admin?tab=flagged' },
         { label: 'Pending Reports', value: summary?.pending_reports || 0, icon: ClockFading, color: 'text-amber-600', titleColor: 'text-amber-600', border: 'border-amber-300', gradient: 'from-white to-amber-100', badge: 'bg-amber-400', caption: 'Reports', path: '/reports?status=pending' },
         { label: 'Average TDS (ppm)', value: summary?.average_tds || 0, icon: Droplets, color: 'text-green-600', titleColor: 'text-green-700', border: 'border-green-400', gradient: 'from-white to-green-100', badge: 'bg-green-600', caption: 'ppm', path: '/visualization' },
@@ -75,8 +78,10 @@ const AdminDashboard = () => {
                     <p className="text-gray-500 mt-1">Barangay Cabalantian Water Quality Overview</p>
                 </div>
 
-                {/* Stat cards */}
-                <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                {/* Stat cards: sized by the container, since the sidebar changes the width.
+                    Six in one row only when each card gets about 15.5rem. */}
+                <div className="@container">
+                <div className="grid grid-cols-1 gap-4 mb-8 @[30rem]:grid-cols-2 @[48rem]:grid-cols-3 @[98rem]:grid-cols-6">
                     {statCards.map((stat) => {
                         const Icon = stat.icon
                         return (
@@ -98,6 +103,7 @@ const AdminDashboard = () => {
                             </Card>
                         )
                     })}
+                </div>
                 </div>
 
                 <WeeklyOverview />

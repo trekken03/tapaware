@@ -87,7 +87,7 @@ const ConcernDetail = () => {
             <Layout>
                 <div className="text-center py-12">
                     <p className="text-gray-500">Concern not found.</p>
-                    <Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
+                    <Button className="mt-4" onClick={() => navigate(-1)}>
                         Back
                     </Button>
                 </div>
@@ -102,7 +102,7 @@ const ConcernDetail = () => {
             <div className="mx-auto w-full">
                 <div className="mb-4 flex items-center justify-between gap-3">
                     <Button
-                        variant="outline"
+
                         size="sm"
                         className="flex items-center gap-1 border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
                         onClick={() => navigate(-1)}
@@ -118,7 +118,7 @@ const ConcernDetail = () => {
                             actionVariant="destructive"
                             onConfirm={handleArchive}
                         >
-                            <Button variant="outline" size="sm" className="flex items-center gap-1 border-red-600 bg-red-600 text-white hover:bg-red-700 hover:text-white">
+                            <Button size="sm" className="flex items-center gap-1 border-red-600 bg-red-600 text-white hover:bg-red-700 hover:text-white">
                                 <ArchiveIcon size={14} />
                                 Archive
                             </Button>

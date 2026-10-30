@@ -1,7 +1,18 @@
 const db = require('../models/db');
+const jwt = require('jsonwebtoken');
 const { getAttentionCounts } = require('../utils/attentionCounts');
 
 exports.getSummary = async (req, res) => {
+    // This route is public (the homepage uses it), so the admin-only total reads the
+    // session cookie here instead of through verifyToken. No or bad token: field is left out.
+    let isAdmin = false;
+    try {
+        const token = req.cookies && req.cookies.token;
+        isAdmin = Boolean(token) && jwt.verify(token, process.env.JWT_SECRET).role === 'admin';
+    } catch (error) {
+        isAdmin = false;
+    }
+
     try {
         const [[totalReports]] = await db.query(
             'SELECT COUNT(*) as count FROM reports WHERE deleted_at IS NULL'
@@ -19,13 +30,21 @@ exports.getSummary = async (req, res) => {
         const [[avgTds]] = await db.query(
             `SELECT AVG(tds_value) as average FROM tds_readings WHERE deleted_at IS NULL`
         );
+        let totalUsers = null;
+        if (isAdmin) {
+            const [[usersCount]] = await db.query(
+                'SELECT COUNT(*) as count FROM users WHERE deleted_at IS NULL'
+            );
+            totalUsers = Number(usersCount.count);
+        }
 
         res.json({
             total_reports: totalReports.count,
             total_households: totalHouseholds.count,
             flagged_households: flaggedHousehold.count,
             pending_reports: pendingReports.count,
-            average_tds: avgTds.average ? parseFloat(avgTds.average).toFixed(2) : 0
+            average_tds: avgTds.average ? parseFloat(avgTds.average).toFixed(2) : 0,
+            ...(isAdmin ? { total_users: totalUsers } : {})
         });
 
     }

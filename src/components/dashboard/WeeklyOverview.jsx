@@ -21,7 +21,7 @@ const issueLabel = (issue) => issue.charAt(0).toUpperCase() + issue.slice(1)
 const TONES = {
     blue: { border: 'border-blue-300', gradient: 'from-white to-blue-100', badge: 'bg-blue-400', title: 'text-blue-800', value: 'text-blue-900' },
     green: { border: 'border-green-400', gradient: 'from-white to-green-100', badge: 'bg-green-600', title: 'text-green-800', value: 'text-green-800' },
-    purple: { border: 'border-purple-400', gradient: 'from-white to-purple-100', badge: 'bg-purple-700', title: 'text-purple-700', value: 'text-purple-700' },
+    teal: { border: 'border-teal-400', gradient: 'from-white to-teal-50', badge: 'bg-teal-600', title: 'text-teal-700', value: 'text-teal-800' },
     amber: { border: 'border-amber-300', gradient: 'from-white to-amber-100', badge: 'bg-amber-400', title: 'text-amber-700', value: 'text-amber-700' },
     gray: { border: 'border-gray-300', gradient: 'from-white to-gray-100', badge: 'bg-gray-500', title: 'text-gray-700', value: 'text-gray-900' },
 }
@@ -37,7 +37,7 @@ const StatTile = ({ icon: Icon, label, value, caption, tag, tone }) => {
                 <div className="min-w-0">
                     <p className={`flex flex-wrap items-center gap-2 text-sm font-semibold ${t.title}`}>
                         {label}
-                        {tag && <span className="rounded-full bg-purple-200 px-2 py-0.5 text-[11px] font-semibold text-purple-900">{tag}</span>}
+                        {tag && <span className="rounded-full bg-teal-200 px-2 py-0.5 text-[11px] font-semibold text-teal-900">{tag}</span>}
                     </p>
                     <p className={`mt-1 text-2xl font-bold ${t.value}`}>{value}</p>
                     <p className="mt-1 text-xs text-gray-600">{caption}</p>
@@ -142,7 +142,7 @@ const WeeklyOverview = () => {
                 <StatTile icon={FileText} tone="blue" label="New reports" value={reports.last7} caption={compareCaption(reports.last7, reports.previous7)} />
                 <StatTile icon={Droplets} tone="green" label="TDS readings" value={readings.last7} caption={compareCaption(readings.last7, readings.previous7)} />
                 {admin && (
-                    <StatTile icon={UserPlus} tone="purple" label="New accounts" tag="Admin" value={admin.new_accounts.last7} caption={compareCaption(admin.new_accounts.last7, admin.new_accounts.previous7)} />
+                    <StatTile icon={UserPlus} tone="teal" label="New accounts" tag="Admin" value={admin.new_accounts.last7} caption={compareCaption(admin.new_accounts.last7, admin.new_accounts.previous7)} />
                 )}
                 <StatTile
                     icon={ClockFading}
