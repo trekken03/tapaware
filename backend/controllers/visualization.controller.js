@@ -340,22 +340,6 @@ exports.getDashboardWeek = async (req, res) => {
             `SELECT COUNT(DISTINCT household_id) as count
             FROM recurring_flags WHERE status = 'active'`
         );
-        // Same query as getTdsByZone (without the date filter).
-        const [zoneRows] = await db.query(
-            `SELECT households.zone,
-            AVG(tds_readings.tds_value) as average_tds,
-            MAX(tds_readings.recorded_at) as last_recorded
-            FROM households
-            LEFT JOIN tds_readings ON households.id = tds_readings.household_id AND tds_readings.deleted_at IS NULL
-            WHERE households.deleted_at IS NULL GROUP BY households.zone ORDER BY households.zone ASC`
-        );
-        const [openRows] = await db.query(
-            `SELECT households.zone, COUNT(*) as count
-            FROM reports JOIN households ON reports.household_id = households.id
-            WHERE reports.deleted_at IS NULL AND households.deleted_at IS NULL
-            AND reports.status IN ('pending','investigating')
-            GROUP BY households.zone`
-        );
 
         const perDayCounts = Object.fromEntries(lastKeys.map((key) => [key, 0]));
         const issueCounts = {};
@@ -383,8 +367,6 @@ exports.getDashboardWeek = async (req, res) => {
             return { last7, previous7 };
         };
 
-        const openByZone = Object.fromEntries(openRows.map((row) => [String(row.zone), Number(row.count)]));
-
         const response = {
             generated_at: now.toISOString(),
             reports: {
@@ -401,12 +383,6 @@ exports.getDashboardWeek = async (req, res) => {
             tds_readings: countWindows(readingRows, 'recorded_at'),
             follow_up: { count: Number(followUp.count), threshold_days: FOLLOW_UP_DAYS },
             flagged_households: Number(flaggedHousehold.count),
-            zones: zoneRows.map((row) => ({
-                zone: row.zone,
-                average_tds: row.average_tds,
-                last_recorded: row.last_recorded,
-                open_reports: openByZone[String(row.zone)] || 0,
-            })),
         };
 
         if (req.user.role === 'admin') {

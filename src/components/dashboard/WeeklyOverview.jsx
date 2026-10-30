@@ -16,23 +16,36 @@ const compareCaption = (last7, previous7) => {
 
 const issueLabel = (issue) => issue.charAt(0).toUpperCase() + issue.slice(1)
 
-const StatTile = ({ icon: Icon, label, value, caption, tag, warning }) => (
-    <div className={`rounded-2xl border p-4 ${warning ? 'border-amber-300 bg-amber-50' : 'border-gray-200 bg-white'}`}>
-        <div className="flex items-start gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-100">
-                <Icon size={18} className="text-blue-700" aria-hidden="true" />
-            </div>
-            <div className="min-w-0">
-                <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-gray-700">
-                    {label}
-                    {tag && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-800">{tag}</span>}
-                </p>
-                <p className="mt-1 text-2xl font-bold text-gray-900">{value}</p>
-                <p className="mt-0.5 text-xs text-gray-600">{caption}</p>
+// Same family as the dashboard's top stat cards (border, gradient, solid badge, colored title),
+// one step smaller. Text shades are darkened where the top row's shade would drop below 4.5:1.
+const TONES = {
+    blue: { border: 'border-blue-300', gradient: 'from-white to-blue-100', badge: 'bg-blue-400', title: 'text-blue-800', value: 'text-blue-900' },
+    green: { border: 'border-green-400', gradient: 'from-white to-green-100', badge: 'bg-green-600', title: 'text-green-800', value: 'text-green-800' },
+    purple: { border: 'border-purple-400', gradient: 'from-white to-purple-100', badge: 'bg-purple-700', title: 'text-purple-700', value: 'text-purple-700' },
+    amber: { border: 'border-amber-300', gradient: 'from-white to-amber-100', badge: 'bg-amber-400', title: 'text-amber-700', value: 'text-amber-700' },
+    gray: { border: 'border-gray-300', gradient: 'from-white to-gray-100', badge: 'bg-gray-500', title: 'text-gray-700', value: 'text-gray-900' },
+}
+
+const StatTile = ({ icon: Icon, label, value, caption, tag, tone }) => {
+    const t = TONES[tone]
+    return (
+        <div className={`rounded-xl border ${t.border} bg-gradient-to-b ${t.gradient} p-3 shadow-sm`}>
+            <div className="flex items-start gap-3">
+                <div className={`flex size-9 shrink-0 items-center justify-center rounded-full ${t.badge}`}>
+                    <Icon size={18} className="text-white" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                    <p className={`flex flex-wrap items-center gap-2 text-sm font-semibold ${t.title}`}>
+                        {label}
+                        {tag && <span className="rounded-full bg-purple-200 px-2 py-0.5 text-[11px] font-semibold text-purple-900">{tag}</span>}
+                    </p>
+                    <p className={`mt-1 text-2xl font-bold ${t.value}`}>{value}</p>
+                    <p className="mt-1 text-xs text-gray-600">{caption}</p>
+                </div>
             </div>
         </div>
-    </div>
-)
+    )
+}
 
 const AttentionRow = ({ icon: Icon, label, count, to }) => {
     const muted = count === 0
@@ -71,9 +84,8 @@ const Skeleton = () => (
     </div>
 )
 
-// Read-only "last 7 days" section for the staff and admin dashboards. It fetches its own
-// data; onZones hands the per-zone details to the dashboard's zone card.
-const WeeklyOverview = ({ onZones }) => {
+// Read-only "last 7 days" section for the staff and admin dashboards. It fetches its own data.
+const WeeklyOverview = () => {
     const { user } = useAuth()
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -85,7 +97,6 @@ const WeeklyOverview = ({ onZones }) => {
             .then((res) => {
                 if (ignore) return
                 setData(res.data)
-                onZones?.(res.data?.zones || null)
             })
             .catch(() => {
                 if (!ignore) setFailed(true)
@@ -94,7 +105,7 @@ const WeeklyOverview = ({ onZones }) => {
                 if (!ignore) setLoading(false)
             })
         return () => { ignore = true }
-    }, [onZones])
+    }, [])
 
     if (loading) return <Skeleton />
     if (failed || !data) {
@@ -115,7 +126,7 @@ const WeeklyOverview = ({ onZones }) => {
 
     const attentionRows = [
         { icon: Flag, label: 'Flagged households', count: data.flagged_households, to: user?.role === 'admin' ? '/admin?tab=flagged' : null },
-        { icon: ClockFading, label: `Reports pending over ${followUp.threshold_days} days`, count: followUp.count, to: '/reports?status=pending' },
+        { icon: ClockFading, label: `Open reports over ${followUp.threshold_days} days`, count: followUp.count, to: '/reports' },
         ...(admin ? [
             { icon: MessageSquare, label: 'New concerns', count: admin.concerns_new, to: '/admin?tab=concerns' },
             { icon: UserPlus, label: 'Account requests waiting', count: admin.account_requests_pending, to: '/admin?tab=requests' },
@@ -128,17 +139,17 @@ const WeeklyOverview = ({ onZones }) => {
             <h2 id="weekly-overview-heading" className="mb-3 text-lg font-semibold text-gray-900">Last 7 days</h2>
 
             <div className="grid grid-cols-[repeat(auto-fit,minmax(11rem,1fr))] gap-4">
-                <StatTile icon={FileText} label="New reports" value={reports.last7} caption={compareCaption(reports.last7, reports.previous7)} />
-                <StatTile icon={Droplets} label="TDS readings" value={readings.last7} caption={compareCaption(readings.last7, readings.previous7)} />
+                <StatTile icon={FileText} tone="blue" label="New reports" value={reports.last7} caption={compareCaption(reports.last7, reports.previous7)} />
+                <StatTile icon={Droplets} tone="green" label="TDS readings" value={readings.last7} caption={compareCaption(readings.last7, readings.previous7)} />
                 {admin && (
-                    <StatTile icon={UserPlus} label="New accounts" tag="Admin" value={admin.new_accounts.last7} caption={compareCaption(admin.new_accounts.last7, admin.new_accounts.previous7)} />
+                    <StatTile icon={UserPlus} tone="purple" label="New accounts" tag="Admin" value={admin.new_accounts.last7} caption={compareCaption(admin.new_accounts.last7, admin.new_accounts.previous7)} />
                 )}
                 <StatTile
                     icon={ClockFading}
+                    tone={followUp.count > 0 ? 'amber' : 'gray'}
                     label="Needs follow-up"
                     value={followUp.count}
                     caption={`Open for over ${followUp.threshold_days} days`}
-                    warning={followUp.count > 0}
                 />
             </div>
 
