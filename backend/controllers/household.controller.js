@@ -1,8 +1,24 @@
 const db = require('../models/db');
 const auditLog = require('../utils/auditLogger');
 
+// A resident's own household, read from the database (never from the request).
+const getOwnHouseholdId = async (userId) => {
+    const [[user]] = await db.query(
+        'SELECT household_id FROM users WHERE id = ? AND deleted_at IS NULL',
+        [userId]
+    );
+    return user?.household_id || null;
+};
+
 exports.getAllHouseholds = async (req, res) => {
     try {
+        // Residents only see their own household (Submit Report looks it up in this list).
+        const isResident = req.user?.role === 'resident';
+        const ownHouseholdId = isResident ? await getOwnHouseholdId(req.user.id) : null;
+        if (isResident && !ownHouseholdId) {
+            return res.json([]);
+        }
+
         const [rows] = await db.query(`
             SELECT h.*,
                 CASE
@@ -18,8 +34,9 @@ exports.getAllHouseholds = async (req, res) => {
                 END AS computed_status
             FROM households h
             WHERE h.deleted_at IS NULL
+            ${isResident ? 'AND h.id = ?' : ''}
             ORDER BY h.created_at DESC
-        `);
+        `, isResident ? [ownHouseholdId] : []);
         res.json(rows);
     }
     catch (error) {
@@ -97,6 +114,14 @@ exports.getHouseholdById = async (req, res) => {
     const { id } = req.params;
 
     try {
+        // A resident may only open their own household; anything else looks like it doesn't exist.
+        if (req.user?.role === 'resident') {
+            const ownHouseholdId = await getOwnHouseholdId(req.user.id);
+            if (!ownHouseholdId || Number(ownHouseholdId) !== Number(id)) {
+                return res.status(404).json({ message: 'Household not found' });
+            }
+        }
+
         const [[household]] = await db.query(
             `SELECT h.*,
                 CASE
