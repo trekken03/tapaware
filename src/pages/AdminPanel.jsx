@@ -5,11 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { Pagination } from '@/components/ui/pagination'
-import { Users, Flag, Plus, Search, Pencil, MessageSquare, UserStar, Trash2, ChevronDown, UserPlus } from 'lucide-react'
+import { Users, Flag, Plus, Search, Pencil, MessageSquare, UserStar, Trash2, ChevronDown, UserPlus, Inbox } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { adminRequestTypeLabel } from '@/constants/adminRequests'
 import { toast } from 'sonner'
 
 const PAGE_SIZE = 10
@@ -33,10 +37,30 @@ const requestStatusClass = (status) => ({
     rejected: 'bg-red-100 text-red-700',
 }[status] || 'bg-gray-100 text-gray-700')
 
+const USER_REQUEST_FILTERS = [
+    { key: 'pending', label: 'Pending' },
+    { key: 'done', label: 'Done' },
+    { key: 'rejected', label: 'Rejected' },
+    { key: 'all', label: 'All' },
+]
+
+const userRequestStatusClass = (status) => ({
+    pending: 'bg-amber-100 text-amber-800',
+    done: 'bg-green-100 text-green-700',
+    rejected: 'bg-red-100 text-red-700',
+}[status] || 'bg-gray-100 text-gray-700')
+
 const AdminPanel = () => {
     const [accountRequests, setAccountRequests] = useState([])
     const [pendingRequestCount, setPendingRequestCount] = useState(0)
     const [requestFilter, setRequestFilter] = useState('pending')
+    const [userRequests, setUserRequests] = useState([])
+    const [pendingUserRequestCount, setPendingUserRequestCount] = useState(0)
+    const [userRequestFilter, setUserRequestFilter] = useState('pending')
+    const [userRequestsError, setUserRequestsError] = useState('')
+    const [reviewTarget, setReviewTarget] = useState(null)
+    const [reviewNote, setReviewNote] = useState('')
+    const [reviewing, setReviewing] = useState(false)
     const [users, setUsers] = useState([])
     const [flagged, setFlagged] = useState([])
     const [concerns, setConcerns] = useState([])
@@ -54,6 +78,7 @@ const AdminPanel = () => {
     useEffect(() => {
         fetchData()
         fetchAccountRequests()
+        fetchUserRequests()
     }, [])
 
     // Kept apart from fetchData so a failure here never breaks the other tabs.
@@ -64,6 +89,42 @@ const AdminPanel = () => {
             setPendingRequestCount(Number(res.data.pending_count) || 0)
         } catch (error) {
             console.log('Error fetching account requests:', error)
+        }
+    }
+
+    // Also kept apart: this tab needs the admin_requests table, which may not exist yet.
+    const fetchUserRequests = async () => {
+        try {
+            const res = await API.get('/admin-requests')
+            setUserRequests(res.data.requests || [])
+            setPendingUserRequestCount(Number(res.data.pending_count) || 0)
+            setUserRequestsError('')
+        } catch (error) {
+            console.log('Error fetching user requests:', error)
+            setUserRequestsError(error.response?.data?.message || 'Failed to load user requests')
+        }
+    }
+
+    const openReview = (request, status) => {
+        setReviewTarget({ request, status })
+        setReviewNote('')
+    }
+
+    const submitReview = async () => {
+        if (!reviewTarget) return
+        setReviewing(true)
+        try {
+            const res = await API.patch(`/admin-requests/${reviewTarget.request.id}`, {
+                status: reviewTarget.status,
+                admin_note: reviewNote,
+            })
+            toast.success(res.data.message)
+            setReviewTarget(null)
+            fetchUserRequests()
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to update the request')
+        } finally {
+            setReviewing(false)
         }
     }
 
@@ -213,6 +274,9 @@ const AdminPanel = () => {
     const filteredRequests = requestFilter === 'all'
         ? accountRequests
         : accountRequests.filter(r => r.status === requestFilter)
+    const filteredUserRequests = userRequestFilter === 'all'
+        ? userRequests
+        : userRequests.filter(r => r.status === userRequestFilter)
 
     // One page state serves every tab, since only one table is on screen at a time.
     const rowsForTab = {
@@ -222,6 +286,7 @@ const AdminPanel = () => {
         flagged,
         concerns,
         requests: filteredRequests,
+        'user-requests': filteredUserRequests,
     }[activeTab] || []
 
     const totalPages = Math.max(1, Math.ceil(rowsForTab.length / PAGE_SIZE))
@@ -235,7 +300,7 @@ const AdminPanel = () => {
 
     useEffect(() => {
         setCurrentPage(1)
-    }, [requestFilter])
+    }, [requestFilter, userRequestFilter])
 
     useEffect(() => {
         if (currentPage > totalPages) {
@@ -337,6 +402,7 @@ const AdminPanel = () => {
                                 { key: 'flagged', label: 'Flagged Households' },
                                 { key: 'concerns', label: 'Concerns' },
                                 { key: 'requests', label: pendingRequestCount > 0 ? `Account Requests (${pendingRequestCount})` : 'Account Requests' },
+                            { key: 'user-requests', label: pendingUserRequestCount > 0 ? `User Requests (${pendingUserRequestCount})` : 'User Requests' },
 
                             ].map(tab => (
                                 <option key={tab.key} value={tab.key}>{tab.label}</option>
@@ -354,6 +420,7 @@ const AdminPanel = () => {
                             { key: 'flagged', label: 'Flagged Households', icon: Flag },
                             { key: 'concerns', label: 'Concerns', icon: MessageSquare },
                             { key: 'requests', label: 'Account Requests', icon: UserPlus },
+                            { key: 'user-requests', label: 'User Requests', icon: Inbox },
 
                         ].map(tab => {
                             const Icon = tab.icon
@@ -371,6 +438,11 @@ const AdminPanel = () => {
                                     {tab.key === 'requests' && pendingRequestCount > 0 && (
                                         <span className="rounded-full bg-amber-400 px-2 py-0.5 text-xs font-semibold text-amber-950">
                                             {pendingRequestCount}
+                                        </span>
+                                    )}
+                                    {tab.key === 'user-requests' && pendingUserRequestCount > 0 && (
+                                        <span className="rounded-full bg-amber-400 px-2 py-0.5 text-xs font-semibold text-amber-950">
+                                            {pendingUserRequestCount}
                                         </span>
                                     )}
                                 </button>
@@ -791,7 +863,160 @@ const AdminPanel = () => {
                     </Card>
                 )}
 
+                {/* User Requests tab ("Contact an admin" from Profile) */}
+                {activeTab === 'user-requests' && (
+                    <Card className="bg-white/80">
+                        <CardHeader>
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <CardTitle className="flex items-center gap-2">
+                                    <Inbox size={20} className="text-blue-600" />
+                                    User Requests ({filteredUserRequests.length})
+                                </CardTitle>
+                                <div className="flex flex-wrap gap-2">
+                                    {USER_REQUEST_FILTERS.map(f => (
+                                        <button
+                                            key={f.key}
+                                            type="button"
+                                            onClick={() => setUserRequestFilter(f.key)}
+                                            className={`min-h-9 rounded-lg border px-3 py-1.5 text-sm font-medium hover:cursor-pointer transition-colors ${userRequestFilter === f.key
+                                                ? 'border-blue-900 bg-blue-900 text-white'
+                                                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {userRequestsError ? (
+                                <div className="text-center py-12">
+                                    <Inbox size={48} className="text-gray-300 mx-auto mb-4" />
+                                    <p className="text-gray-500">{userRequestsError}</p>
+                                </div>
+                            ) : filteredUserRequests.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <Inbox size={48} className="text-gray-300 mx-auto mb-4" />
+                                    <p className="text-gray-500">No requests.</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <Table className="md:min-w-[960px]">
+                                        <TableHeader className="bg-blue-800">
+                                            <TableRow>
+                                                <TableHead>No.</TableHead>
+                                                <TableHead>Requester</TableHead>
+                                                <TableHead>Household</TableHead>
+                                                <TableHead>Request</TableHead>
+                                                <TableHead>Reason</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Submitted</TableHead>
+                                                <TableHead>Actions</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {paginatedRows.map((r, index) => (
+                                                <TableRow key={r.id}>
+                                                    <TableCell label="No.">{rowNumber(index)}</TableCell>
+                                                    <TableCell label="Requester">
+                                                        <p className="font-semibold break-words">{r.user_name}</p>
+                                                        <p className="text-xs text-gray-500 break-all">{r.user_email}</p>
+                                                    </TableCell>
+                                                    <TableCell label="Household">
+                                                        {r.household_number ? `#${r.household_number}, Zone ${r.zone}` : '—'}
+                                                    </TableCell>
+                                                    <TableCell label="Request">
+                                                        <p className="font-medium">{adminRequestTypeLabel(r.request_type)}</p>
+                                                        {r.requested_value && (
+                                                            <p className="text-xs text-gray-500 break-words">To: {r.requested_value}</p>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell label="Reason" className="max-w-[280px] whitespace-normal break-words">{r.reason}</TableCell>
+                                                    <TableCell label="Status">
+                                                        <span className={`inline-block px-2 py-1 text-xs font-semibold capitalize ${userRequestStatusClass(r.status)}`}>
+                                                            {r.status}
+                                                        </span>
+                                                        {r.admin_note && (
+                                                            <p className="mt-1 text-xs text-gray-500 break-words">Note: {r.admin_note}</p>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell label="Submitted" className="whitespace-nowrap">{formatDate(r.created_at)}</TableCell>
+                                                    <TableCell label="Actions">
+                                                        {r.status === 'pending' ? (
+                                                            <div className="flex flex-wrap items-center gap-1 sm:flex-nowrap sm:gap-2">
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    className="h-7 px-2 text-xs text-green-700 border-green-300 hover:bg-green-50 sm:h-9 sm:px-3 sm:text-sm"
+                                                                    onClick={() => openReview(r, 'done')}
+                                                                >
+                                                                    Done
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    className="h-7 px-2 text-xs text-red-600 border-red-200 hover:bg-red-50 sm:h-9 sm:px-3 sm:text-sm"
+                                                                    onClick={() => openReview(r, 'rejected')}
+                                                                >
+                                                                    Reject
+                                                                </Button>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-xs text-gray-500">
+                                                                {r.reviewed_by_name ? `By ${r.reviewed_by_name}` : '—'}
+                                                            </span>
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                    {paginationRow}
+                                </>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
+
             </div>
+            <Dialog open={reviewTarget !== null} onOpenChange={(open) => !open && !reviewing && setReviewTarget(null)}>
+                <DialogContent className="bg-white">
+                    <DialogHeader>
+                        <DialogTitle className="font-semibold">
+                            {reviewTarget?.status === 'done' ? 'Mark request as done?' : 'Reject request?'}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {reviewTarget?.status === 'done'
+                                ? 'This only records the decision. Make the actual change to the account through Edit User.'
+                                : 'The account will not be changed.'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-2">
+                        <Label htmlFor="review_note">Note (optional)</Label>
+                        <Textarea
+                            id="review_note"
+                            value={reviewNote}
+                            onChange={(e) => setReviewNote(e.target.value)}
+                            rows={3}
+                            maxLength={500}
+                        />
+                    </div>
+                    <DialogFooter className="bg-white">
+                        <Button type="button" variant="outline" disabled={reviewing} onClick={() => setReviewTarget(null)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            variant={reviewTarget?.status === 'done' ? 'default' : 'destructive'}
+                            disabled={reviewing}
+                            onClick={submitReview}
+                        >
+                            {reviewing ? 'Saving...' : reviewTarget?.status === 'done' ? 'Mark as done' : 'Reject'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             <ConfirmDialog
                 open={actionConfirmOpen}
                 onOpenChange={(open) => {

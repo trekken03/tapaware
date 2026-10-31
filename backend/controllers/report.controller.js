@@ -152,6 +152,21 @@ exports.submitReport = async (req, res) => {
     const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     const finalOccurredTime = occurred_time || currentTime;
 
+        // One open report per household and issue type; a new one is allowed once it is resolved.
+        const [[openReport]] = await db.query(
+            `SELECT id FROM reports
+             WHERE household_id = ? AND issue_type = ? AND deleted_at IS NULL AND status <> 'resolved'
+             ORDER BY created_at DESC LIMIT 1`,
+            [household_id, normalizedIssueType]
+        );
+        if (openReport) {
+            return res.status(409).json({
+                code: 'OPEN_REPORT_EXISTS',
+                message: 'You already have an open report for this issue. You can submit again once it is resolved.',
+                existingReportId: openReport.id
+            });
+        }
+
         const [result] = await db.query(
             `INSERT INTO reports
         (household_id, user_id, issue_type, other_issue, description, occurred_at, occurred_on)

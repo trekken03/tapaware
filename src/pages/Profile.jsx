@@ -1,18 +1,21 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { User, Save, KeyRound, ArrowLeft, Home, MapPin, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { toast } from 'sonner'
+import { ADMIN_REQUEST_TYPES } from '@/constants/adminRequests'
+
+const emptyAdminRequest = { request_type: '', requested_value: '', reason: '' }
 
 const Profile = () => {
-    const navigate = useNavigate()
     const { user, updateUser } = useAuth()
     const [showPassword, setShowPassword] = useState(false);
     const [showPassword1, setShowPassword1] = useState(false);
@@ -22,6 +25,10 @@ const Profile = () => {
     const [passwordLoading, setPasswordLoading] = useState(false)
     const [profileConfirmOpen, setProfileConfirmOpen] = useState(false)
     const [passwordConfirmOpen, setPasswordConfirmOpen] = useState(false)
+    const [adminRequestOpen, setAdminRequestOpen] = useState(false)
+    const [adminRequest, setAdminRequest] = useState(emptyAdminRequest)
+    const [adminRequestLoading, setAdminRequestLoading] = useState(false)
+    const [adminRequestSent, setAdminRequestSent] = useState(false)
 
     const [form, setForm] = useState({
         name: user?.name || '',
@@ -93,6 +100,38 @@ const Profile = () => {
             setPasswordLoading(false)
         }
     }
+
+    const openAdminRequest = () => {
+        setAdminRequest(emptyAdminRequest)
+        setAdminRequestSent(false)
+        setAdminRequestOpen(true)
+    }
+
+    const handleAdminRequestChange = (e) => {
+        setAdminRequest({ ...adminRequest, [e.target.name]: e.target.value })
+    }
+
+    const sendAdminRequest = async (e) => {
+        e.preventDefault()
+        setAdminRequestLoading(true)
+        try {
+            await API.post('/admin-requests', {
+                request_type: adminRequest.request_type,
+                requested_value: adminRequest.request_type === 'other' ? '' : adminRequest.requested_value,
+                reason: adminRequest.reason,
+            })
+            toast.success('Your request was sent to an admin.')
+            setAdminRequestSent(true)
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to send your request')
+        } finally {
+            setAdminRequestLoading(false)
+        }
+    }
+
+    const adminRequestValid = adminRequest.request_type !== ''
+        && (adminRequest.request_type === 'other' || adminRequest.requested_value.trim() !== '')
+        && adminRequest.reason.trim().length >= 10
 
     const roleBadgeStyle = {
         admin: 'bg-purple-200 text-purple-800',
@@ -221,7 +260,7 @@ const Profile = () => {
                                                     Household number and zone are managed by barangay staff.{' '}
                                                     <button
                                                         type="button"
-                                                        onClick={() => navigate('/', { state: { scrollTo: 'contact' } })}
+                                                        onClick={openAdminRequest}
                                                         className="inline-flex min-h-11 items-center underline hover:text-gray-600 hover:cursor-pointer"
                                                     >
                                                         Contact an admin
@@ -369,6 +408,91 @@ const Profile = () => {
                 isLoading={passwordLoading}
                 onConfirm={savePassword}
             />
+            <Dialog open={adminRequestOpen} onOpenChange={(open) => !adminRequestLoading && setAdminRequestOpen(open)}>
+                <DialogContent className="bg-white">
+                    <DialogHeader>
+                        <DialogTitle className="text-[#102765] font-semibold">Contact an admin</DialogTitle>
+                        <DialogDescription>
+                            Ask the barangay to change details on your account.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {adminRequestSent ? (
+                        <>
+                            <p className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                                Your request is pending. An admin will review it and update your account if it is approved.
+                            </p>
+                            <DialogFooter className="bg-white">
+                                <Button type="button" className="bg-[#102765] text-white hover:bg-[#1a3a8f]" onClick={() => setAdminRequestOpen(false)}>
+                                    Close
+                                </Button>
+                            </DialogFooter>
+                        </>
+                    ) : (
+                        <form onSubmit={sendAdminRequest} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="request_type">Request type</Label>
+                                <select
+                                    id="request_type"
+                                    name="request_type"
+                                    value={adminRequest.request_type}
+                                    onChange={handleAdminRequestChange}
+                                    required
+                                    className="h-11 w-full rounded-md border border-gray-300 bg-gray-50 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="">Select a request type...</option>
+                                    {ADMIN_REQUEST_TYPES.map(t => (
+                                        <option key={t.value} value={t.value}>{t.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {adminRequest.request_type !== 'other' && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="requested_value">What should it be changed to?</Label>
+                                    <Input
+                                        id="requested_value"
+                                        name="requested_value"
+                                        value={adminRequest.requested_value}
+                                        onChange={handleAdminRequestChange}
+                                        maxLength={255}
+                                        required
+                                        className="h-11 rounded-md border-gray-300 bg-gray-50"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="space-y-2">
+                                <Label htmlFor="reason">Reason</Label>
+                                <Textarea
+                                    id="reason"
+                                    name="reason"
+                                    value={adminRequest.reason}
+                                    onChange={handleAdminRequestChange}
+                                    rows={4}
+                                    maxLength={1000}
+                                    required
+                                    className="rounded-md border-gray-300 bg-gray-50"
+                                />
+                                <p className="text-xs text-gray-500">At least 10 characters.</p>
+                            </div>
+
+                            <DialogFooter className="bg-white">
+                                <Button type="button" variant="outline" disabled={adminRequestLoading} onClick={() => setAdminRequestOpen(false)}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    className="bg-[#102765] text-white hover:bg-[#1a3a8f]"
+                                    disabled={adminRequestLoading || !adminRequestValid}
+                                >
+                                    {adminRequestLoading ? 'Sending...' : 'Send request'}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    )}
+                </DialogContent>
+            </Dialog>
         </Layout>
     )
 }

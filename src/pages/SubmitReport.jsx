@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import { ArrowLeft, FileText, Home, Calendar as CalendarIcon } from 'lucide-reac
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { toast } from 'sonner'
+import { ESTIMATED_PROCESSING_TEXT } from '@/constants/reports'
 
 const MAX_BACKDATE_DAYS = 30
 
@@ -47,6 +48,7 @@ const SubmitReport = () => {
     const [loading, setLoading] = useState(false)
     const [confirmOpen, setConfirmOpen] = useState(false)
     const [dateOpen, setDateOpen] = useState(false)
+    const [openReportId, setOpenReportId] = useState(null)
 
     const [householdInfo, setHouseholdInfo] = useState(null)
     const [form, setForm] = useState(() => {
@@ -122,12 +124,18 @@ const SubmitReport = () => {
 
     const submitReport = async () => {
         setLoading(true)
+        setOpenReportId(null)
 
         try {
             await API.post('/reports', form)
             toast.success("Report submitted successfully")
             setTimeout(() => navigate('/dashboard'), 2000)
         } catch (error) {
+            if (error.response?.data?.code === 'OPEN_REPORT_EXISTS') {
+                setOpenReportId(error.response.data.existingReportId)
+                setLoading(false)
+                return
+            }
             const message = error.response?.data?.message || 'Failed to submit report'
 
             toast.error(message)
@@ -311,6 +319,15 @@ const SubmitReport = () => {
                                         Cancel
                                     </Button>
                                 </div>
+                                <p className="text-xs text-gray-500">{ESTIMATED_PROCESSING_TEXT}</p>
+                                {openReportId && (
+                                    <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                                        You already have an open report for this issue. You can submit again once it is resolved.{' '}
+                                        <Link to={`/reports/${openReportId}`} className="font-semibold underline">
+                                            View that report
+                                        </Link>
+                                    </div>
+                                )}
                             </form>
                         </>
 

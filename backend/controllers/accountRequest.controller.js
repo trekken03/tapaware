@@ -195,6 +195,15 @@ exports.submitRequest = async (req, res) => {
     }
 
     try {
+        // Includes archived (soft-deleted) users, since users.email is unique.
+        const [registered] = await db.query(
+            'SELECT id FROM users WHERE LOWER(email) = ? LIMIT 1',
+            [email]
+        );
+        if (registered.length > 0) {
+            return res.status(409).json({ code: 'EMAIL_REGISTERED', message: 'This email already has an account.' });
+        }
+
         const [existing] = await db.query(
             `SELECT id FROM account_requests WHERE LOWER(email) = ? AND status = 'pending' LIMIT 1`,
             [email]

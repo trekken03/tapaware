@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { Trash2 } from 'lucide-react'
+import { ESTIMATED_PROCESSING_TEXT } from '@/constants/reports'
 
 const getStatusStyle = (status) => {
     switch (status) {
@@ -231,6 +232,10 @@ const ReportDetail = () => {
                                 <p className="font-semibold text-gray-900">{report.description || '-'}</p>
                             </div>
                         </div>
+
+                        {isResident && report.status !== 'resolved' && (
+                            <p className="mt-4 text-xs text-gray-500">{ESTIMATED_PROCESSING_TEXT}</p>
+                        )}
 
                         {!isResident && (
                             <div className="mt-6 ">

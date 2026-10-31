@@ -259,7 +259,7 @@ const AccountRequestDetail = () => {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base font-semibold">
                                     <ListChecks size={18} className="text-blue-600" />
-                                    {isSnapshot ? 'Checks at time of review' : 'Checks'}
+                                    Review Summary
                                 </CardTitle>
                                 {isSnapshot && (
                                     <div className="space-y-0.5 text-xs text-gray-500">
@@ -280,7 +280,7 @@ const AccountRequestDetail = () => {
                         <Card>
                             <CardContent className="pt-2">
                                 <p className="text-sm text-gray-500">
-                                    Checks were not recorded for this request (it was reviewed before this record-keeping was added).
+                                    A review summary was not recorded for this request (it was reviewed before this record-keeping was added).
                                 </p>
                             </CardContent>
                         </Card>
@@ -363,7 +363,7 @@ const AccountRequestDetail = () => {
                                         description={needsHousehold
                                             ? `This household is not in the system. Approving will create Household #${request.household_number}, Zone ${request.zone} and a resident account for ${request.full_name}, and email a temporary password and a verification link to ${request.email}.`
                                             : `This creates an unverified resident account for ${request.full_name}, links it to household #${request.household_number}, Zone ${request.zone}, and emails a temporary password and a verification link to ${request.email}.`}
-                                        actionText={needsHousehold ? 'Approve and create household' : 'Approve'}
+                                        actionText={needsHousehold ? 'Approve' : 'Approve'}
                                         actionVariant="default"
                                         isLoading={working}
                                         onConfirm={handleApprove}

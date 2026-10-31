@@ -150,6 +150,23 @@ CREATE TABLE account_requests (
     INDEX idx_account_requests_email (email)
 );
 
+CREATE TABLE admin_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    request_type ENUM('change_email','change_household','correct_name','other') NOT NULL,
+    requested_value VARCHAR(255) NULL,
+    reason TEXT NOT NULL,
+    status ENUM('pending','done','rejected') NOT NULL DEFAULT 'pending',
+    admin_note TEXT NULL,
+    reviewed_by INT NULL,
+    reviewed_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_admin_requests_status (status),
+    INDEX idx_admin_requests_user_type_status (user_id, request_type, status)
+);
+
 
 CREATE TABLE time_patterns(
     id int auto_increment primary key,

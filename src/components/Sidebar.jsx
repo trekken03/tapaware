@@ -95,7 +95,7 @@ const Sidebar = (props) => {
         }
     };
 
-    // Admin Panel dot: on while any concern is unreviewed or any account request is pending.
+    // Admin Panel dot: on while any concern is unreviewed or any account or user request is pending.
     const [hasAdminAttention, setHasAdminAttention] = useState(false);
 
     useEffect(() => {
@@ -104,7 +104,8 @@ const Sidebar = (props) => {
         API.get('/admin/attention-counts')
             .then((res) => {
                 if (ignore) return;
-                const total = Number(res.data?.concerns_new || 0) + Number(res.data?.account_requests_pending || 0);
+                const total = Number(res.data?.concerns_new || 0) + Number(res.data?.account_requests_pending || 0)
+                    + Number(res.data?.admin_requests_pending || 0);
                 setHasAdminAttention(total > 0);
             })
             .catch(() => {});

@@ -46,6 +46,7 @@ const RequestAccount = () => {
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [touched, setTouched] = useState({});
+    const [emailRegistered, setEmailRegistered] = useState(false);
 
     useEffect(() => {
         if (!authLoading && isAuthenticated) {
@@ -66,6 +67,9 @@ const RequestAccount = () => {
                 .replace(/^ +/, '')
                 .replace(/ {2,}/g, ' ')
                 .slice(0, 60);
+        }
+        if (name === 'email') {
+            setEmailRegistered(false);
         }
 
         setForm({ ...form, [name]: value });
@@ -96,6 +100,10 @@ const RequestAccount = () => {
             setConsent(false)
             setTouched({})
         } catch (err) {
+            if (err.response?.data?.code === 'EMAIL_REGISTERED') {
+                setEmailRegistered(true)
+                return
+            }
             toast.error(err.response?.data?.message || 'Something went wrong')
         } finally {
             setLoading(false)
@@ -188,6 +196,13 @@ const RequestAccount = () => {
                                         />
                                         {touched.email && emailInvalid && (
                                             <p id="email-hint" className={hintClass}>Enter a valid email address.</p>
+                                        )}
+                                        {emailRegistered && (
+                                            <p role="alert" className={hintClass}>
+                                                This email already has an account.{' '}
+                                                <Link to="/login" className="underline">Log in</Link> or use{' '}
+                                                <Link to="/forgot-password" className="underline">Forgot password</Link>.
+                                            </p>
                                         )}
                                     </div>
 

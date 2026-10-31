@@ -69,4 +69,11 @@ const accountRequestLimiter = rateLimit({
     message: { message: 'Too many requests from this device, please try again later' }
 });
 
-module.exports = { loginLimiter, forgotPasswordLimiter, verifyEmailLimiter, concernLimiter, accountRequestLimiter };
+const adminRequestLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    message: { message: 'Too many requests sent, please try again later' },
+    handler: logAndRespond('ADMIN_REQUEST_RATE_LIMIT_EXCEEDED', (req) => req.user?.name || 'Unknown user', 60 * 60 * 1000)
+});
+
+module.exports = { loginLimiter, forgotPasswordLimiter, verifyEmailLimiter, concernLimiter, accountRequestLimiter, adminRequestLimiter };
