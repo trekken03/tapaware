@@ -33,6 +33,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const RequestAccount = lazy(() => import('./pages/RequestAccount'));
 const AccountRequestDetail = lazy(() => import('./pages/AccountRequestDetail'));
 const UserRequestDetail = lazy(() => import('./pages/UserRequestDetail'));
+const ReportsMaintenance = lazy(() => import('./pages/ReportsMaintenance'));
 
 
 const App = () => {
@@ -57,6 +58,7 @@ const App = () => {
                     {/* Reports - All roles (but with different views based on role) */}
                     <Route path="/reports" element={<RoleBasedRoute><Reports /></RoleBasedRoute>} />
                     <Route path="/reports/add" element={<RoleBasedRoute allowedRoles={['resident']}><SubmitReport /></RoleBasedRoute>} />
+                    <Route path="/reports/maintenance" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><ReportsMaintenance /></RoleBasedRoute>} />
 
                     {/* Analytics - Admin and Staff */}
                     <Route path="/visualization" element={<RoleBasedRoute allowedRoles={['admin', 'staff']}><Visualization /></RoleBasedRoute>} />

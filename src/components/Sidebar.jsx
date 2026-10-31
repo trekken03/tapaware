@@ -11,6 +11,7 @@ import {
     LogOut,
     User,
     Trash2,
+    Wrench,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -38,6 +39,7 @@ const getNavItems = (role) => {
     const adminItems = [
         ...baseItems,
         { path: '/reports', label: 'Reports', icon: ClipboardList },
+        { path: '/reports/maintenance', label: 'Reports Maintenance', icon: Wrench },
         { path: '/households', label: 'Households', icon: Home },
         { path: '/visualization', label: 'Visualization', icon: BarChart3 },
         { path: '/audit-trail', label: 'Audit Trail', icon: ClipboardList },
@@ -48,6 +50,7 @@ const getNavItems = (role) => {
     const staffItems = [
         ...baseItems,
         { path: '/reports', label: 'Reports', icon: ClipboardList },
+        { path: '/reports/maintenance', label: 'Reports Maintenance', icon: Wrench },
         { path: '/households', label: 'Households', icon: Home },
         { path: '/visualization', label: 'Visualization', icon: BarChart3 },
     ];
