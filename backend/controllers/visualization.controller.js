@@ -1,6 +1,7 @@
 const db = require('../models/db');
 const jwt = require('jsonwebtoken');
 const { getAttentionCounts } = require('../utils/attentionCounts');
+const { PUROKS, missingPurokRows } = require('../utils/puroks');
 
 exports.getSummary = async (req, res) => {
     // This route is public (the homepage uses it), so the admin-only total reads the
@@ -157,7 +158,20 @@ exports.getTdsByZone = async (req, res) => {
 
         query += ` WHERE households.deleted_at IS NULL GROUP BY households.zone ORDER BY households.zone ASC`;
         const [rows] = await db.query(query, params);
-        res.json(rows);
+
+        // Every purok gets a row, even one with no households yet (NULL average and
+        // last_recorded, same as a zone with no readings). Puroks come first in order;
+        // any other zone value keeps its place after them (the sort is stable).
+        const purokKeys = PUROKS.map(String);
+        const rank = (row) => {
+            const index = purokKeys.indexOf(String(row.zone).trim());
+            return index === -1 ? purokKeys.length : index;
+        };
+        const filled = [
+            ...rows,
+            ...missingPurokRows(rows, (zone) => ({ zone, average_tds: null, last_recorded: null })),
+        ].sort((a, b) => rank(a) - rank(b));
+        res.json(filled);
     }
     catch (error) {
         console.error(error);
@@ -221,7 +235,9 @@ exports.getReportsByZoneCount = async (req, res) => {
 
         query += ` WHERE households.deleted_at IS NULL GROUP BY households.zone ORDER BY report_count DESC`;
         const [rows] = await db.query(query, params);
-        res.json(rows);
+
+        // Puroks with no households yet get a 0 row at the end, keeping the DESC order.
+        res.json([...rows, ...missingPurokRows(rows, (zone) => ({ zone, report_count: 0 }))]);
     }
     catch (error) {
         console.error(error);

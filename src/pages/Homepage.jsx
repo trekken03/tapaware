@@ -13,6 +13,7 @@ import API from '@/services/api'
 import { toast } from 'sonner'
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { PUROKS } from '@/constants/puroks';
 
 
 // MySQL timestamps normally arrive as ISO strings, but a plain "YYYY-MM-DD HH:MM:SS"
@@ -70,7 +71,14 @@ const Homepage = () => {
                 API.get('/visualization/tds-by-zone'),
                 API.get('/visualization/summary'),
             ])
-            setZoneData(zoneRes.data.filter(p => p.last_recorded))
+            // One card per purok, empty ones included; any other zone only shows when it has readings.
+            const rows = zoneRes.data
+            const purokKeys = PUROKS.map(String)
+            const byZone = new Map(rows.map(p => [String(p.zone).trim(), p]))
+            setZoneData([
+                ...purokKeys.map(zone => byZone.get(zone) || { zone, average_tds: null, last_recorded: null }),
+                ...rows.filter(p => p.last_recorded && !purokKeys.includes(String(p.zone).trim())),
+            ])
             setSummary(summaryRes.data)
         } catch (error) {
             console.log('Error loading public water data:', error)
@@ -367,16 +375,19 @@ const Homepage = () => {
 
                     {loading ? (
                         <p className="text-[#536a8d]">Loading readings...</p>
-                    ) : zoneData.length === 0 ? (
+                    ) : zoneData.every(p => !p.last_recorded) ? (
                         <p className="text-[#536a8d]">No readings recorded yet.</p>
                     ) : (
-                        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:gap-x-12 lg:gap-y-8">
+                        // Flex-wrap with the same column widths and gaps as the old 2/3-column grid,
+                        // so a lone card in the last row sits centered.
+                        <div className="flex flex-wrap justify-center gap-5 lg:gap-x-12 lg:gap-y-8">
                             {zoneData.map((p) => (
-                                <div key={p.zone} className="flex justify-center rounded-xl border border-white/80 bg-white p-4 shadow-[0_10px_28px_-20px_rgba(12,43,86,0.55)] transition-transform duration-300 hover:-translate-y-1 sm:p-5">
+                                <div key={p.zone} className="flex w-[calc((100%_-_1.25rem)/2)] justify-center rounded-xl border border-white/80 bg-white p-4 shadow-[0_10px_28px_-20px_rgba(12,43,86,0.55)] transition-transform duration-300 hover:-translate-y-1 sm:w-[calc((100%_-_2.5rem)/3)] sm:p-5 lg:w-[calc((100%_-_6rem)/3)]">
                                     <WaterGauge
                                         value={p.average_tds}
                                         label={`Zone ${p.zone}`}
-                                        sublabel={`Last recorded on ${formatRecordedAt(p.last_recorded)}`}
+                                        sublabel={p.last_recorded ? `Last recorded on ${formatRecordedAt(p.last_recorded)}` : undefined}
+                                        empty={!p.last_recorded}
                                     />
                                 </div>
                             ))}
@@ -455,7 +466,7 @@ const Homepage = () => {
                                                     <select id="zone" name="zone" value={form.zone} onChange={handleChange} required
                                                         className={`${fieldBase} ${fieldHeight} appearance-none pr-9`}>
                                                         <option value="">Select zone...</option>
-                                                        {[1, 2, 3, 4, 5, 6].map(p => <option key={p} value={p}>{p}</option>)}
+                                                        {PUROKS.map(p => <option key={p} value={p}>{p}</option>)}
                                                     </select>
                                                     <ChevronDown size={16} aria-hidden="true"
                                                         className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" />

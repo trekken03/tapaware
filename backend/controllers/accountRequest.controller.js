@@ -4,9 +4,8 @@ const auditLog = require('../utils/auditLogger');
 const sendEmail = require('../utils/emailSender');
 const sendVerificationEmail = require('../utils/emailVerification');
 const generatePassword = require('../utils/generatePassword');
-
 // Same zone options as the Add User form and the landing page concern form.
-const ZONES = ['1', '2', '3', '4', '5', '6'];
+const { isValidPurok } = require('../utils/puroks');
 
 const NEUTRAL_MESSAGE = 'Request received. The barangay will review it. If it is approved, you will receive an email with your login details.';
 const ALREADY_PROCESSED = 'This request has already been processed.';
@@ -185,7 +184,7 @@ exports.submitRequest = async (req, res) => {
     }
     const householdNumber = String(parseInt(householdInput, 10));
     const zone = /^\d{1,3}$/.test(zoneInput) ? String(parseInt(zoneInput, 10)) : '';
-    if (!ZONES.includes(zone)) {
+    if (!isValidPurok(zone)) {
         return res.status(400).json({ message: 'Please select your zone.' });
     }
     if (address.length < 5 || address.length > 250) {

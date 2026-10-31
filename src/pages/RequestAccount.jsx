@@ -10,6 +10,7 @@ import API from "@/services/api";
 import { toast } from 'sonner'
 import LandingNavbar from "@/components/NavBar";
 import SceneMascot from "@/components/SceneMascot";
+import { PUROKS } from "@/constants/puroks";
 
 // 16px text and 44px height so phones don't zoom in and fingers hit the target.
 const fieldClass = 'h-11 text-base md:text-base'
@@ -223,7 +224,7 @@ const RequestAccount = () => {
                                             required
                                         >
                                             <option value="">Select zone...</option>
-                                            {[1, 2, 3, 4, 5, 6].map(p => (
+                                            {PUROKS.map(p => (
                                                 <option key={p} value={p} className="text-foreground">{p}</option>
                                             ))}
                                         </select>

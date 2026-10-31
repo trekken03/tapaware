@@ -9,6 +9,7 @@ import { ArrowLeft, Users } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { PUROKS } from '@/constants/puroks'
 
 const EditUser = () => {
     const navigate = useNavigate()
@@ -224,7 +225,7 @@ const EditUser = () => {
                                         className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         <option value="">Select zone...</option>
-                                        {[1, 2, 3, 4, 5, 6].map(p => (
+                                        {PUROKS.map(p => (
                                             <option key={p} value={p}>{p}</option>
                                         ))}
                                     </select>

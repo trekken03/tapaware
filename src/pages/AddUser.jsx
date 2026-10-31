@@ -9,6 +9,7 @@ import { ArrowLeft, Users, Eye, EyeOff } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { PUROKS } from '@/constants/puroks'
 
 // Shared look for every field: white, thin gray outline, rounded, same height.
 const labelClass = 'font-normal text-gray-900'
@@ -250,7 +251,7 @@ const AddUser = () => {
                                         className={nativeSelectClass}
                                     >
                                         <option value="">Select zone...</option>
-                                        {[1, 2, 3, 4, 5, 6].map(p => (
+                                        {PUROKS.map(p => (
                                             <option key={p} value={p}>{p}</option>
                                         ))}
                                     </select>
