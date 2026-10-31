@@ -338,7 +338,7 @@ const Homepage = () => {
                                     <img src="/assets/figure-for-green.png" alt="" aria-hidden="true" className="h-12 w-12 object-contain" />
                                 </div>
                                 <p className="mb-1 font-bold text-green-700">0–500 ppm</p>
-                                <p className="max-w-[210px] text-sm text-green-800/75">Safe for everyday drinking and household use.</p>
+                                <p className="max-w-[210px] text-sm text-green-800/75">Within the accepted TDS range; continue routine monitoring.</p>
                             </CardContent>
                         </Card>
                         <Card className="rounded-2xl border border-amber-300 bg-gradient-to-br from-white to-amber-50 shadow-[0_12px_32px_-22px_rgba(217,119,6,0.55)] transition-transform duration-300 hover:-translate-y-1">
@@ -347,7 +347,7 @@ const Homepage = () => {
                                     <img src="/assets/figure-for-yellow.png" alt="" aria-hidden="true" className="h-12 w-12 object-contain" />
                                 </div>
                                 <p className="mb-1 font-bold text-amber-700">501–1000 ppm</p>
-                                <p className="max-w-[210px] text-sm text-amber-800/75">Still usable, but worth monitoring closely.</p>
+                                <p className="max-w-[210px] text-sm text-amber-800/75">Regular monitoring is recommended for changes and irregularities.</p>
                             </CardContent>
                         </Card>
                         <Card className="rounded-2xl border border-red-300 bg-gradient-to-br from-white to-red-50 shadow-[0_12px_32px_-22px_rgba(220,38,38,0.55)] transition-transform duration-300 hover:-translate-y-1">
@@ -356,7 +356,7 @@ const Homepage = () => {
                                     <img src="/assets/figure-for-red.png" alt="" aria-hidden="true" className="h-12 w-12 object-contain" />
                                 </div>
                                 <p className="mb-1 font-bold text-red-700">1000+ ppm</p>
-                                <p className="max-w-[210px] text-sm text-red-800/75">May need attention, this is when reports matter most.</p>
+                                <p className="max-w-[210px] text-sm text-red-800/75">Water has high TDS levels. Further checking and inspection is needed. </p>
                             </CardContent>
                         </Card>
                     </div>
