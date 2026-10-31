@@ -32,6 +32,7 @@ const Archive = lazy(() => import('./pages/Archive'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const RequestAccount = lazy(() => import('./pages/RequestAccount'));
 const AccountRequestDetail = lazy(() => import('./pages/AccountRequestDetail'));
+const UserRequestDetail = lazy(() => import('./pages/UserRequestDetail'));
 
 
 const App = () => {
@@ -83,6 +84,7 @@ const App = () => {
                     <Route path="/verify-email" element={<VerifyEmail />} />
                     <Route path="/request-account" element={<RequestAccount />} />
                     <Route path="/admin/account-requests/:id" element={<RoleBasedRoute allowedRoles={['admin']}><AccountRequestDetail /></RoleBasedRoute>} />
+                    <Route path="/admin/user-requests/:id" element={<RoleBasedRoute allowedRoles={['admin']}><UserRequestDetail /></RoleBasedRoute>} />
                     <Route path="/audit-trail/:id" element={<RoleBasedRoute allowedRoles={['admin']}><AuditDetail /></RoleBasedRoute>} />
                     <Route path="/admin/flags/:id" element={<RoleBasedRoute allowedRoles={['admin']}><FlagDetail /></RoleBasedRoute>} />
 

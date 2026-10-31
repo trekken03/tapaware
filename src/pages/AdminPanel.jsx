@@ -917,7 +917,11 @@ const AdminPanel = () => {
                                         </TableHeader>
                                         <TableBody>
                                             {paginatedRows.map((r, index) => (
-                                                <TableRow key={r.id}>
+                                                <TableRow
+                                                    key={r.id}
+                                                    className="cursor-pointer hover:bg-gray-50"
+                                                    onClick={() => navigate(`/admin/user-requests/${r.id}`)}
+                                                >
                                                     <TableCell label="No.">{rowNumber(index)}</TableCell>
                                                     <TableCell label="Requester">
                                                         <p className="font-semibold break-words">{r.user_name}</p>
@@ -942,7 +946,7 @@ const AdminPanel = () => {
                                                         )}
                                                     </TableCell>
                                                     <TableCell label="Submitted" className="whitespace-nowrap">{formatDate(r.created_at)}</TableCell>
-                                                    <TableCell label="Actions">
+                                                    <TableCell label="Actions" onClick={(e) => e.stopPropagation()}>
                                                         {r.status === 'pending' ? (
                                                             <div className="flex flex-wrap items-center gap-1 sm:flex-nowrap sm:gap-2">
                                                                 <Button
@@ -993,7 +997,7 @@ const AdminPanel = () => {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-2">
-                        <Label htmlFor="review_note">Note (optional)</Label>
+                        <Label htmlFor="review_note">{reviewTarget?.status === 'rejected' ? 'Note (required)' : 'Note (optional)'}</Label>
                         <Textarea
                             id="review_note"
                             value={reviewNote}
@@ -1009,7 +1013,7 @@ const AdminPanel = () => {
                         <Button
                             type="button"
                             variant={reviewTarget?.status === 'done' ? 'default' : 'destructive'}
-                            disabled={reviewing}
+                            disabled={reviewing || (reviewTarget?.status === 'rejected' && reviewNote.trim() === '')}
                             onClick={submitReview}
                         >
                             {reviewing ? 'Saving...' : reviewTarget?.status === 'done' ? 'Mark as done' : 'Reject'}

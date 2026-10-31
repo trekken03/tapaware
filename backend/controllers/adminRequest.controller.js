@@ -97,8 +97,69 @@ exports.getAllRequests = async (req, res) => {
     }
 };
 
-// Only records the decision. The actual account change is made by the admin
-// through Edit User; nothing on the user's account is changed here.
+// The request plus the requester's current account details, so the detail page
+// can show the current value next to the requested one.
+exports.getRequestById = async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) {
+        return res.status(400).json({ message: 'Invalid request ID.' });
+    }
+
+    try {
+        const [[row]] = await db.query(
+            `SELECT ar.id, ar.user_id, ar.request_type, ar.requested_value, ar.reason, ar.status,
+                    ar.admin_note, ar.reviewed_at, ar.created_at,
+                    reviewer.name AS reviewed_by_name,
+                    u.name AS user_name, u.email AS user_email, u.email_verified AS user_email_verified,
+                    u.role AS user_role, u.deleted_at AS user_deleted_at,
+                    h.household_number, h.zone, h.address
+             FROM admin_requests ar
+             JOIN users u ON ar.user_id = u.id
+             LEFT JOIN households h ON u.household_id = h.id
+             LEFT JOIN users reviewer ON ar.reviewed_by = reviewer.id
+             WHERE ar.id = ?`,
+            [id]
+        );
+        if (!row) {
+            return res.status(404).json({ message: 'Request not found' });
+        }
+
+        res.json({
+            request: {
+                id: row.id,
+                request_type: row.request_type,
+                requested_value: row.requested_value,
+                reason: row.reason,
+                status: row.status,
+                admin_note: row.admin_note,
+                reviewed_at: row.reviewed_at,
+                reviewed_by_name: row.reviewed_by_name,
+                created_at: row.created_at,
+            },
+            user: {
+                id: row.user_id,
+                name: row.user_name,
+                email: row.user_email,
+                email_verified: Number(row.user_email_verified) === 1,
+                role: row.user_role,
+                archived: Boolean(row.user_deleted_at),
+                household_number: row.household_number,
+                zone: row.zone,
+                address: row.address,
+            },
+        });
+    }
+    catch (error) {
+        if (isTableMissing(error)) {
+            return res.status(503).json({ message: TABLE_MISSING });
+        }
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Only records the decision. Any account change is made beforehand through the
+// Edit User endpoint (PUT /api/admin/users/:id); nothing on the account is changed here.
 exports.reviewRequest = async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) {
@@ -117,6 +178,11 @@ exports.reviewRequest = async (req, res) => {
     if (note.length > 500) {
         return res.status(400).json({ message: 'The note can be at most 500 characters.' });
     }
+    if (status === 'rejected' && note === '') {
+        return res.status(400).json({ message: 'Please add a note explaining why the request is rejected.' });
+    }
+    // Set by the detail page after its Edit User update succeeded; only used for the audit entry.
+    const applied = status === 'done' && req.body?.applied === true;
 
     try {
         // The status condition makes a second, simultaneous review a no-op.
@@ -140,7 +206,7 @@ exports.reviewRequest = async (req, res) => {
             action: status === 'done' ? 'COMPLETE_ADMIN_REQUEST' : 'REJECT_ADMIN_REQUEST',
             table_affected: 'admin_requests',
             record_id: id,
-            details: `Marked user request #${id} as ${status}`,
+            details: `Marked user request #${id} as ${status}${status === 'done' ? (applied ? ' (change applied through Edit User)' : ' (no change applied)') : ''}`,
             ip_address: req.ip
         });
 

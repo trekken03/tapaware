@@ -8,6 +8,7 @@ const { adminRequestLimiter } = require('../middleware/rateLimit');
 
 router.post('/', verifyToken, verifyCsrf, adminRequestLimiter, adminRequestController.submitRequest);
 router.get('/', verifyToken, requireRole('admin'), adminRequestController.getAllRequests);
+router.get('/:id', verifyToken, requireRole('admin'), adminRequestController.getRequestById);
 router.patch('/:id', verifyToken, verifyCsrf, requireRole('admin'), adminRequestController.reviewRequest);
 
 module.exports = router;
