@@ -233,7 +233,7 @@ const RequestAccount = () => {
                                     </p>
 
                                     <div className="grid gap-2 sm:col-span-2">
-                                        <Label htmlFor="address">Street address</Label>
+                                        <Label htmlFor="address">Address</Label>
                                         <Input
                                             id="address"
                                             name="address"

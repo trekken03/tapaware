@@ -76,7 +76,7 @@ const LandingNavbar = () => {
                 </button>
 
                 {/* Desktop */}
-                <div className="hidden md:flex items-center gap-4">
+                <div className="hidden md:flex items-center gap-2.5">
                     {navLinks.map((link) => (
                         <button
                             key={link.id}
@@ -112,7 +112,7 @@ const LandingNavbar = () => {
                             >
                                 <Button
 
-                                    className=" rounded-full bg-white hover:bg-cyan-50 text-[#143472] flex items-center gap-2 hover:cursor-pointer"
+                                    className=" rounded-full bg-blue-900 hover:bg-blue-600 border-white text-white flex items-center gap-2 hover:cursor-pointer"
                                 >
                                     <LogOut size={16} />
                                     Logout
@@ -121,6 +121,7 @@ const LandingNavbar = () => {
 
                         </>
                     )}
+
 
                     {isStaffOrAdmin && (
                         <>
@@ -139,7 +140,7 @@ const LandingNavbar = () => {
                             >
                                 <Button
 
-                                    className="bg-white rounded-full hover:bg-cyan-50 text-[#143472] flex items-center gap-2 hover:cursor-pointer"
+                                    className=" rounded-full bg-blue-900 hover:bg-blue-600 border-white text-white  flex items-center gap-2 hover:cursor-pointer"
                                 >
                                     <LogOut size={16} />
                                     Logout
@@ -151,7 +152,7 @@ const LandingNavbar = () => {
                     {!user && !isLoginPage && (
                         <Button
                             onClick={() => navigate('/login')}
-                            className="bg-white hover:bg-cyan-50 text-[#143472] rounded-full"
+                            className="bg-white hover:bg-gray-200 text-[#143472] rounded-full"
                         >
                             Log in
                         </Button>
@@ -160,9 +161,9 @@ const LandingNavbar = () => {
                     {!user && !isRequestAccountPage && (
                         <Button
                             asChild
-                            className="rounded-full  bg-white text-[#143472] hover:bg-cyan-50 hover:cursor-pointer"
+                            className="rounded-full border-white bg-blue-900 text-white hover:bg-blue-600 hover:cursor-pointer"
                         >
-                            <Link to="/request-account">Request account</Link>
+                            <Link to="/request-account">Request an Account</Link>
                         </Button>
                     )}
 
@@ -217,7 +218,7 @@ const LandingNavbar = () => {
                                 >
                                     <Button
 
-                                        className="mt-2 min-h-11 bg-white hover:bg-cyan-50 text-[#143472] flex font-medium items-center gap-2 rounded-full justify-center"
+                                        className="mt-2 min-h-11 bg-blue-900 hover:bg-blue-600 border-white text-white   flex font-medium items-center gap-2 rounded-full justify-center"
                                     >
                                         <LogOut size={16} />
                                         Logout
@@ -244,7 +245,7 @@ const LandingNavbar = () => {
                                 >
                                     <Button
 
-                                        className="rounded-full mt-2 bg-white hover:bg-cyan-50 text-[#143472] flex items-center gap-2 justify-center"
+                                        className="rounded-full mt-2  bg-blue-900 hover:bg-blue-600 border-white text-white flex items-center gap-2 justify-center"
                                     >
                                         <LogOut size={16} />
                                         Logout
@@ -256,7 +257,7 @@ const LandingNavbar = () => {
                         {!user && !isLoginPage && (
                             <Button
                                 onClick={() => { setIsOpen(false); navigate('/login') }}
-                                className="mt-2 bg-white hover:bg-cyan-50 text-[#143472] rounded-full"
+                                className="mt-2 bg-white hover:bg-gray-200 mb-1.5 text-[#143472] rounded-full"
                             >
                                 Log in
                             </Button>
@@ -265,9 +266,9 @@ const LandingNavbar = () => {
                         {!user && !isRequestAccountPage && (
                             <Button
                                 asChild
-                                className="mt-2 w-full rounded-full border-white/70 bg-white text-[#143472] hover:bg-cyan-50 hover:cursor-pointer"
+                                className="rounded-full border-white bg-blue-900 text-white hover:bg-blue-600 hover:cursor-pointer"
                             >
-                                <Link to="/request-account" onClick={() => setIsOpen(false)}>Request account</Link>
+                                <Link to="/request-account">Request an Account</Link>
                             </Button>
                         )}
 

@@ -191,8 +191,9 @@ const Homepage = () => {
                     aria-hidden="true"
                     className="absolute inset-0 h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#071d50]/45 via-[#123c75]/10 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#06447d]/25 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-[#041433]/25" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#071d50]/70 via-[#0b2d66]/35 to-[#071d50]/15" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#031230]/55 via-transparent to-transparent" />
 
                 {/* Hero Content */}
                 <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-12 px-4 pb-20 pt-32 sm:px-6 md:grid-cols-2 md:items-end md:pb-28">
