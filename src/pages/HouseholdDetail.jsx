@@ -4,7 +4,7 @@ import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { ArrowLeft, Home, FileText, Droplets, Flag, Plus } from 'lucide-react'
+import { ArrowLeft, Home, FileText, Droplets, Flag, Plus, MapPin } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/context/AuthContext'
@@ -34,6 +34,28 @@ const getTdsStatus = (value) => {
     if (value <= 500) return { label: 'Safe', color: 'text-green-700', bg: 'bg-green-100' }
     if (value <= 1000) return { label: 'Moderate', color: 'text-yellow-700', bg: 'bg-yellow-100' }
     return { label: 'High', color: 'text-red-700', bg: 'bg-red-100' }
+}
+
+// measured_at_text is a plain local "YYYY-MM-DDTHH:MM" built from its parts so it
+// can't shift across time zones. Older readings have none and show recorded_at.
+const formatReadingTime = (reading) => {
+    if (reading.measured_at_text) {
+        const [datePart, timePart] = reading.measured_at_text.split('T')
+        const [year, month, day] = datePart.split('-').map(Number)
+        const [hours, minutes] = timePart.split(':').map(Number)
+        return new Date(year, month - 1, day, hours, minutes).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+        })
+    }
+    return new Date(reading.recorded_at).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    })
 }
 
 const HouseholdDetail = () => {
@@ -309,11 +331,13 @@ const HouseholdDetail = () => {
                                                 <div>
                                                     <p className="font-semibold text-gray-900">{t.tds_value} ppm</p>
                                                     <p className="text-xs text-gray-500">
-                                                        {t.staff_name} • {new Date(t.recorded_at).toLocaleDateString('en-US', {
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            year: 'numeric',
-                                                        })}
+                                                        {t.staff_name} • {formatReadingTime(t)}
+                                                        {t.latitude != null && t.longitude != null && (
+                                                            <span className="ml-2 inline-flex items-center gap-0.5 text-green-700">
+                                                                <MapPin size={11} aria-hidden="true" />
+                                                                location saved
+                                                            </span>
+                                                        )}
                                                     </p>
                                                 </div>
                                                 <span className={`${s.bg} ${s.color} px-2 py-1 text-xs font-semibold`}>

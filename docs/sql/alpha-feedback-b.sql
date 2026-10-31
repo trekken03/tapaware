@@ -15,3 +15,11 @@ ALTER TABLE reports
     ADD COLUMN resolution_lng DECIMAL(10,7) NULL,
     -- SET NULL so permanently deleting an archived user is not blocked.
     ADD CONSTRAINT fk_reports_resolved_by FOREIGN KEY (resolved_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- Task 4: TDS reading time and optional GPS.
+-- measured_at is the barangay's local time (Asia/Manila). Older readings keep it NULL
+-- and the app shows their recorded_at instead.
+ALTER TABLE tds_readings
+    ADD COLUMN measured_at DATETIME NULL,
+    ADD COLUMN latitude DECIMAL(10,7) NULL,
+    ADD COLUMN longitude DECIMAL(10,7) NULL;

@@ -6,10 +6,15 @@ import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ArrowLeft, Droplets, Home } from 'lucide-react'
+import { ArrowLeft, Droplets, Home, MapPin } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/context/AuthContext'
+
+// Local date and time as "YYYY-MM-DDTHH:MM" for a datetime-local input (toISOString() would be UTC).
+const toLocalDateTimeString = (date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` +
+    `T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 
 const AddTdsReading = () => {
     const navigate = useNavigate()
@@ -25,8 +30,11 @@ const AddTdsReading = () => {
         household_id: householdIdParam || '',
         staff_id: user?.id,
         tds_value: '',
-        notes: ''
+        notes: '',
+        measured_at: toLocalDateTimeString(new Date())
     })
+    const [location, setLocation] = useState(null)
+    const [locationState, setLocationState] = useState('asking')
 
     useEffect(() => {
         if (householdIdParam) {
@@ -35,6 +43,22 @@ const AddTdsReading = () => {
             fetchHouseholds()
         }
     }, [householdIdParam])
+
+    // Location is optional: ask once, never block saving on it.
+    useEffect(() => {
+        if (!navigator.geolocation) {
+            setLocationState('unavailable')
+            return
+        }
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude })
+                setLocationState('saved')
+            },
+            () => setLocationState('unavailable'),
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+        )
+    }, [])
 
     const fetchHouseholdInfo = async () => {
         try {
@@ -61,6 +85,10 @@ const AddTdsReading = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault()
+        if (form.measured_at > toLocalDateTimeString(new Date())) {
+            toast.error('The measurement time cannot be in the future.')
+            return
+        }
         setConfirmOpen(true)
     }
 
@@ -68,7 +96,7 @@ const AddTdsReading = () => {
         setLoading(true)
 
         try {
-            await API.post('/tds', form)
+            await API.post('/tds', location ? { ...form, ...location } : form)
             toast.success('TDS reading added successfully')
             navigate(householdIdParam ? `/households/${householdIdParam}` : '/tds')
         } catch (error) {
@@ -167,6 +195,25 @@ const AddTdsReading = () => {
                                     onChange={handleChange}
                                     required
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="measured_at">Measured at</Label>
+                                <Input
+                                    id="measured_at"
+                                    name="measured_at"
+                                    type="datetime-local"
+                                    max={toLocalDateTimeString(new Date())}
+                                    value={form.measured_at}
+                                    onChange={handleChange}
+                                    required
+                                />
+                                <p className="flex items-center gap-1 text-xs text-gray-500">
+                                    <MapPin size={12} aria-hidden="true" />
+                                    {locationState === 'saved' ? 'Your current location will be saved with this reading.'
+                                        : locationState === 'asking' ? 'Checking your location (optional)...'
+                                            : 'Location not available. The reading will be saved without it.'}
+                                </p>
                             </div>
 
                             <div className="space-y-2">

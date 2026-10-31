@@ -143,7 +143,15 @@ exports.getHouseholdById = async (req, res) => {
             [id]
         );
 
-        res.json({ ...household, reports, tds_readings: tdsReadings, flags });
+        // measured_at holds the barangay's local wall-clock time (no time zone), and mysql2
+        // turns it into a Date in the server's zone; send it back as plain "YYYY-MM-DDTHH:MM"
+        // so the browser doesn't shift it. Readings saved before the column existed have none.
+        const toLocalText = (value) => (value instanceof Date
+            ? `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}T${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}`
+            : null);
+        const readings = tdsReadings.map((reading) => ({ ...reading, measured_at_text: toLocalText(reading.measured_at) }));
+
+        res.json({ ...household, reports, tds_readings: readings, flags });
     }
     catch (error) {
         console.error(error);
