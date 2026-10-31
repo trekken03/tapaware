@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -62,7 +62,10 @@ const formatSchedule = (r) => {
     return `${date}, ${formatTime(r.scheduled_from)}–${formatTime(r.scheduled_to)}`
 }
 
-const ReportsMaintenance = () => {
+// embedded: rendered as the Maintenance view inside the Reports page, which
+// supplies the Layout and the page header.
+const ReportsMaintenance = ({ embedded = false }) => {
+    const Wrapper = embedded ? Fragment : Layout
     const navigate = useNavigate()
     const { user } = useAuth()
     const isAdmin = user?.role === 'admin'
@@ -151,23 +154,25 @@ const ReportsMaintenance = () => {
 
     if (loading) {
         return (
-            <Layout>
+            <Wrapper>
                 <div className="flex items-center justify-center h-64">
                     <p className="text-gray-500">Loading reports...</p>
                 </div>
-            </Layout>
+            </Wrapper>
         )
     }
 
     const isArchivedTab = tab === 'archived'
 
     return (
-        <Layout>
+        <Wrapper>
             <div>
-                <div className="mb-6 sm:mb-8">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Reports Maintenance</h1>
-                    <p className="text-gray-500 mt-1">Schedule, resolve and archive reports.</p>
-                </div>
+                {!embedded && (
+                    <div className="mb-6 sm:mb-8">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Reports Maintenance</h1>
+                        <p className="text-gray-500 mt-1">Schedule, resolve and archive reports.</p>
+                    </div>
+                )}
 
                 <Card className="bg-white/80">
                     <CardHeader>
@@ -341,7 +346,7 @@ const ReportsMaintenance = () => {
                 statusOptions={editReport ? EDIT_OPTIONS[editReport.status] : undefined}
                 onUpdated={fetchReports}
             />
-        </Layout>
+        </Wrapper>
     )
 }
 

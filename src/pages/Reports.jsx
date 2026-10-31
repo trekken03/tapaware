@@ -14,6 +14,12 @@ import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { PUROKS } from '@/constants/puroks'
+import ReportsMaintenance from '@/pages/ReportsMaintenance'
+
+const VIEW_OPTIONS = [
+    { key: 'reports', label: 'Reports' },
+    { key: 'maintenance', label: 'Maintenance' },
+]
 
 
 const Reports = () => {
@@ -141,6 +147,46 @@ const Reports = () => {
         }
     }, [currentPage, totalPages])
 
+    // Staff and admin can switch to the Maintenance view (kept in ?view= so refresh
+    // and links work). Residents never see the switcher, and the param is ignored for them.
+    const canMaintain = user?.role === 'staff' || user?.role === 'admin'
+    const view = canMaintain && searchParams.get('view') === 'maintenance' ? 'maintenance' : 'reports'
+
+    const viewSwitcher = canMaintain && (
+        <div className="mb-4 inline-flex rounded-xl border border-blue-200 bg-blue-50 p-1" role="tablist" aria-label="Reports view">
+            {VIEW_OPTIONS.map(option => (
+                <button
+                    key={option.key}
+                    type="button"
+                    role="tab"
+                    aria-selected={view === option.key}
+                    onClick={() => setSearchParams(option.key === 'maintenance' ? { view: 'maintenance' } : {})}
+                    className={`rounded-lg border px-4 py-2 text-sm font-medium hover:cursor-pointer transition-colors ${view === option.key
+                        ? 'border-blue-900 bg-blue-900 text-white shadow-sm'
+                        : 'border-transparent text-gray-700 hover:bg-white hover:text-blue-900'
+                        }`}
+                >
+                    {option.label}
+                </button>
+            ))}
+        </div>
+    )
+
+    if (view === 'maintenance') {
+        return (
+            <Layout>
+                <div>
+                    {viewSwitcher}
+                    <div className="mb-6 sm:mb-8">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Reports</h1>
+                        <p className="text-gray-500 mt-1">Schedule, resolve and archive reports.</p>
+                    </div>
+                    <ReportsMaintenance embedded />
+                </div>
+            </Layout>
+        )
+    }
+
     if (loading) {
         return (
             <Layout>
@@ -160,6 +206,7 @@ const Reports = () => {
     return (
         <Layout>
             <div>
+                {viewSwitcher}
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
                     <div>
