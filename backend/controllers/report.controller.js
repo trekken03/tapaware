@@ -2,6 +2,14 @@ const db = require('../models/db');
 const auditLog = require('../utils/auditLogger');
 const sendEmail = require('../utils/emailSender');
 
+// mysql2 returns DATE columns as a Date at local midnight; send a plain "YYYY-MM-DD"
+// so the browser can't shift it a day. Undefined (column not added yet) stays null.
+const toDateText = (value) => {
+    if (!value) return null;
+    if (!(value instanceof Date)) return String(value).slice(0, 10);
+    return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`;
+};
+
 exports.getAllReports = async (req, res) => {
     try {
         const isResident = req.user?.role === 'resident';
@@ -17,7 +25,7 @@ exports.getAllReports = async (req, res) => {
             ORDER BY reports.created_at DESC`;
         const params = isResident ? [req.user.id] : [];
         const [rows] = await db.query(query, params);
-        res.json(rows);
+        res.json(rows.map((row) => ({ ...row, scheduled_date_text: toDateText(row.scheduled_date) })));
     }
     catch (error) {
         console.error(error);
@@ -284,6 +292,51 @@ exports.submitReport = async (req, res) => {
     }
 };
 
+// The schedule and resolution columns come from docs/sql/alpha-feedback-b.sql.
+// Until they exist, Investigating and Resolved answer with this instead of crashing.
+const REPORT_COLUMNS_MISSING = 'Scheduling and resolution details are not available yet. The database has not been updated for this feature.';
+
+const TIME_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+
+// The barangay's calendar day, so "not in the past" doesn't depend on the server's time zone.
+const todayInManila = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(new Date());
+
+const isValidDateText = (value) => {
+    const match = typeof value === 'string' && /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (!match) return false;
+    const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+    return date.getUTCFullYear() === Number(match[1])
+        && date.getUTCMonth() === Number(match[2]) - 1
+        && date.getUTCDate() === Number(match[3]);
+};
+
+// Optional coordinate from the browser; anything unusable is simply not saved.
+const parseCoordinate = (value, limit) => {
+    if (value === undefined || value === null || value === '') return null;
+    const number = Number(value);
+    return Number.isFinite(number) && Math.abs(number) <= limit ? Number(number.toFixed(7)) : null;
+};
+
+const formatTime12 = (time) => {
+    const [hours, minutes] = String(time).split(':').map(Number);
+    const suffix = hours >= 12 ? 'PM' : 'AM';
+    return `${hours % 12 || 12}:${String(minutes).padStart(2, '0')} ${suffix}`;
+};
+
+const formatDateLong = (dateText) => {
+    const [year, month, day] = dateText.split('-').map(Number);
+    return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString('en-US', {
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC'
+    });
+};
+
+const escapeHtml = (value) => String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
 exports.updateReportStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
@@ -292,32 +345,91 @@ exports.updateReportStatus = async (req, res) => {
         return res.status(400).json({ message: 'Valid status is required' });
     }
 
+    const scheduledDate = req.body.scheduled_date;
+    const scheduledFrom = req.body.scheduled_from;
+    const scheduledTo = req.body.scheduled_to;
+    const resolutionNotes = typeof req.body.resolution_notes === 'string' ? req.body.resolution_notes.trim() : '';
+    const resolutionLat = parseCoordinate(req.body.resolution_lat, 90);
+    const resolutionLng = parseCoordinate(req.body.resolution_lng, 180);
+    const hasLocation = resolutionLat !== null && resolutionLng !== null;
+
+    if (status === 'investigating') {
+        if (!isValidDateText(scheduledDate)) {
+            return res.status(400).json({ message: 'Please choose the scheduled day.' });
+        }
+        if (scheduledDate < todayInManila()) {
+            return res.status(400).json({ message: 'The scheduled day cannot be in the past.' });
+        }
+        if (typeof scheduledFrom !== 'string' || !TIME_PATTERN.test(scheduledFrom)
+            || typeof scheduledTo !== 'string' || !TIME_PATTERN.test(scheduledTo)) {
+            return res.status(400).json({ message: 'Please enter the scheduled time window.' });
+        }
+        if (scheduledTo <= scheduledFrom) {
+            return res.status(400).json({ message: 'The end of the time window must be after the start.' });
+        }
+    }
+    if (status === 'resolved') {
+        if (resolutionNotes.length < 10) {
+            return res.status(400).json({ message: 'Please describe how it was resolved (at least 10 characters).' });
+        }
+        if (resolutionNotes.length > 2000) {
+            return res.status(400).json({ message: 'The resolution notes can be at most 2000 characters.' });
+        }
+    }
+
     try {
 
-        const [[report]] = await db.query(`select household_id, issue_type 
+        const [[report]] = await db.query(`select household_id, issue_type, user_id
             from reports where id = ? and deleted_at is null`, [id]);
 
         if (!report) {
             return res.status(404).json({ message: 'Report not found' });
         }
 
-        await db.query(
-            `UPDATE reports SET status = ? WHERE id= ?`,
-            [status, id]
-        );
+        if (status === 'pending') {
+            await db.query(
+                `UPDATE reports SET status = ? WHERE id= ?`,
+                [status, id]
+            );
+        }
+        // The other open reports for the same household and issue follow this one,
+        // and get the same schedule or resolution details.
         if (status === 'resolved') {
-            await db.query(`update reports set status = 'resolved'
-             where household_id = ? and issue_type = ? and deleted_at is null and status != 'resolved'`, [report.household_id, report.issue_type]);
-
+            await db.query(
+                `UPDATE reports
+                 SET status = 'resolved', resolution_notes = ?, resolved_by = ?, resolved_at = NOW(),
+                     resolution_lat = ?, resolution_lng = ?
+                 WHERE id = ?`,
+                [resolutionNotes, req.user.id, resolutionLat, resolutionLng, id]
+            );
+            await db.query(
+                `UPDATE reports
+                 SET status = 'resolved', resolution_notes = ?, resolved_by = ?, resolved_at = NOW(),
+                     resolution_lat = ?, resolution_lng = ?
+                 WHERE household_id = ? AND issue_type = ? AND deleted_at IS NULL AND status != 'resolved'`,
+                [resolutionNotes, req.user.id, resolutionLat, resolutionLng, report.household_id, report.issue_type]
+            );
         }
         if (status === 'investigating') {
-            await db.query(`update reports set status = 'investigating'
-               where household_id = ? and issue_type = ? and deleted_at is null
-               and status != 'resolved' and status != 'investigating'`, [report.household_id, report.issue_type]);
-
+            await db.query(
+                `UPDATE reports
+                 SET status = 'investigating', scheduled_date = ?, scheduled_from = ?, scheduled_to = ?,
+                     investigating_at = COALESCE(investigating_at, NOW())
+                 WHERE id = ?`,
+                [scheduledDate, scheduledFrom, scheduledTo, id]
+            );
+            await db.query(
+                `UPDATE reports
+                 SET status = 'investigating', scheduled_date = ?, scheduled_from = ?, scheduled_to = ?,
+                     investigating_at = COALESCE(investigating_at, NOW())
+                 WHERE household_id = ? AND issue_type = ? AND deleted_at IS NULL AND status != 'resolved'`,
+                [scheduledDate, scheduledFrom, scheduledTo, report.household_id, report.issue_type]
+            );
         }
 
-
+        const scheduleText = status === 'investigating'
+            ? `${formatDateLong(scheduledDate)}, ${formatTime12(scheduledFrom)} to ${formatTime12(scheduledTo)}`
+            : '';
 
         await auditLog({
             user_id: req.user ? req.user.id : null,
@@ -326,12 +438,54 @@ exports.updateReportStatus = async (req, res) => {
             action: 'UPDATE_REPORT_STATUS',
             table_affected: 'reports',
             record_id: id,
-            details: `Report status updated to ${status} for report ID: ${id}`,
+            details: `Report status updated to ${status} for report ID: ${id}`
+                + (status === 'investigating' ? ` (scheduled ${scheduledDate} ${scheduledFrom}-${scheduledTo})` : '')
+                + (status === 'resolved' ? ` (resolution notes saved${hasLocation ? ', location saved' : ''})` : ''),
             ip_address: req.ip
         });
-        res.json({ message: 'Report status updated successfully ' });
+
+        if (status !== 'investigating') {
+            return res.json({ message: 'Report status updated successfully ' });
+        }
+
+        // The status change already succeeded; a failed email is only reported back.
+        let emailSent = false;
+        try {
+            const [[resident]] = await db.query('SELECT name, email FROM users WHERE id = ?', [report.user_id]);
+            if (resident?.email) {
+                const issueLabel = String(report.issue_type);
+                const result = await sendEmail({
+                    to: resident.email,
+                    subject: 'Your TapAware report is being checked',
+                    html: `
+                <div style="margin:0;padding:32px 16px;background-color:#0a1a33;font-family:Arial,sans-serif;color:#0a1a33;">
+                    <div style="max-width:560px;margin:0 auto;padding:32px;background-color:#ffffff;border-radius:8px;">
+                        <h1 style="margin:0 0 20px;color:#0a1a33;font-size:24px;">Your report is being checked</h1>
+                        <p style="margin:0 0 16px;line-height:1.5;">Hello ${escapeHtml(resident.name)},</p>
+                        <p style="margin:0 0 16px;line-height:1.5;">The barangay is now looking into your report about <strong>${escapeHtml(issueLabel)}</strong>.</p>
+                        <p style="margin:0 0 24px;line-height:1.5;">Scheduled visit: <strong>${escapeHtml(scheduleText)}</strong></p>
+                        <p style="margin:0;line-height:1.5;">Barangay Cabalantian</p>
+                    </div>
+                </div>
+            `
+                });
+                emailSent = Boolean(result?.success);
+            }
+        } catch (emailError) {
+            console.log('Failed to send report schedule email:', emailError.message);
+        }
+
+        res.json({
+            message: emailSent
+                ? 'Report status updated. The resident was emailed the schedule.'
+                : 'Report status updated, but the email to the resident could not be sent.',
+            emailSent
+        });
     }
     catch (error) {
+        if (error.code === 'ER_BAD_FIELD_ERROR') {
+            return res.status(503).json({ message: REPORT_COLUMNS_MISSING });
+        }
         console.error(error);
         res.status(500).json({ message: 'Server error' });
     }
@@ -401,7 +555,12 @@ exports.getReportById = async (req, res) => {
             [report.household_id, report.issue_type]
         );
 
-        res.json({ ...report, household_reports: otherReports, active_flag: activeFlag || null });
+        res.json({
+            ...report,
+            scheduled_date_text: toDateText(report.scheduled_date),
+            household_reports: otherReports,
+            active_flag: activeFlag || null
+        });
     }
     catch (error) {
         console.error(error);

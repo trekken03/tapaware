@@ -10,6 +10,7 @@ import API from '@/services/api'
 import { toast } from 'sonner'
 import { Trash2 } from 'lucide-react'
 import { ESTIMATED_PROCESSING_TEXT } from '@/constants/reports'
+import ReportStatusDialog from '@/components/ReportStatusDialog'
 
 const getStatusStyle = (status) => {
     switch (status) {
@@ -48,17 +49,6 @@ const ReportDetail = () => {
             toast.error('Failed to fetch report')
         } finally {
             setLoading(false)
-        }
-    }
-
-    const handleStatusUpdate = async (newStatus) => {
-        try {
-            await API.put(`/reports/${id}/status`, { status: newStatus })
-            toast.success('Report status updated successfully')
-            fetchReport()
-        } catch (error) {
-            console.log('Error updating status:', error)
-            toast.error('Failed to update report status')
         }
     }
 
@@ -126,6 +116,14 @@ const ReportDetail = () => {
         }
         return date.toLocaleDateString('en-US', {
             month: 'short', day: 'numeric', year: 'numeric',
+        })
+    }
+
+    // "YYYY-MM-DD" built from its parts, like formatOccurredDate, so it can't shift a day.
+    const formatScheduledDate = (dateText) => {
+        const [year, month, day] = dateText.split('-').map(Number)
+        return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
         })
     }
 
@@ -233,6 +231,34 @@ const ReportDetail = () => {
                             </div>
                         </div>
 
+                        <div className="mt-6 grid grid-cols-1 gap-4 border-t border-gray-100 pt-4 text-sm sm:grid-cols-2">
+                            <div>
+                                <p className="text-gray-500">Status</p>
+                                <span className={`${status.bg} ${status.color} mt-1 inline-block px-2 py-1 text-xs font-semibold`}>
+                                    {status.label}
+                                </span>
+                            </div>
+                            {report.scheduled_date_text && report.scheduled_from && report.scheduled_to && (
+                                <div>
+                                    <p className="text-gray-500">Scheduled visit</p>
+                                    <p className="font-semibold text-gray-900">
+                                        {formatScheduledDate(report.scheduled_date_text)}, {formatOccurredTime(report.scheduled_from)} to {formatOccurredTime(report.scheduled_to)}
+                                    </p>
+                                </div>
+                            )}
+                            {report.status === 'resolved' && report.resolution_notes && (
+                                <div className="sm:col-span-2">
+                                    <p className="text-gray-500">Resolution notes</p>
+                                    <p className="font-semibold text-gray-900 whitespace-pre-line break-words">{report.resolution_notes}</p>
+                                    {report.resolved_at && (
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Resolved on {new Date(report.resolved_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
                         {isResident && report.status !== 'resolved' && (
                             <p className="mt-4 text-xs text-gray-500">{ESTIMATED_PROCESSING_TEXT}</p>
                         )}
@@ -310,17 +336,15 @@ const ReportDetail = () => {
                     </CardContent>
                 </Card>
             </div>
-            <ConfirmDialog
+            <ReportStatusDialog
                 open={statusConfirmOpen}
                 onOpenChange={(open) => {
                     setStatusConfirmOpen(open)
                     if (!open) setPendingStatus(null)
                 }}
-                title="Change report status?"
-                description={`This will change the report status to ${pendingStatus || 'the selected status'}.`}
-                actionText="Update status"
-                actionVariant="default"
-                onConfirm={() => pendingStatus && handleStatusUpdate(pendingStatus)}
+                report={report}
+                targetStatus={pendingStatus}
+                onUpdated={fetchReport}
             />
         </Layout>
     )

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { Pagination } from '@/components/ui/pagination'
-import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import ReportStatusDialog from '@/components/ReportStatusDialog'
 import { Home, Plus, Search, Hourglass, ClockFading, CircleCheck, FileText } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
@@ -61,28 +61,10 @@ const Reports = () => {
         }
     }
 
-    const handleStatusUpdate = async (reportId, newStatus) => {
-        try {
-            await API.put(`/reports/${reportId}/status`, { status: newStatus });
-            toast.success('Report status updated successfully')
-            fetchReports();
-        }
-        catch (error) {
-            console.log('Error updating status:', error)
-            toast.error('Failed to update report status')
-        }
-    }
-
     const requestStatusUpdate = (reportId, currentStatus, newStatus) => {
         if (newStatus === currentStatus) return
         setPendingStatus({ reportId, currentStatus, newStatus })
         setStatusConfirmOpen(true)
-    }
-
-    const confirmStatusUpdate = async () => {
-        if (pendingStatus) {
-            await handleStatusUpdate(pendingStatus.reportId, pendingStatus.newStatus)
-        }
     }
 
     const getStatusStyle = (status) => {
@@ -385,17 +367,15 @@ const Reports = () => {
                 </Card>
 
             </div>
-            <ConfirmDialog
+            <ReportStatusDialog
                 open={statusConfirmOpen}
                 onOpenChange={(open) => {
                     setStatusConfirmOpen(open)
                     if (!open) setPendingStatus(null)
                 }}
-                title="Change report status?"
-                description={`This will change the report status to ${pendingStatus?.newStatus || 'the selected status'}.`}
-                actionText="Update status"
-                actionVariant="default"
-                onConfirm={confirmStatusUpdate}
+                report={reports.find(r => r.id === pendingStatus?.reportId) || null}
+                targetStatus={pendingStatus?.newStatus}
+                onUpdated={fetchReports}
             />
         </Layout >
     )
