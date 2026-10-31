@@ -4,11 +4,14 @@ const getGaugeStatus = (value) => {
     return { label: 'High', color: '#dc2626', bg: '#fee2e2' }
 }
 
-const WaterGauge = ({ value, label, sublabel, size = 140, maxScale = 1500 }) => {
-    const status = getGaugeStatus(value)
+// Shown instead of a status when a zone has no readings, so an empty zone never reads as "0 ppm, Safe".
+const EMPTY_STATUS = { label: 'No readings yet', color: '#6b7280', bg: '#f3f4f6' }
+
+const WaterGauge = ({ value, label, sublabel, size = 140, maxScale = 1500, empty = false }) => {
+    const status = empty ? EMPTY_STATUS : getGaugeStatus(value)
     const radius = (size - 16) / 2
     const circumference = 2 * Math.PI * radius
-    const percentFilled = Math.min(value / maxScale, 1)
+    const percentFilled = empty ? 0 : Math.min(value / maxScale, 1)
     const dashOffset = circumference * (1 - percentFilled)
 
     return (
@@ -23,24 +26,26 @@ const WaterGauge = ({ value, label, sublabel, size = 140, maxScale = 1500 }) => 
                         stroke="#e5edf5"
                         strokeWidth="10"
                     />
-                    <circle
-                        cx={size / 2}
-                        cy={size / 2}
-                        r={radius}
-                        fill="none"
-                        stroke={status.color}
-                        strokeWidth="10"
-                        strokeLinecap="round"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={dashOffset}
-                        style={{ transition: 'stroke-dashoffset 1s ease-out' }}
-                    />
+                    {!empty && (
+                        <circle
+                            cx={size / 2}
+                            cy={size / 2}
+                            r={radius}
+                            fill="none"
+                            stroke={status.color}
+                            strokeWidth="10"
+                            strokeLinecap="round"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={dashOffset}
+                            style={{ transition: 'stroke-dashoffset 1s ease-out' }}
+                        />
+                    )}
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-2xl font-black tracking-tight" style={{ color: status.color }}>
-                        {Math.round(value)}
+                        {empty ? '—' : Math.round(value)}
                     </span>
-                    <span className="text-[10px] text-gray-500 font-medium uppercase tracking-wide">ppm</span>
+                    {!empty && <span className="text-[10px] text-gray-500 font-medium uppercase tracking-wide">ppm</span>}
                 </div>
             </div>
             <div className="text-center">

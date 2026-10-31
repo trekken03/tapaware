@@ -10,6 +10,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Home, Plus, Search } from 'lucide-react'
 import API from '@/services/api'
 import { toast } from 'sonner'
+import { PUROKS } from '@/constants/puroks'
 import {
     InputGroup,
     InputGroupAddon,
@@ -77,7 +78,7 @@ const Households = () => {
         }
     };
 
-    const zoneOptions = [...new Set(households.map(h => h.zone).filter(Boolean))]
+    const zoneOptions = [...new Set([...PUROKS.map(String), ...households.map(h => h.zone?.toString()).filter(Boolean)])]
         .sort((a, b) => a.toString().localeCompare(b.toString(), undefined, { numeric: true }))
 
     const statusZoneFiltered = households.filter(h => {

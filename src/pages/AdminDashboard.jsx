@@ -130,19 +130,23 @@ const AdminDashboard = () => {
                                                 Zone {item.zone}
                                             </span>
 
-                                            <div className="flex items-center gap-2">
-                                                <span
-                                                    className={`text-lg font-bold ${tdsColors(
-                                                        parseFloat(item.average_tds)
-                                                    )}`}
-                                                >
-                                                    {parseFloat(item.average_tds).toFixed(2)}
-                                                </span>
+                                            {item.last_recorded ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span
+                                                        className={`text-lg font-bold ${tdsColors(
+                                                            parseFloat(item.average_tds)
+                                                        )}`}
+                                                    >
+                                                        {parseFloat(item.average_tds).toFixed(2)}
+                                                    </span>
 
-                                                <span className="text-xs text-gray-500">
-                                                    ppm
-                                                </span>
-                                            </div>
+                                                    <span className="text-xs text-gray-500">
+                                                        ppm
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-sm text-gray-500">No readings yet</span>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

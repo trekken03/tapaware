@@ -13,6 +13,7 @@ import { InputGroupAddon, InputGroup, InputGroupInput } from '@/components/ui/in
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { toast } from 'sonner'
+import { PUROKS } from '@/constants/puroks'
 
 
 const Reports = () => {
@@ -118,7 +119,7 @@ const Reports = () => {
                 };
         }
     };
-    const zoneOptions = [...new Set(reports.map(r => r.zone).filter(Boolean))]
+    const zoneOptions = [...new Set([...PUROKS.map(String), ...reports.map(r => r.zone?.toString()).filter(Boolean)])]
         .sort((a, b) => a.toString().localeCompare(b.toString(), undefined, { numeric: true }))
 
     const statusZoneFiltered = reports.filter(r => {

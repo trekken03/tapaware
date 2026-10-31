@@ -115,10 +115,14 @@ const StaffDashboard = () => {
                                     {tdsByZone.map((item) => (
                                         <div key={item.zone} className="flex items-center justify-between pb-3 last:border-b-0">
                                             <span className="text-sm font-medium text-gray-700">Zone {item.zone}</span>
-                                            <div className="flex items-center gap-2">
-                                                <span className={`text-lg font-bold ${tdsColors(parseFloat(item.average_tds))}`}>{parseFloat(item.average_tds).toFixed(2)}</span>
-                                                <span className="text-xs text-gray-500">ppm</span>
-                                            </div>
+                                            {item.last_recorded ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-lg font-bold ${tdsColors(parseFloat(item.average_tds))}`}>{parseFloat(item.average_tds).toFixed(2)}</span>
+                                                    <span className="text-xs text-gray-500">ppm</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-sm text-gray-500">No readings yet</span>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

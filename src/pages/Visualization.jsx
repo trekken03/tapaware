@@ -640,12 +640,12 @@ const Visualization = () => {
                                                 label={{ value: 'TDS (ppm)', angle: -90, position: 'insideLeft', style: { fill: '#6b7280', fontSize: 12 } }}
                                             />
                                             <Tooltip
-                                                formatter={(value) => [`${Number(value).toFixed(2)} ppm`, 'Avg TDS']}
+                                                formatter={(value) => [value == null ? 'No readings yet' : `${Number(value).toFixed(2)} ppm`, 'Avg TDS']}
                                                 labelFormatter={(label) => `Zone ${label}`}
                                             />
                                             <Bar dataKey="average_tds" radius={[2, 2, 0, 0]}>
                                                 {tdsByZone.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={getTDSColor(entry.average_tds)} />
+                                                    <Cell key={`cell-${index}`} fill={entry.last_recorded ? getTDSColor(entry.average_tds) : '#d1d5db'} />
                                                 ))}
                                             </Bar>
                                         </BarChart>
