@@ -246,6 +246,12 @@ const ReportDetail = () => {
                                     </p>
                                 </div>
                             )}
+                            {report.resolution_tds_value != null && (
+                                <div>
+                                    <p className="text-gray-500">TDS at resolution</p>
+                                    <p className="font-semibold text-gray-900">{Number(report.resolution_tds_value)} ppm</p>
+                                </div>
+                            )}
                             {report.status === 'resolved' && report.resolution_notes && (
                                 <div className="sm:col-span-2">
                                     <p className="text-gray-500">Resolution notes</p>

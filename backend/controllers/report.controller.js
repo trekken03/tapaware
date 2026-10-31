@@ -295,11 +295,24 @@ exports.submitReport = async (req, res) => {
 // The schedule and resolution columns come from docs/sql/alpha-feedback-b.sql.
 // Until they exist, Investigating and Resolved answer with this instead of crashing.
 const REPORT_COLUMNS_MISSING = 'Scheduling and resolution details are not available yet. The database has not been updated for this feature.';
+// resolution_tds_value comes from docs/sql/alpha-feedback-c.sql.
+const RESOLUTION_TDS_MISSING = 'Saving a TDS reading at resolution is not available yet. The database has not been updated for this feature. Resolve without the TDS value, or try again later.';
+const RESOLUTION_TDS_FAILED = 'The report was not resolved because the TDS reading could not be saved. Nothing was changed. Please try again.';
 
 const TIME_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
 
 // The barangay's calendar day, so "not in the past" doesn't depend on the server's time zone.
 const todayInManila = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(new Date());
+
+// Current wall-clock time in the barangay as "YYYY-MM-DD HH:MM:00", the format
+// tds_readings.measured_at is stored in (see tds.controller addReadings).
+const nowInManilaDateTime = () => {
+    const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+    }).formatToParts(new Date()).map((part) => [part.type, part.value]));
+    return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:00`;
+};
 
 const isValidDateText = (value) => {
     const match = typeof value === 'string' && /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
@@ -353,6 +366,12 @@ exports.updateReportStatus = async (req, res) => {
     const resolutionLng = parseCoordinate(req.body.resolution_lng, 180);
     const hasLocation = resolutionLat !== null && resolutionLng !== null;
 
+    // Optional TDS reading taken when resolving. Empty means "not given".
+    const rawTds = req.body.resolution_tds_value;
+    const tdsProvided = status === 'resolved' && rawTds !== undefined && rawTds !== null
+        && !(typeof rawTds === 'string' && rawTds.trim() === '');
+    const resolutionTds = tdsProvided ? Number(rawTds) : null;
+
     if (status === 'investigating') {
         if (!isValidDateText(scheduledDate)) {
             return res.status(400).json({ message: 'Please choose the scheduled day.' });
@@ -375,6 +394,10 @@ exports.updateReportStatus = async (req, res) => {
         if (resolutionNotes.length > 2000) {
             return res.status(400).json({ message: 'The resolution notes can be at most 2000 characters.' });
         }
+        // Same rule as addReadings in tds.controller.
+        if (tdsProvided && (isNaN(resolutionTds) || resolutionTds < 0 || resolutionTds > 1500)) {
+            return res.status(400).json({ message: 'Invalid TDS value' });
+        }
     }
 
     try {
@@ -394,7 +417,58 @@ exports.updateReportStatus = async (req, res) => {
         }
         // The other open reports for the same household and issue follow this one,
         // and get the same schedule or resolution details.
-        if (status === 'resolved') {
+        let resolutionReadingId = null;
+        if (status === 'resolved' && tdsProvided) {
+            // With a TDS value, resolving and saving the reading succeed or fail together.
+            const conn = await db.getConnection();
+            try {
+                await conn.beginTransaction();
+                await conn.query(
+                    `UPDATE reports
+                     SET status = 'resolved', resolution_notes = ?, resolved_by = ?, resolved_at = NOW(),
+                         resolution_lat = ?, resolution_lng = ?, resolution_tds_value = ?
+                     WHERE id = ?`,
+                    [resolutionNotes, req.user.id, resolutionLat, resolutionLng, resolutionTds, id]
+                );
+                await conn.query(
+                    `UPDATE reports
+                     SET status = 'resolved', resolution_notes = ?, resolved_by = ?, resolved_at = NOW(),
+                         resolution_lat = ?, resolution_lng = ?, resolution_tds_value = ?
+                     WHERE household_id = ? AND issue_type = ? AND deleted_at IS NULL AND status != 'resolved'`,
+                    [resolutionNotes, req.user.id, resolutionLat, resolutionLng, resolutionTds, report.household_id, report.issue_type]
+                );
+
+                // One reading for the household, however many reports were resolved.
+                const readingNotes = `Resolution check, report #${id}`;
+                let readingResult;
+                try {
+                    [readingResult] = await conn.query(
+                        'INSERT INTO tds_readings(household_id,staff_id,tds_value,notes,measured_at,latitude,longitude) VALUES(?,?,?,?,?,?,?)',
+                        [report.household_id, req.user.id, resolutionTds, readingNotes, nowInManilaDateTime(), hasLocation ? resolutionLat : null, hasLocation ? resolutionLng : null]
+                    );
+                } catch (insertError) {
+                    // measured_at/latitude/longitude not added yet: save the reading the old way, like addReadings.
+                    if (insertError.code !== 'ER_BAD_FIELD_ERROR') throw insertError;
+                    [readingResult] = await conn.query(
+                        'INSERT INTO tds_readings(household_id,staff_id,tds_value,notes) VALUES(?,?,?,?)',
+                        [report.household_id, req.user.id, resolutionTds, readingNotes]
+                    );
+                }
+                resolutionReadingId = readingResult.insertId;
+
+                await conn.commit();
+            } catch (transactionError) {
+                try { await conn.rollback(); } catch (rollbackError) { console.error(rollbackError); }
+                console.error(transactionError);
+                const columnMissing = transactionError.code === 'ER_BAD_FIELD_ERROR'
+                    && String(transactionError.sqlMessage || transactionError.message).includes('resolution_tds_value');
+                return res.status(columnMissing ? 503 : 500).json({
+                    message: columnMissing ? RESOLUTION_TDS_MISSING : RESOLUTION_TDS_FAILED
+                });
+            } finally {
+                conn.release();
+            }
+        } else if (status === 'resolved') {
             await db.query(
                 `UPDATE reports
                  SET status = 'resolved', resolution_notes = ?, resolved_by = ?, resolved_at = NOW(),
@@ -440,9 +514,22 @@ exports.updateReportStatus = async (req, res) => {
             record_id: id,
             details: `Report status updated to ${status} for report ID: ${id}`
                 + (status === 'investigating' ? ` (scheduled ${scheduledDate} ${scheduledFrom}-${scheduledTo})` : '')
-                + (status === 'resolved' ? ` (resolution notes saved${hasLocation ? ', location saved' : ''})` : ''),
+                + (status === 'resolved' ? ` (resolution notes saved${hasLocation ? ', location saved' : ''}${tdsProvided ? `, TDS ${resolutionTds} ppm` : ''})` : ''),
             ip_address: req.ip
         });
+
+        if (resolutionReadingId) {
+            await auditLog({
+                user_id: req.user.id,
+                user_name: req.user.name,
+                user_role: req.user.role,
+                action: 'ADD_TDS_READING',
+                table_affected: 'tds_readings',
+                record_id: resolutionReadingId,
+                details: `TDS reading added for household: ${report.household_id}, value: ${resolutionTds} (resolution check, report #${id})`,
+                ip_address: req.ip
+            });
+        }
 
         if (status !== 'investigating') {
             return res.json({ message: 'Report status updated successfully ' });

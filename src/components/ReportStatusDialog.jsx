@@ -27,6 +27,9 @@ const ReportStatusDialog = ({ open, onOpenChange, report, targetStatus, onUpdate
     const [scheduledFrom, setScheduledFrom] = useState('')
     const [scheduledTo, setScheduledTo] = useState('')
     const [notes, setNotes] = useState('')
+    const [tdsValue, setTdsValue] = useState('')
+    // A number input reports typed letters as '' — remember that it was not a number.
+    const [tdsBadInput, setTdsBadInput] = useState(false)
     const [location, setLocation] = useState(null)
     const [locationState, setLocationState] = useState('idle')
     const [saving, setSaving] = useState(false)
@@ -37,6 +40,8 @@ const ReportStatusDialog = ({ open, onOpenChange, report, targetStatus, onUpdate
         setScheduledFrom(report.scheduled_from ? String(report.scheduled_from).slice(0, 5) : '')
         setScheduledTo(report.scheduled_to ? String(report.scheduled_to).slice(0, 5) : '')
         setNotes('')
+        setTdsValue('')
+        setTdsBadInput(false)
         setLocation(null)
         setLocationState('idle')
         setChosenStatus(targetStatus)
@@ -69,7 +74,12 @@ const ReportStatusDialog = ({ open, onOpenChange, report, targetStatus, onUpdate
         else if (!scheduledFrom || !scheduledTo) problem = 'Enter the time window.'
         else if (scheduledTo <= scheduledFrom) problem = 'The end time must be after the start time.'
     } else if (status === 'resolved') {
+        // Same range as the TDS reading form and the server (0 to 1500 ppm); empty is allowed.
+        const tdsNumber = Number(tdsValue)
         if (notes.trim().length < 10) problem = 'Describe how it was resolved (at least 10 characters).'
+        else if (tdsBadInput || (tdsValue.trim() !== '' && (isNaN(tdsNumber) || tdsNumber < 0 || tdsNumber > 1500))) {
+            problem = 'Enter a TDS value from 0 to 1500 ppm, or leave it empty.'
+        }
     }
 
     const handleSave = async () => {
@@ -81,6 +91,9 @@ const ReportStatusDialog = ({ open, onOpenChange, report, targetStatus, onUpdate
         }
         if (status === 'resolved') {
             body.resolution_notes = notes.trim()
+            if (tdsValue.trim() !== '') {
+                body.resolution_tds_value = tdsValue.trim()
+            }
             if (location) {
                 body.resolution_lat = location.lat
                 body.resolution_lng = location.lng
@@ -186,6 +199,24 @@ const ReportStatusDialog = ({ open, onOpenChange, report, targetStatus, onUpdate
                             maxLength={2000}
                             placeholder="What was found and what was done"
                         />
+                        <div className="space-y-2 pt-2">
+                            <Label htmlFor="resolution_tds_value">TDS reading taken at the house (ppm)</Label>
+                            <Input
+                                id="resolution_tds_value"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="1500"
+                                placeholder="Optional, e.g. 145.5"
+                                value={tdsValue}
+                                onChange={(e) => {
+                                    setTdsValue(e.target.value)
+                                    setTdsBadInput(e.target.validity.badInput)
+                                }}
+                                className="h-11 text-base md:text-base"
+                            />
+                            <p className="text-xs text-gray-500">Recommended for water quality issues.</p>
+                        </div>
                         <p className="flex items-center gap-1 text-xs text-gray-500">
                             <MapPin size={12} aria-hidden="true" />
                             {locationState === 'saved' ? 'Your current location will be saved with this resolution.'

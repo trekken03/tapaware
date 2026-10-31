@@ -78,6 +78,7 @@ create table reports(
     resolved_at DATETIME NULL,
     resolution_lat DECIMAL(10,7) NULL,
     resolution_lng DECIMAL(10,7) NULL,
+    resolution_tds_value DECIMAL(6,2) NULL,
     foreign key(household_id) references households(id) on delete cascade,
     foreign key(user_id) references users(id),
     constraint fk_reports_resolved_by foreign key(resolved_by) references users(id) on delete set null,
