@@ -108,7 +108,7 @@ const ConcernDetail = () => {
                         onClick={() => navigate(-1)}
                     >
                         <ArrowLeft size={14} />
-                        Back to Admin Panel
+                        Back
                     </Button>
                     {user?.role === 'admin' && (
                         <ConfirmDialog

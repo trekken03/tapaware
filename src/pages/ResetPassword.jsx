@@ -67,7 +67,7 @@ const ResetPassword = () => {
                 {/* Mascot glued to the background scene (right of the centered card). Desktop only. */}
                 <SceneMascot src="/assets/login_figure.png" x={0.73} size={0.21} className="hidden lg:block" />
 
-                <Card className="relative z-10 w-full max-w-sm shadow-lg">
+                <Card className="relative z-10 w-full  max-w-lg shadow-lg">
                     <CardContent className="pt-6">
                         <Alert variant="destructive">
                             <XCircle className="h-4 w-4" />

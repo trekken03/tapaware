@@ -67,7 +67,7 @@ const Login = () => {
                 x = horizontal position, size = width (both as a fraction of the background image) */}
             <SceneMascot src="/assets/login_figure.png" x={0.45} size={0.21} className="hidden md:block" />
 
-            <Card className="relative z-10 w-full max-w-sm bg-white shadow-lg">
+            <Card className="relative z-10 w-full max-w-xl bg-white shadow-lg">
                 <div className="flex flex-col items-center mb-6">
                     <div className="flex items-center justify-center gap-2">
                         <img

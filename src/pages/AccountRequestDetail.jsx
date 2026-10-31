@@ -182,7 +182,7 @@ const AccountRequestDetail = () => {
 
     const backButton = (
         <Button
-            variant="outline"
+
             size="sm"
             className="flex items-center gap-1 border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-100 hover:cursor-pointer"
             onClick={() => navigate(-1)}

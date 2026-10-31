@@ -66,7 +66,7 @@ const ForgotPass = () => {
             {/* Mascot glued to the background scene (right of the centered card). Desktop only. */}
             <SceneMascot src="/assets/login_figure.png" x={0.73} size={0.21} className="hidden lg:block" />
 
-            <Card className="relative z-10 w-full max-w-sm bg-white shadow-lg">
+            <Card className="relative z-10 w-full h-85 max-w-lg bg-white shadow-lg">
                 <div className="flex flex-col items-center mb-6">
                     <div className="flex items-center justify-center gap-2">
                         <img

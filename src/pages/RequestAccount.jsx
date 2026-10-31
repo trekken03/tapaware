@@ -122,10 +122,10 @@ const RequestAccount = () => {
                                 className="w-10 h-10 object-contain hover:cursor-pointer "
                             />
                             <h1 className="text-2xl font-bold text-blue-900">
-                                Request an account
+                                Request an Account
                             </h1>
                         </div>
-                        <p className="text-gray-500 text-sm mt-1 text-center">
+                        <p className="text-gray-500 text-xs mt-1 text-center">
                             Fill in your details. The barangay will review your request and email you if it is approved.
                         </p>
                     </div>
