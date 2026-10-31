@@ -13,6 +13,7 @@ import ReportStatusDialog from '@/components/ReportStatusDialog'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { toast } from 'sonner'
+import { getDueDate, isOverdue } from '@/utils/reportDue'
 
 const PAGE_SIZE = 10
 
@@ -39,6 +40,21 @@ const formatTime = (time) => {
     return new Date(2000, 0, 1, hours, minutes).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 }
 
+// "YYYY-MM-DD" built from its parts, so it can't shift a day.
+const formatDayKey = (key) => {
+    const [year, month, day] = key.split('-').map(Number)
+    return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+// Resolved reports show when they were resolved; open ones their due date.
+const formatDue = (r) => {
+    if (r.status === 'resolved') {
+        return r.resolved_at && !isNaN(new Date(r.resolved_at)) ? formatDate(r.resolved_at) : '—'
+    }
+    const dueKey = getDueDate(r.created_at)
+    return dueKey ? formatDayKey(dueKey) : '—'
+}
+
 const formatSchedule = (r) => {
     if (!r.scheduled_date_text || !r.scheduled_from || !r.scheduled_to) return '—'
     const [year, month, day] = r.scheduled_date_text.split('-').map(Number)
@@ -57,6 +73,7 @@ const ReportsMaintenance = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const [currentPage, setCurrentPage] = useState(1)
     const [editReport, setEditReport] = useState(null)
+    const [overdueOnly, setOverdueOnly] = useState(false)
 
     useEffect(() => {
         fetchReports()
@@ -102,8 +119,14 @@ const ReportsMaintenance = () => {
     const statusForTab = { new: 'pending', investigating: 'investigating', resolved: 'resolved' }[tab]
     const sourceRows = tab === 'archived' ? archived : reports
     const tabRows = statusForTab ? sourceRows.filter(r => r.status === statusForTab) : sourceRows
+    // The Overdue filter only exists on All, New and Investigating.
+    const now = new Date()
+    const overdueAllowed = tab === 'all' || tab === 'new' || tab === 'investigating'
+    const overdueCount = overdueAllowed ? tabRows.filter(r => isOverdue(r, now)).length : 0
+    const overdueActive = overdueAllowed && overdueOnly
+    const visibleRows = overdueActive ? tabRows.filter(r => isOverdue(r, now)) : tabRows
     const searchLower = searchTerm.toLowerCase()
-    const filteredRows = tabRows.filter(r =>
+    const filteredRows = visibleRows.filter(r =>
         r.issue_type?.toLowerCase().includes(searchLower) ||
         r.household_number?.toString().includes(searchLower) ||
         r.owner_name?.toLowerCase().includes(searchLower) ||
@@ -116,7 +139,11 @@ const ReportsMaintenance = () => {
 
     useEffect(() => {
         setCurrentPage(1)
-    }, [tab, searchTerm])
+    }, [tab, searchTerm, overdueOnly])
+
+    useEffect(() => {
+        if (tab === 'resolved' || tab === 'archived') setOverdueOnly(false)
+    }, [tab])
 
     useEffect(() => {
         if (currentPage > totalPages) setCurrentPage(totalPages)
@@ -151,15 +178,30 @@ const ReportsMaintenance = () => {
                                 <span className="text-sm font-normal text-gray-500">({filteredRows.length})</span>
                             </CardTitle>
                             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                                <Tabs value={tab} onValueChange={setTab}>
-                                    <TabsList variant="line" className="flex-wrap">
-                                        <TabsTrigger value="all">All</TabsTrigger>
-                                        <TabsTrigger value="new">New</TabsTrigger>
-                                        <TabsTrigger value="investigating">Investigating</TabsTrigger>
-                                        <TabsTrigger value="resolved">Resolved</TabsTrigger>
-                                        {isAdmin && <TabsTrigger value="archived">Archived</TabsTrigger>}
-                                    </TabsList>
-                                </Tabs>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <Tabs value={tab} onValueChange={setTab}>
+                                        <TabsList variant="line" className="flex-wrap">
+                                            <TabsTrigger value="all">All</TabsTrigger>
+                                            <TabsTrigger value="new">New</TabsTrigger>
+                                            <TabsTrigger value="investigating">Investigating</TabsTrigger>
+                                            <TabsTrigger value="resolved">Resolved</TabsTrigger>
+                                            {isAdmin && <TabsTrigger value="archived">Archived</TabsTrigger>}
+                                        </TabsList>
+                                    </Tabs>
+                                    {overdueAllowed && (
+                                        <button
+                                            type="button"
+                                            aria-pressed={overdueActive}
+                                            onClick={() => setOverdueOnly(!overdueOnly)}
+                                            className={`min-h-9 rounded-full border px-3 py-1 text-sm font-medium hover:cursor-pointer transition-colors ${overdueActive
+                                                ? 'border-red-600 bg-red-600 text-white'
+                                                : 'border-red-200 bg-white text-red-700 hover:bg-red-50'
+                                                }`}
+                                        >
+                                            Overdue ({overdueCount})
+                                        </button>
+                                    )}
+                                </div>
                                 <InputGroup className="max-w-xs">
                                     <InputGroupInput
                                         placeholder="Search..."
@@ -189,6 +231,7 @@ const ReportsMaintenance = () => {
                                             <TableHead>Household</TableHead>
                                             <TableHead>Zone</TableHead>
                                             <TableHead>Status</TableHead>
+                                            <TableHead>Due</TableHead>
                                             <TableHead>{isArchivedTab ? 'Archived' : 'Scheduled'}</TableHead>
                                             <TableHead>Reported</TableHead>
                                             <TableHead>Actions</TableHead>
@@ -207,10 +250,18 @@ const ReportsMaintenance = () => {
                                                     <TableCell label="Household">#{r.household_number} · {r.owner_name}</TableCell>
                                                     <TableCell label="Zone">Zone {r.zone || '—'}</TableCell>
                                                     <TableCell label="Status">
-                                                        <span className={`inline-block px-2 py-1 text-xs font-semibold ${statusStyle.className}`}>
-                                                            {statusStyle.label}
-                                                        </span>
+                                                        <div className="flex flex-wrap items-center gap-1">
+                                                            <span className={`inline-block px-2 py-1 text-xs font-semibold ${statusStyle.className}`}>
+                                                                {statusStyle.label}
+                                                            </span>
+                                                            {!isArchivedTab && isOverdue(r, now) && (
+                                                                <span className="inline-block rounded bg-red-600 px-2 py-1 text-xs font-semibold text-white">
+                                                                    Overdue
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </TableCell>
+                                                    <TableCell label="Due" className="whitespace-nowrap">{formatDue(r)}</TableCell>
                                                     <TableCell label={isArchivedTab ? 'Archived' : 'Scheduled'} className="whitespace-nowrap">
                                                         {isArchivedTab ? formatDate(r.deleted_at) : formatSchedule(r)}
                                                     </TableCell>
