@@ -16,8 +16,7 @@ import { useAuth } from '@/context/AuthContext';
 import { PUROKS } from '@/constants/puroks';
 
 
-// MySQL timestamps normally arrive as ISO strings, but a plain "YYYY-MM-DD HH:MM:SS"
-// is only parsed reliably once the space is swapped for a "T" — same guard Archive.jsx uses.
+
 const formatRecordedAt = (value) => {
     const parsed = new Date(typeof value === 'string' ? value.replace(' ', 'T') : value)
     if (isNaN(parsed)) return 'unknown date'
@@ -71,7 +70,7 @@ const Homepage = () => {
                 API.get('/visualization/tds-by-zone'),
                 API.get('/visualization/summary'),
             ])
-            // One card per purok, empty ones included; any other zone only shows when it has readings.
+            
             const rows = zoneRes.data
             const purokKeys = PUROKS.map(String)
             const byZone = new Map(rows.map(p => [String(p.zone).trim(), p]))
@@ -90,14 +89,14 @@ const Homepage = () => {
         if (location.state?.scrollTo) {
             const id = location.state.scrollTo;
 
-            // Wait until the page has rendered
+            
             setTimeout(() => {
                 document.getElementById(id)?.scrollIntoView({
                     behavior: 'smooth',
                     block: 'start',
                 });
 
-                // Clear the navigation state
+                
                 window.history.replaceState({}, document.title);
             }, 300);
         }
@@ -188,7 +187,7 @@ const Homepage = () => {
             )}
             <LandingNavbar />
 
-            {/* HERO */}
+           
             <section
                 id="home"
                 className="relative flex min-h-[680px] items-center overflow-hidden text-white sm:min-h-screen"
@@ -203,10 +202,10 @@ const Homepage = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-[#071d50]/70 via-[#0b2d66]/35 to-[#071d50]/15" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#031230]/55 via-transparent to-transparent" />
 
-                {/* Hero Content */}
+                
                 <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-12 px-4 pb-20 pt-32 sm:px-6 md:grid-cols-2 md:items-end md:pb-28">
 
-                    {/* Left Side */}
+                    
                     <div className="max-w-xl">
                         <span className="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white">
                             <MapPin size={14} />
@@ -281,7 +280,7 @@ const Homepage = () => {
                             <div className="h-[220px] w-[220px] animate-pulse rounded-full border-4 border-white/30" />
                         ) : summary && overallStatus ? (
                             <div className="relative mt-16 w-full max-w-[300px] rounded-2xl bg-white px-6 pb-7 pt-9 text-[#14213d] shadow-2xl shadow-[#071d50]/30 md:mr-32 md:mt-0 lg:mr-40 xl:mr-56">
-                                {/* Mascot: small hop every few seconds, click it for a squash-and-pop + heart */}
+                               
                                 <PokeMascot
                                     src="/assets/figure-barangay-wide.png"
                                     origin="50% 73%"
@@ -312,7 +311,7 @@ const Homepage = () => {
                 </div>
             </section>
 
-            {/* ABOUT */}
+            
             <section id="about" className="bg-gradient-to-b from-white via-[#f7fcff] to-[#e8f8ff] py-20">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
                     <div className="mb-12 grid items-end gap-6 md:grid-cols-2 md:gap-16">
@@ -365,7 +364,7 @@ const Homepage = () => {
 
             <HowItWorks isLoggedIn={!!user} />
 
-            {/* ZONE GAUGES */}
+          
             <section id="quality" className="relative overflow-hidden bg-[#e4f5fc] px-0 pb-32 pt-20">
                 <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
                     <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#4776ae]">Latest readings</span>
@@ -378,8 +377,7 @@ const Homepage = () => {
                     ) : zoneData.every(p => !p.last_recorded) ? (
                         <p className="text-[#536a8d]">No readings recorded yet.</p>
                     ) : (
-                        // Flex-wrap with the same column widths and gaps as the old 2/3-column grid,
-                        // so a lone card in the last row sits centered.
+                        
                         <div className="flex flex-wrap justify-center gap-5 lg:gap-x-12 lg:gap-y-8">
                             {zoneData.map((p) => (
                                 <div key={p.zone} className="flex w-[calc((100%_-_1.25rem)/2)] justify-center rounded-xl border border-white/80 bg-white p-4 shadow-[0_10px_28px_-20px_rgba(12,43,86,0.55)] transition-transform duration-300 hover:-translate-y-1 sm:w-[calc((100%_-_2.5rem)/3)] sm:p-5 lg:w-[calc((100%_-_6rem)/3)]">
@@ -403,7 +401,7 @@ const Homepage = () => {
                 </div>
             </section>
 
-            {/* CONTACT / CONCERN FORM */}
+            
 
             <section id="contact" className="relative -mt-px overflow-hidden bg-[#102765] py-20 text-white">
                 <div className={user
@@ -443,7 +441,7 @@ const Homepage = () => {
                     {!user && (
 
                         <div className="relative w-full max-w-md md:justify-self-end">
-                            {/* Mascot: small hop every few seconds, click it for a squash-and-pop + heart */}
+                            
                             <PokeMascot
                                 src="/assets/figure-form.png"
                                 origin="50% 96%"
@@ -513,7 +511,7 @@ const Homepage = () => {
             </section>
 
 
-            {/* FOOTER */}
+            
             <footer className="bg-[#071b4d] py-8 text-blue-200">
                 <div className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-x-8 gap-y-3 px-4 text-center sm:flex-row sm:flex-wrap sm:px-6">
                     <div className="flex items-center gap-2">
@@ -528,4 +526,4 @@ const Homepage = () => {
     )
 }
 
-export default Homepage
+export default Homepage;
