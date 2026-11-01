@@ -10,6 +10,33 @@ const toDateText = (value) => {
     return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`;
 };
 
+// A resident's own household, read from the database (never from the request).
+const getOwnHouseholdId = async (userId) => {
+    const [[user]] = await db.query(
+        'SELECT household_id FROM users WHERE id = ? AND deleted_at IS NULL',
+        [userId]
+    );
+    return user?.household_id || null;
+};
+
+// report_followups comes from docs/sql/alpha-feedback-d.sql. Until it exists,
+// reads simply carry no follow-up data and the follow-up endpoint answers 503.
+const FOLLOWUPS_MISSING = 'Follow-ups are not available yet. The database has not been updated for this feature.';
+const isTableMissing = (error) => error && error.code === 'ER_NO_SUCH_TABLE';
+
+const getFollowupStats = async () => {
+    try {
+        const [rows] = await db.query(
+            `SELECT report_id, COUNT(*) AS followup_count, MAX(created_at) AS last_followup_at
+             FROM report_followups GROUP BY report_id`
+        );
+        return new Map(rows.map((row) => [row.report_id, row]));
+    } catch (error) {
+        if (!isTableMissing(error)) console.error(error);
+        return new Map();
+    }
+};
+
 exports.getAllReports = async (req, res) => {
     try {
         const isResident = req.user?.role === 'resident';
@@ -25,7 +52,13 @@ exports.getAllReports = async (req, res) => {
             ORDER BY reports.created_at DESC`;
         const params = isResident ? [req.user.id] : [];
         const [rows] = await db.query(query, params);
-        res.json(rows.map((row) => ({ ...row, scheduled_date_text: toDateText(row.scheduled_date) })));
+        const followupStats = await getFollowupStats();
+        res.json(rows.map((row) => ({
+            ...row,
+            scheduled_date_text: toDateText(row.scheduled_date),
+            followup_count: Number(followupStats.get(row.id)?.followup_count) || 0,
+            last_followup_at: followupStats.get(row.id)?.last_followup_at || null,
+        })));
     }
     catch (error) {
         console.error(error);
@@ -655,14 +688,90 @@ exports.getReportById = async (req, res) => {
             [report.household_id, report.issue_type]
         );
 
+        let followups = [];
+        try {
+            [followups] = await db.query(
+                `SELECT report_followups.id, report_followups.message, report_followups.created_at, users.name AS user_name
+                 FROM report_followups JOIN users ON report_followups.user_id = users.id
+                 WHERE report_followups.report_id = ?
+                 ORDER BY report_followups.created_at DESC, report_followups.id DESC`,
+                [report.id]
+            );
+        } catch (followupError) {
+            if (!isTableMissing(followupError)) console.error(followupError);
+        }
+
         res.json({
             ...report,
             scheduled_date_text: toDateText(report.scheduled_date),
             household_reports: otherReports,
-            active_flag: activeFlag || null
+            active_flag: activeFlag || null,
+            followups
         });
     }
     catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// A resident nudges the barangay about an open report of their own household
+// (e.g. after the open-report block stopped them from filing a duplicate).
+exports.followUpReport = async (req, res) => {
+    const { id } = req.params;
+    const rawMessage = req.body?.message;
+
+    if (rawMessage !== undefined && rawMessage !== null && typeof rawMessage !== 'string') {
+        return res.status(400).json({ message: 'The message must be text.' });
+    }
+    const message = typeof rawMessage === 'string' ? rawMessage.trim() : '';
+    if (message.length > 200) {
+        return res.status(400).json({ message: 'The message can be at most 200 characters.' });
+    }
+
+    try {
+        const [[report]] = await db.query(
+            'SELECT id, household_id, issue_type, status FROM reports WHERE id = ? AND deleted_at IS NULL',
+            [id]
+        );
+        const ownHouseholdId = report ? await getOwnHouseholdId(req.user.id) : null;
+        if (!report || !ownHouseholdId || Number(report.household_id) !== Number(ownHouseholdId)) {
+            return res.status(404).json({ message: 'Report not found' });
+        }
+        if (report.status !== 'pending' && report.status !== 'investigating') {
+            return res.status(400).json({ message: 'You can only follow up on an open report.' });
+        }
+
+        const [recent] = await db.query(
+            'SELECT id FROM report_followups WHERE report_id = ? AND created_at > NOW() - INTERVAL 24 HOUR LIMIT 1',
+            [report.id]
+        );
+        if (recent.length > 0) {
+            return res.status(429).json({ message: 'You already followed up on this report in the last 24 hours. You can follow up again 24 hours after your last follow-up.' });
+        }
+
+        const [result] = await db.query(
+            'INSERT INTO report_followups(report_id, user_id, message) VALUES (?,?,?)',
+            [report.id, req.user.id, message || null]
+        );
+
+        await auditLog({
+            user_id: req.user.id,
+            user_name: req.user.name,
+            user_role: req.user.role,
+            action: 'FOLLOW_UP_REPORT',
+            table_affected: 'reports',
+            record_id: report.id,
+            details: `Resident followed up on report #${report.id} (${report.issue_type}), follow-up #${result.insertId}${message ? ' with a message' : ''}`,
+            ip_address: req.ip
+        });
+
+        res.status(201).json({ message: 'Your follow-up was sent to the barangay.' });
+    }
+    catch (error) {
+        if (isTableMissing(error)) {
+            return res.status(503).json({ message: FOLLOWUPS_MISSING });
+        }
         console.error(error);
         res.status(500).json({ message: 'Server error' });
     }

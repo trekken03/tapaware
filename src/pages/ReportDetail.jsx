@@ -4,7 +4,7 @@ import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { ArrowLeft, Home, FileText } from 'lucide-react'
+import { ArrowLeft, Home, FileText, BellRing } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { toast } from 'sonner'
@@ -300,6 +300,30 @@ const ReportDetail = () => {
                         )}
                     </CardContent>
                 </Card>
+
+                {report.followups?.length > 0 && (
+                    <Card className="w-full mb-6">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <BellRing size={20} className="text-orange-600" />
+                                Follow-ups ({report.followups.length})
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ul className="space-y-2">
+                                {report.followups.map((f) => (
+                                    <li key={f.id} className="rounded-lg border-l-4 border-orange-300 bg-orange-50 p-3 text-sm">
+                                        <p className="text-xs text-gray-500">
+                                            {new Date(f.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                                            {f.user_name ? ` · ${f.user_name}` : ''}
+                                        </p>
+                                        <p className="mt-1 text-gray-900 break-words">{f.message || <span className="text-gray-500 italic">No message</span>}</p>
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
+                )}
 
                 <Card className="w-full">
                     <CardHeader>

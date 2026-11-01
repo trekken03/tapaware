@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { getDueDate, isOverdue } from '@/utils/reportDue'
+import { FollowupBadge } from '@/components/ReportBadges'
 
 const PAGE_SIZE = 10
 
@@ -264,6 +265,7 @@ const ReportsMaintenance = ({ embedded = false }) => {
                                                                     Overdue
                                                                 </span>
                                                             )}
+                                                            <FollowupBadge count={r.followup_count} lastAt={r.last_followup_at} />
                                                         </div>
                                                     </TableCell>
                                                     <TableCell label="Due" className="whitespace-nowrap">{formatDue(r)}</TableCell>

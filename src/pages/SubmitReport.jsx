@@ -4,6 +4,8 @@ import Layout from '@/components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Calendar } from '@/components/ui/calendar'
@@ -49,6 +51,9 @@ const SubmitReport = () => {
     const [confirmOpen, setConfirmOpen] = useState(false)
     const [dateOpen, setDateOpen] = useState(false)
     const [openReportId, setOpenReportId] = useState(null)
+    const [followUpOpen, setFollowUpOpen] = useState(false)
+    const [followUpMessage, setFollowUpMessage] = useState('')
+    const [followUpSending, setFollowUpSending] = useState(false)
 
     const [householdInfo, setHouseholdInfo] = useState(null)
     const [form, setForm] = useState(() => {
@@ -120,6 +125,21 @@ const SubmitReport = () => {
         }
 
         setConfirmOpen(true)
+    }
+
+    // Follow up on the open report that blocked this one. The form is left as typed.
+    const sendFollowUp = async () => {
+        if (!openReportId) return
+        setFollowUpSending(true)
+        try {
+            const res = await API.post(`/reports/${openReportId}/follow-up`, { message: followUpMessage.trim() })
+            toast.success(res.data?.message || 'Your follow-up was sent.')
+            setFollowUpOpen(false)
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to send your follow-up')
+        } finally {
+            setFollowUpSending(false)
+        }
     }
 
     const submitReport = async () => {
@@ -322,10 +342,23 @@ const SubmitReport = () => {
                                 <p className="text-xs text-gray-500">{ESTIMATED_PROCESSING_TEXT}</p>
                                 {openReportId && (
                                     <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                                        You already have an open report for this issue. You can submit again once it is resolved.{' '}
-                                        <Link to={`/reports/${openReportId}`} className="font-semibold underline">
-                                            View that report
-                                        </Link>
+                                        <p>You already have an open report for this issue. You can follow up on it instead.</p>
+                                        <div className="mt-2 flex flex-wrap items-center gap-3">
+                                            <Link to={`/reports/${openReportId}`} className="font-semibold underline">
+                                                View that report
+                                            </Link>
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                className="bg-blue-900 hover:bg-blue-700 text-white"
+                                                onClick={() => {
+                                                    setFollowUpMessage('')
+                                                    setFollowUpOpen(true)
+                                                }}
+                                            >
+                                                Follow up on my report
+                                            </Button>
+                                        </div>
                                     </div>
                                 )}
                             </form>
@@ -335,6 +368,36 @@ const SubmitReport = () => {
                 </Card>
 
             </div>
+            <Dialog open={followUpOpen} onOpenChange={(open) => !followUpSending && setFollowUpOpen(open)}>
+                <DialogContent className="bg-white">
+                    <DialogHeader>
+                        <DialogTitle className="font-semibold">Follow up on my report</DialogTitle>
+                        <DialogDescription>
+                            The barangay will see that you are still waiting on this report.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-2">
+                        <Label htmlFor="follow_up_message">Message (optional)</Label>
+                        <Textarea
+                            id="follow_up_message"
+                            value={followUpMessage}
+                            onChange={(e) => setFollowUpMessage(e.target.value)}
+                            maxLength={200}
+                            rows={3}
+                            placeholder="e.g. The problem is getting worse."
+                        />
+                        <p className="text-right text-xs text-gray-500">{followUpMessage.length}/200</p>
+                    </div>
+                    <DialogFooter className="bg-white">
+                        <Button type="button" variant="outline" disabled={followUpSending} onClick={() => setFollowUpOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button type="button" disabled={followUpSending} onClick={sendFollowUp}>
+                            {followUpSending ? 'Sending...' : 'Send'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             <ConfirmDialog
                 open={confirmOpen}
                 onOpenChange={setConfirmOpen}
