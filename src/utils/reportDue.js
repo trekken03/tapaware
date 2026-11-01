@@ -1,9 +1,9 @@
 // Due dates and "overdue" for reports, matching the promised processing time
-// (ESTIMATED_PROCESSING_TEXT: 3 to 4 business days). Days are bucketed in
+// (ESTIMATED_PROCESSING_TEXT: 1 to 3 business days). Days are bucketed in
 // Manila time, like the dashboard's weekly overview
 // (backend/controllers/visualization.controller.js, manilaDateKey).
 
-export const ESTIMATED_PROCESSING_DAYS_MAX = 4
+export const ESTIMATED_PROCESSING_DAYS_MAX = 3
 
 const manilaDateKey = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit',
