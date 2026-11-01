@@ -9,6 +9,7 @@ import API from '@/services/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/context/AuthContext'
 import { Trash2 } from 'lucide-react'
+import MapLink from '@/components/MapLink'
 
 
 const getTdsStatus = (value) => {
@@ -142,6 +143,14 @@ const TdsDetail = () => {
                             <div className="sm:col-span-2">
                                 <p className="text-gray-500">Notes</p>
                                 <p className="font-semibold text-gray-900">{reading.notes || '-'}</p>
+                            </div>
+                            <div className="sm:col-span-2">
+                                <p className="text-gray-500">Location</p>
+                                {reading.latitude != null && reading.longitude != null ? (
+                                    <MapLink lat={reading.latitude} lng={reading.longitude} />
+                                ) : (
+                                    <p className="font-semibold text-gray-900">Not recorded</p>
+                                )}
                             </div>
                         </div>
                     </CardContent>

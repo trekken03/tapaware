@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { Trash2 } from 'lucide-react'
 import { ESTIMATED_PROCESSING_TEXT } from '@/constants/reports'
 import ReportStatusDialog from '@/components/ReportStatusDialog'
+import MapLink from '@/components/MapLink'
 import { ConfirmationBadge, formatConfirmationDate } from '@/components/ReportBadges'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -285,6 +286,12 @@ const ReportDetail = () => {
                                     {report.resolved_at && (
                                         <p className="mt-1 text-xs text-gray-500">
                                             Resolved on {new Date(report.resolved_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        </p>
+                                    )}
+                                    {/* Where staff were when they resolved it; staff and admin only. */}
+                                    {!isResident && report.resolution_lat != null && report.resolution_lng != null && (
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Resolved at location: <MapLink lat={report.resolution_lat} lng={report.resolution_lng} />
                                         </p>
                                     )}
                                 </div>
