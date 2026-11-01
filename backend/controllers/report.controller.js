@@ -484,6 +484,9 @@ exports.updateReportStatus = async (req, res) => {
                 [resolutionNotes, req.user.id, resolutionLat, resolutionLng, report.household_id, report.issue_type]
             );
         }
+        // Investigating covers the whole household visit: every open report of the
+        // household, any issue type, gets the same schedule.
+        let reportsInvestigating = 0;
         if (status === 'investigating') {
             await db.query(
                 `UPDATE reports
@@ -492,13 +495,15 @@ exports.updateReportStatus = async (req, res) => {
                  WHERE id = ?`,
                 [scheduledDate, scheduledFrom, scheduledTo, id]
             );
-            await db.query(
+            const [householdResult] = await db.query(
                 `UPDATE reports
                  SET status = 'investigating', scheduled_date = ?, scheduled_from = ?, scheduled_to = ?,
                      investigating_at = COALESCE(investigating_at, NOW())
-                 WHERE household_id = ? AND issue_type = ? AND deleted_at IS NULL AND status != 'resolved'`,
-                [scheduledDate, scheduledFrom, scheduledTo, report.household_id, report.issue_type]
+                 WHERE household_id = ? AND deleted_at IS NULL AND status != 'resolved'`,
+                [scheduledDate, scheduledFrom, scheduledTo, report.household_id]
             );
+            // mysql2 sends FOUND_ROWS, so this counts every matched report (the target included).
+            reportsInvestigating = Number(householdResult?.affectedRows) || 0;
         }
 
         const scheduleText = status === 'investigating'
@@ -513,7 +518,7 @@ exports.updateReportStatus = async (req, res) => {
             table_affected: 'reports',
             record_id: id,
             details: `Report status updated to ${status} for report ID: ${id}`
-                + (status === 'investigating' ? ` (scheduled ${scheduledDate} ${scheduledFrom}-${scheduledTo})` : '')
+                + (status === 'investigating' ? ` (scheduled ${scheduledDate} ${scheduledFrom}-${scheduledTo}; ${reportsInvestigating} report(s) in the household moved to investigating)` : '')
                 + (status === 'resolved' ? ` (resolution notes saved${hasLocation ? ', location saved' : ''}${tdsProvided ? `, TDS ${resolutionTds} ppm` : ''})` : ''),
             ip_address: req.ip
         });
@@ -536,11 +541,19 @@ exports.updateReportStatus = async (req, res) => {
         }
 
         // The status change already succeeded; a failed email is only reported back.
+        // One email for the household visit, listing every issue now being checked.
         let emailSent = false;
         try {
             const [[resident]] = await db.query('SELECT name, email FROM users WHERE id = ?', [report.user_id]);
             if (resident?.email) {
-                const issueLabel = String(report.issue_type);
+                const [issueRows] = await db.query(
+                    `SELECT DISTINCT issue_type FROM reports
+                     WHERE household_id = ? AND deleted_at IS NULL AND status = 'investigating'`,
+                    [report.household_id]
+                );
+                const issueTypes = issueRows.map((row) => String(row.issue_type));
+                const issueLabel = (issueTypes.length > 0 ? issueTypes : [String(report.issue_type)]).join(', ');
+                const reportWord = issueTypes.length > 1 ? 'reports' : 'report';
                 const result = await sendEmail({
                     to: resident.email,
                     subject: 'Your TapAware report is being checked',
@@ -549,7 +562,7 @@ exports.updateReportStatus = async (req, res) => {
                     <div style="max-width:560px;margin:0 auto;padding:32px;background-color:#ffffff;border-radius:8px;">
                         <h1 style="margin:0 0 20px;color:#0a1a33;font-size:24px;">Your report is being checked</h1>
                         <p style="margin:0 0 16px;line-height:1.5;">Hello ${escapeHtml(resident.name)},</p>
-                        <p style="margin:0 0 16px;line-height:1.5;">The barangay is now looking into your report about <strong>${escapeHtml(issueLabel)}</strong>.</p>
+                        <p style="margin:0 0 16px;line-height:1.5;">The barangay is now looking into your ${reportWord} about <strong>${escapeHtml(issueLabel)}</strong>.</p>
                         <p style="margin:0 0 24px;line-height:1.5;">Scheduled visit: <strong>${escapeHtml(scheduleText)}</strong></p>
                         <p style="margin:0;line-height:1.5;">Barangay Cabalantian</p>
                     </div>

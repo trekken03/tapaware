@@ -127,7 +127,7 @@ const ReportStatusDialog = ({ open, onOpenChange, report, targetStatus, onUpdate
                     </DialogTitle>
                     <DialogDescription>
                         {status === 'investigating'
-                            ? 'Set when the barangay will check this issue. The resident is emailed this schedule. Other open reports for the same household and issue get the same schedule.'
+                            ? 'Set when the barangay will check this issue. The resident is emailed this schedule. All open reports for this household get the same schedule.'
                             : status === 'resolved'
                                 ? 'Other open reports for the same household and issue are resolved with the same notes.'
                                 : 'This will change the report status to New.'}
