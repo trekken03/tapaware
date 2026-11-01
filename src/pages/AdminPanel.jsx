@@ -53,6 +53,7 @@ const userRequestStatusClass = (status) => ({
 const AdminPanel = () => {
     const [accountRequests, setAccountRequests] = useState([])
     const [pendingRequestCount, setPendingRequestCount] = useState(0)
+    const [newConcernCount, setNewConcernCount] = useState(0)
     const [requestFilter, setRequestFilter] = useState('pending')
     const [userRequests, setUserRequests] = useState([])
     const [pendingUserRequestCount, setPendingUserRequestCount] = useState(0)
@@ -89,6 +90,18 @@ const AdminPanel = () => {
             setPendingRequestCount(Number(res.data.pending_count) || 0)
         } catch (error) {
             console.log('Error fetching account requests:', error)
+        }
+    }
+
+    // Count of New concerns for the Concerns tab label. Kept apart so a failure shows 0
+    // and never breaks the other tabs. Refreshed whenever fetchData reloads the tabs.
+    const fetchConcernCount = async () => {
+        try {
+            const res = await API.get('/admin/attention-counts')
+            setNewConcernCount(Number(res.data?.concerns_new) || 0)
+        } catch (error) {
+            console.log('Error fetching concern count:', error)
+            setNewConcernCount(0)
         }
     }
 
@@ -138,6 +151,7 @@ const AdminPanel = () => {
             setUsers(usersRes.data)
             setFlagged(flaggedRes.data)
             setConcerns(concernsRes.data)
+            fetchConcernCount()
         } catch (error) {
             console.log('Error fetching admin data:', error)
             toast.error('Failed to load admin data')
@@ -400,7 +414,7 @@ const AdminPanel = () => {
                                 { key: 'staff', label: 'Staff Management' },
                                 { key: 'admin', label: 'Admin Management' },
                                 { key: 'flagged', label: 'Flagged Households' },
-                                { key: 'concerns', label: 'Concerns' },
+                                { key: 'concerns', label: newConcernCount > 0 ? `Concerns (${newConcernCount})` : 'Concerns' },
                                 { key: 'requests', label: pendingRequestCount > 0 ? `Account Requests (${pendingRequestCount})` : 'Account Requests' },
                             { key: 'user-requests', label: pendingUserRequestCount > 0 ? `User Requests (${pendingUserRequestCount})` : 'User Requests' },
 
@@ -435,6 +449,11 @@ const AdminPanel = () => {
                                 >
                                     <Icon size={16} />
                                     {tab.label}
+                                    {tab.key === 'concerns' && newConcernCount > 0 && (
+                                        <span className="rounded-full bg-amber-400 px-2 py-0.5 text-xs font-semibold text-amber-950">
+                                            {newConcernCount}
+                                        </span>
+                                    )}
                                     {tab.key === 'requests' && pendingRequestCount > 0 && (
                                         <span className="rounded-full bg-amber-400 px-2 py-0.5 text-xs font-semibold text-amber-950">
                                             {pendingRequestCount}
