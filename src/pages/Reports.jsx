@@ -15,7 +15,7 @@ import API from '@/services/api'
 import { toast } from 'sonner'
 import { PUROKS } from '@/constants/puroks'
 import ReportsMaintenance from '@/pages/ReportsMaintenance'
-import { FollowupBadge } from '@/components/ReportBadges'
+import { FollowupBadge, ConfirmationBadge } from '@/components/ReportBadges'
 
 const VIEW_OPTIONS = [
     { key: 'reports', label: 'Reports' },
@@ -335,9 +335,10 @@ const Reports = () => {
 
                                                     <TableCell label="Issue" className="font-semibold capitalize">
                                                         {r.issue_type}
-                                                        {!isResident && r.followup_count > 0 && (
-                                                            <div className="mt-1 normal-case">
+                                                        {!isResident && (r.followup_count > 0 || r.confirmation) && (
+                                                            <div className="mt-1 flex flex-wrap gap-1 normal-case">
                                                                 <FollowupBadge count={r.followup_count} lastAt={r.last_followup_at} />
+                                                                <ConfirmationBadge confirmation={r.confirmation} />
                                                             </div>
                                                         )}
                                                     </TableCell>

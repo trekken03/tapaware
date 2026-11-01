@@ -13,8 +13,8 @@ import ReportStatusDialog from '@/components/ReportStatusDialog'
 import { useAuth } from '@/context/AuthContext'
 import API from '@/services/api'
 import { toast } from 'sonner'
-import { getDueDate, isOverdue } from '@/utils/reportDue'
-import { FollowupBadge } from '@/components/ReportBadges'
+import { getDueDate, isOverdue, dueBase } from '@/utils/reportDue'
+import { FollowupBadge, ConfirmationBadge } from '@/components/ReportBadges'
 
 const PAGE_SIZE = 10
 
@@ -52,7 +52,7 @@ const formatDue = (r) => {
     if (r.status === 'resolved') {
         return r.resolved_at && !isNaN(new Date(r.resolved_at)) ? formatDate(r.resolved_at) : '—'
     }
-    const dueKey = getDueDate(r.created_at)
+    const dueKey = getDueDate(dueBase(r))
     return dueKey ? formatDayKey(dueKey) : '—'
 }
 
@@ -266,6 +266,7 @@ const ReportsMaintenance = ({ embedded = false }) => {
                                                                 </span>
                                                             )}
                                                             <FollowupBadge count={r.followup_count} lastAt={r.last_followup_at} />
+                                                            {!isArchivedTab && <ConfirmationBadge confirmation={r.confirmation} />}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell label="Due" className="whitespace-nowrap">{formatDue(r)}</TableCell>

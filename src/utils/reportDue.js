@@ -38,6 +38,10 @@ export const getDueDate = (createdAt) => {
     return date.toISOString().slice(0, 10)
 }
 
+// The due date counts from when the report was made, or from when the resident
+// reopened it, so a reopened report gets a fresh window instead of being overdue at once.
+export const dueBase = (report) => report?.reopened_at || report?.created_at
+
 // End of the scheduled visit window as an instant, or null if the schedule is missing or unreadable.
 const scheduleEnd = (report) => {
     const dateText = report?.scheduled_date_text
@@ -57,7 +61,7 @@ export const isOverdue = (report, now = new Date()) => {
         if (end) return now.getTime() > end.getTime()
     }
 
-    const dueKey = getDueDate(report.created_at)
+    const dueKey = getDueDate(dueBase(report))
     const todayKey = manilaDayKey(now)
     return Boolean(dueKey && todayKey && todayKey > dueKey)
 }

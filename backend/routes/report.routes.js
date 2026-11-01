@@ -12,6 +12,7 @@ router.post('/', verifyToken, verifyCsrf, reportController.submitReport);
 router.put('/:id/status', verifyToken, verifyCsrf, requireRole('staff', 'admin'), reportController.updateReportStatus);
 router.put('/:id/restore', verifyToken, verifyCsrf, requireRole('admin'), reportController.restoreReport);
 router.post('/:id/follow-up', verifyToken, verifyCsrf, requireRole('resident'), reportController.followUpReport);
+router.post('/:id/confirm-resolution', verifyToken, verifyCsrf, requireRole('resident'), reportController.confirmResolution);
 router.get('/household/:id', verifyToken, reportController.getReportsByHousehold);
 router.get('/:id', verifyToken, reportController.getReportById);
 router.delete('/:id/permanent', verifyToken, verifyCsrf, requireRole('admin'), reportController.permanentDeleteReport);

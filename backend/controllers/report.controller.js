@@ -1,6 +1,7 @@
 const db = require('../models/db');
 const auditLog = require('../utils/auditLogger');
 const sendEmail = require('../utils/emailSender');
+const { CONFIRMATION_WINDOW_HOURS, hasConfirmationColumns, deriveConfirmation } = require('../utils/reportConfirmation');
 
 // mysql2 returns DATE columns as a Date at local midnight; send a plain "YYYY-MM-DD"
 // so the browser can't shift it a day. Undefined (column not added yet) stays null.
@@ -53,11 +54,13 @@ exports.getAllReports = async (req, res) => {
         const params = isResident ? [req.user.id] : [];
         const [rows] = await db.query(query, params);
         const followupStats = await getFollowupStats();
+        const now = new Date();
         res.json(rows.map((row) => ({
             ...row,
             scheduled_date_text: toDateText(row.scheduled_date),
             followup_count: Number(followupStats.get(row.id)?.followup_count) || 0,
             last_followup_at: followupStats.get(row.id)?.last_followup_at || null,
+            confirmation: deriveConfirmation(row, now),
         })));
     }
     catch (error) {
@@ -706,7 +709,8 @@ exports.getReportById = async (req, res) => {
             scheduled_date_text: toDateText(report.scheduled_date),
             household_reports: otherReports,
             active_flag: activeFlag || null,
-            followups
+            followups,
+            confirmation: deriveConfirmation(report)
         });
     }
     catch (error) {
@@ -771,6 +775,100 @@ exports.followUpReport = async (req, res) => {
     catch (error) {
         if (isTableMissing(error)) {
             return res.status(503).json({ message: FOLLOWUPS_MISSING });
+        }
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+const CONFIRMATION_MISSING = 'Confirming a resolution is not available yet. The database has not been updated for this feature.';
+
+// The resident answers "Yes, resolved" or "Not resolved" for a report of their
+// own household, within the confirmation window after staff resolved it.
+exports.confirmResolution = async (req, res) => {
+    const { id } = req.params;
+    const response = req.body?.response;
+    const rawComment = req.body?.comment;
+
+    if (response !== 'confirmed' && response !== 'not_resolved') {
+        return res.status(400).json({ message: 'Please choose whether the issue is resolved.' });
+    }
+    if (rawComment !== undefined && rawComment !== null && typeof rawComment !== 'string') {
+        return res.status(400).json({ message: 'The comment must be text.' });
+    }
+    const comment = typeof rawComment === 'string' ? rawComment.trim() : '';
+    if (comment.length > 500) {
+        return res.status(400).json({ message: 'The comment can be at most 500 characters.' });
+    }
+    if (response === 'not_resolved' && comment.length < 5) {
+        return res.status(400).json({ message: 'Please tell us what is still wrong (at least 5 characters).' });
+    }
+
+    try {
+        const [[report]] = await db.query('SELECT * FROM reports WHERE id = ? AND deleted_at IS NULL', [id]);
+        const ownHouseholdId = report ? await getOwnHouseholdId(req.user.id) : null;
+        if (!report || !ownHouseholdId || Number(report.household_id) !== Number(ownHouseholdId)) {
+            return res.status(404).json({ message: 'Report not found' });
+        }
+        if (!hasConfirmationColumns(report)) {
+            return res.status(503).json({ message: CONFIRMATION_MISSING });
+        }
+        if (report.status !== 'resolved') {
+            return res.status(400).json({ message: 'This report is not resolved.' });
+        }
+        const confirmation = deriveConfirmation(report);
+        if (!confirmation) {
+            return res.status(400).json({ message: 'This report cannot be confirmed.' });
+        }
+        if (confirmation.state === 'confirmed') {
+            return res.status(400).json({ message: 'You already responded to this resolution.' });
+        }
+        if (confirmation.state === 'auto_confirmed') {
+            return res.status(400).json({ message: `The ${CONFIRMATION_WINDOW_HOURS / 24}-day confirmation window has passed.` });
+        }
+
+        // This report and the ones resolved together with it (same household and
+        // issue, resolved within a minute of it, no answer yet for this resolution).
+        const setClause = response === 'confirmed'
+            ? `resident_response = 'confirmed', resident_responded_at = NOW(), resident_comment = ?`
+            : `status = 'investigating', resident_response = 'not_resolved', resident_responded_at = NOW(),
+               resident_comment = ?, reopened_at = NOW(), reopen_count = reopen_count + 1,
+               scheduled_date = NULL, scheduled_from = NULL, scheduled_to = NULL`;
+        const [result] = await db.query(
+            `UPDATE reports SET ${setClause}
+             WHERE household_id = ? AND issue_type = ? AND deleted_at IS NULL AND status = 'resolved'
+               AND resolved_at IS NOT NULL AND ABS(TIMESTAMPDIFF(SECOND, resolved_at, ?)) <= 60
+               AND (resident_responded_at IS NULL OR resident_responded_at < resolved_at)`,
+            [comment || null, report.household_id, report.issue_type, report.resolved_at]
+        );
+        // Zero rows: someone answered a moment ago (the second answer must not overwrite it).
+        if (result.affectedRows === 0) {
+            return res.status(400).json({ message: 'You already responded to this resolution.' });
+        }
+
+        await auditLog({
+            user_id: req.user.id,
+            user_name: req.user.name,
+            user_role: req.user.role,
+            action: response === 'confirmed' ? 'RESIDENT_CONFIRMED_RESOLUTION' : 'RESIDENT_REOPENED_REPORT',
+            table_affected: 'reports',
+            record_id: report.id,
+            details: response === 'confirmed'
+                ? `Resident confirmed the resolution of report #${report.id} (${report.issue_type}); ${result.affectedRows} report(s)`
+                : `Resident reported report #${report.id} (${report.issue_type}) as not resolved; ${result.affectedRows} report(s) reopened to investigating`,
+            ip_address: req.ip
+        });
+
+        res.json({
+            message: response === 'confirmed'
+                ? 'Thank you for confirming.'
+                : 'Thank you. The report was reopened and the barangay will look into it again.',
+            reports_changed: result.affectedRows
+        });
+    }
+    catch (error) {
+        if (error.code === 'ER_BAD_FIELD_ERROR') {
+            return res.status(503).json({ message: CONFIRMATION_MISSING });
         }
         console.error(error);
         res.status(500).json({ message: 'Server error' });

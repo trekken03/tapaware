@@ -11,6 +11,9 @@ import { toast } from 'sonner'
 import { Trash2 } from 'lucide-react'
 import { ESTIMATED_PROCESSING_TEXT } from '@/constants/reports'
 import ReportStatusDialog from '@/components/ReportStatusDialog'
+import { ConfirmationBadge, formatConfirmationDate } from '@/components/ReportBadges'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 const getStatusStyle = (status) => {
     switch (status) {
@@ -35,6 +38,10 @@ const ReportDetail = () => {
     const [loading, setLoading] = useState(true)
     const [pendingStatus, setPendingStatus] = useState(null)
     const [statusConfirmOpen, setStatusConfirmOpen] = useState(false)
+    // Resident answer to "Is the issue really resolved?"
+    const [confirmChoice, setConfirmChoice] = useState(null)
+    const [confirmComment, setConfirmComment] = useState('')
+    const [confirmSending, setConfirmSending] = useState(false)
 
     useEffect(() => {
         fetchReport()
@@ -49,6 +56,24 @@ const ReportDetail = () => {
             toast.error('Failed to fetch report')
         } finally {
             setLoading(false)
+        }
+    }
+
+    const sendConfirmation = async (response) => {
+        setConfirmSending(true)
+        try {
+            const res = await API.post(`/reports/${id}/confirm-resolution`, {
+                response,
+                comment: response === 'not_resolved' ? confirmComment.trim() : undefined,
+            })
+            toast.success(res.data?.message || 'Thank you for your answer.')
+            setConfirmChoice(null)
+            setConfirmComment('')
+            fetchReport()
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to send your answer')
+        } finally {
+            setConfirmSending(false)
         }
     }
 
@@ -84,6 +109,7 @@ const ReportDetail = () => {
 
     const status = getStatusStyle(report.status)
     const isResident = user?.role === 'resident'
+    const confirmation = report.confirmation
     const handleDelete = async () => {
         try {
             await API.delete(`/reports/${id}`)
@@ -267,6 +293,87 @@ const ReportDetail = () => {
 
                         {isResident && report.status !== 'resolved' && (
                             <p className="mt-4 text-xs text-gray-500">{ESTIMATED_PROCESSING_TEXT}</p>
+                        )}
+
+                        {/* Resident confirmation of the resolution (state derived by the API). */}
+                        {isResident && confirmation?.state === 'awaiting' && (
+                            <div className="mt-6 rounded-lg border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+                                <p className="font-semibold">
+                                    Staff marked this resolved on {formatConfirmationDate(report.resolved_at)}. Is the issue really resolved?
+                                </p>
+                                <p className="mt-1 text-xs text-sky-800">Please answer by {formatConfirmationDate(confirmation.deadline)}. After that it is confirmed automatically.</p>
+                                {confirmChoice === 'not_resolved' ? (
+                                    <div className="mt-3 space-y-2">
+                                        <Label htmlFor="resident_comment">What is still wrong?</Label>
+                                        <Textarea
+                                            id="resident_comment"
+                                            value={confirmComment}
+                                            onChange={(e) => setConfirmComment(e.target.value)}
+                                            maxLength={500}
+                                            rows={3}
+                                            className="bg-white"
+                                        />
+                                        <p className="text-xs text-sky-800">At least 5 characters. {confirmComment.length}/500</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Button
+                                                type="button"
+                                                className="bg-red-600 hover:bg-red-700 text-white"
+                                                disabled={confirmSending || confirmComment.trim().length < 5}
+                                                onClick={() => sendConfirmation('not_resolved')}
+                                            >
+                                                {confirmSending ? 'Sending...' : 'Send: not resolved'}
+                                            </Button>
+                                            <Button type="button" variant="outline" disabled={confirmSending} onClick={() => setConfirmChoice(null)}>
+                                                Cancel
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        <Button
+                                            type="button"
+                                            className="bg-green-600 hover:bg-green-700 text-white"
+                                            disabled={confirmSending}
+                                            onClick={() => sendConfirmation('confirmed')}
+                                        >
+                                            {confirmSending ? 'Sending...' : 'Yes, resolved'}
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className="border-red-300 text-red-700 hover:bg-red-50"
+                                            disabled={confirmSending}
+                                            onClick={() => { setConfirmComment(''); setConfirmChoice('not_resolved') }}
+                                        >
+                                            Not resolved
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {isResident && confirmation && confirmation.state !== 'awaiting' && (
+                            <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-800">
+                                {confirmation.state === 'confirmed' && <p>Confirmed by you{confirmation.responded_at ? ` on ${formatConfirmationDate(confirmation.responded_at)}` : ''}.</p>}
+                                {confirmation.state === 'auto_confirmed' && <p>Auto-confirmed on {formatConfirmationDate(confirmation.deadline)}.</p>}
+                                {confirmation.state === 'reopened' && (
+                                    <>
+                                        <p>Reopened on {formatConfirmationDate(confirmation.reopened_at)}. The barangay will look into it again.</p>
+                                        {confirmation.comment && <p className="mt-1 text-gray-600 break-words">Your comment: {confirmation.comment}</p>}
+                                    </>
+                                )}
+                            </div>
+                        )}
+                        {!isResident && confirmation && (
+                            <div className="mt-6 space-y-1 text-sm">
+                                <p className="text-gray-500">Resident confirmation</p>
+                                <ConfirmationBadge confirmation={confirmation} />
+                                {confirmation.responded_at && (
+                                    <p className="text-xs text-gray-500">Answered on {formatConfirmationDate(confirmation.responded_at)}</p>
+                                )}
+                                {confirmation.comment && (
+                                    <p className="text-gray-800 break-words">Resident's comment: {confirmation.comment}</p>
+                                )}
+                            </div>
                         )}
 
                         {!isResident && (
