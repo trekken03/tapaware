@@ -198,7 +198,13 @@ const AddTdsReading = () => {
                                 <Label>Location (optional)</Label>
                                 <GetLocationButton
                                     hasLocation={Boolean(location)}
-                                    onChange={(coords) => setLocation(coords ? { latitude: coords.latitude, longitude: coords.longitude } : null)}
+                                    onChange={(coords) => setLocation(coords
+                                        ? {
+                                            latitude: coords.latitude,
+                                            longitude: coords.longitude,
+                                            ...(coords.accuracy !== null ? { location_accuracy: coords.accuracy } : {}),
+                                        }
+                                        : null)}
                                 />
                             </div>
 

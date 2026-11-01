@@ -77,6 +77,9 @@ const ReportStatusDialog = ({ open, onOpenChange, report, targetStatus, onUpdate
             if (location) {
                 body.resolution_lat = location.lat
                 body.resolution_lng = location.lng
+                if (location.accuracy !== null && location.accuracy !== undefined) {
+                    body.resolution_accuracy = location.accuracy
+                }
             }
         }
 
@@ -201,7 +204,7 @@ const ReportStatusDialog = ({ open, onOpenChange, report, targetStatus, onUpdate
                             <Label>Location (optional)</Label>
                             <GetLocationButton
                                 hasLocation={Boolean(location)}
-                                onChange={(coords) => setLocation(coords ? { lat: coords.latitude, lng: coords.longitude } : null)}
+                                onChange={(coords) => setLocation(coords ? { lat: coords.latitude, lng: coords.longitude, accuracy: coords.accuracy } : null)}
                             />
                         </div>
                     </div>

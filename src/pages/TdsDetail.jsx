@@ -147,7 +147,7 @@ const TdsDetail = () => {
                             <div className="sm:col-span-2">
                                 <p className="text-gray-500">Location</p>
                                 {reading.latitude != null && reading.longitude != null ? (
-                                    <MapLink lat={reading.latitude} lng={reading.longitude} />
+                                    <MapLink lat={reading.latitude} lng={reading.longitude} accuracy={reading.location_accuracy} />
                                 ) : (
                                     <p className="font-semibold text-gray-900">Not recorded</p>
                                 )}

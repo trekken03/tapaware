@@ -68,6 +68,13 @@ const parseCoordinate = (value, limit) => {
     return Number.isFinite(number) && Math.abs(number) <= limit ? Number(number.toFixed(7)) : null;
 };
 
+// Optional GPS accuracy in whole metres; anything unusable is simply not saved.
+const parseAccuracy = (value) => {
+    if (value === undefined || value === null || value === '') return null;
+    const number = Number(value);
+    return Number.isInteger(number) && number >= 0 && number <= 100000 ? number : null;
+};
+
 exports.addReadings = async (req, res) => {
     const { household_id, tds_value, notes, measured_at } = req.body;
     const staff_id = req.user.id;
@@ -89,6 +96,7 @@ exports.addReadings = async (req, res) => {
     const latitude = parseCoordinate(req.body.latitude, 90);
     const longitude = parseCoordinate(req.body.longitude, 180);
     const hasLocation = latitude !== null && longitude !== null;
+    const locationAccuracy = hasLocation ? parseAccuracy(req.body.location_accuracy) : null;
 
     try {
         let result;
@@ -104,6 +112,15 @@ exports.addReadings = async (req, res) => {
                 'INSERT INTO tds_readings(household_id,staff_id,tds_value,notes) VALUES(?,?,?,?)',
                 [household_id, staff_id, tds_value, notes || null]
             );
+        }
+        // Best effort: the reading is already saved; the column comes from
+        // docs/sql/alpha-feedback-e.sql and may not exist yet.
+        if (locationAccuracy !== null) {
+            try {
+                await db.query('UPDATE tds_readings SET location_accuracy = ? WHERE id = ?', [locationAccuracy, result.insertId]);
+            } catch (accuracyError) {
+                if (accuracyError.code !== 'ER_BAD_FIELD_ERROR') console.error(accuracyError);
+            }
         }
         await auditLog({
             user_id: req.user.id,

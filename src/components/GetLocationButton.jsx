@@ -10,7 +10,8 @@ const ERROR_MESSAGES = {
 const NOT_SUPPORTED = 'This browser does not support location.'
 
 // Optional location, asked for only when the user taps the button. The parent
-// keeps the coordinates (onChange gets { latitude, longitude } or null) and
+// keeps the coordinates (onChange gets { latitude, longitude, accuracy } or null;
+// accuracy is in whole metres, or null if the browser gave none) and
 // decides what to send; this component only handles asking and showing status.
 // Used by the Resolved status dialog and the Add TDS Reading form.
 const GetLocationButton = ({ hasLocation, onChange }) => {
@@ -35,9 +36,10 @@ const GetLocationButton = ({ hasLocation, onChange }) => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 if (!mounted.current) return
-                setAccuracy(Number.isFinite(position.coords.accuracy) ? Math.round(position.coords.accuracy) : null)
+                const metres = Number.isFinite(position.coords.accuracy) ? Math.round(position.coords.accuracy) : null
+                setAccuracy(metres)
                 setStatus('idle')
-                onChange({ latitude: position.coords.latitude, longitude: position.coords.longitude })
+                onChange({ latitude: position.coords.latitude, longitude: position.coords.longitude, accuracy: metres })
             },
             (error) => {
                 if (!mounted.current) return

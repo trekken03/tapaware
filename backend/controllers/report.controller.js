@@ -366,6 +366,13 @@ const parseCoordinate = (value, limit) => {
     return Number.isFinite(number) && Math.abs(number) <= limit ? Number(number.toFixed(7)) : null;
 };
 
+// Optional GPS accuracy in whole metres; anything unusable is simply not saved.
+const parseAccuracy = (value) => {
+    if (value === undefined || value === null || value === '') return null;
+    const number = Number(value);
+    return Number.isInteger(number) && number >= 0 && number <= 100000 ? number : null;
+};
+
 const formatTime12 = (time) => {
     const [hours, minutes] = String(time).split(':').map(Number);
     const suffix = hours >= 12 ? 'PM' : 'AM';
@@ -401,6 +408,7 @@ exports.updateReportStatus = async (req, res) => {
     const resolutionLat = parseCoordinate(req.body.resolution_lat, 90);
     const resolutionLng = parseCoordinate(req.body.resolution_lng, 180);
     const hasLocation = resolutionLat !== null && resolutionLng !== null;
+    const resolutionAccuracy = hasLocation ? parseAccuracy(req.body.resolution_accuracy) : null;
 
     // Optional TDS reading taken when resolving. Empty means "not given".
     const rawTds = req.body.resolution_tds_value;
@@ -519,6 +527,23 @@ exports.updateReportStatus = async (req, res) => {
                  WHERE household_id = ? AND issue_type = ? AND deleted_at IS NULL AND status != 'resolved'`,
                 [resolutionNotes, req.user.id, resolutionLat, resolutionLng, report.household_id, report.issue_type]
             );
+        }
+        // Best effort, after the resolve already succeeded: the accuracy columns come from
+        // docs/sql/alpha-feedback-e.sql and may not exist yet, so a failure is ignored.
+        if (status === 'resolved' && resolutionAccuracy !== null) {
+            try {
+                await db.query(
+                    `UPDATE reports SET resolution_accuracy = ?
+                     WHERE household_id = ? AND issue_type = ? AND deleted_at IS NULL AND status = 'resolved'
+                       AND resolved_by = ? AND resolved_at >= NOW() - INTERVAL 1 MINUTE`,
+                    [resolutionAccuracy, report.household_id, report.issue_type, req.user.id]
+                );
+                if (resolutionReadingId) {
+                    await db.query('UPDATE tds_readings SET location_accuracy = ? WHERE id = ?', [resolutionAccuracy, resolutionReadingId]);
+                }
+            } catch (accuracyError) {
+                if (accuracyError.code !== 'ER_BAD_FIELD_ERROR') console.error(accuracyError);
+            }
         }
         // Investigating covers the whole household visit: every open report of the
         // household, any issue type, gets the same schedule.

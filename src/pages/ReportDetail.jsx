@@ -291,7 +291,7 @@ const ReportDetail = () => {
                                     {/* Where staff were when they resolved it; staff and admin only. */}
                                     {!isResident && report.resolution_lat != null && report.resolution_lng != null && (
                                         <p className="mt-1 text-xs text-gray-500">
-                                            Resolved at location: <MapLink lat={report.resolution_lat} lng={report.resolution_lng} />
+                                            Resolved at location: <MapLink lat={report.resolution_lat} lng={report.resolution_lng} accuracy={report.resolution_accuracy} />
                                         </p>
                                     )}
                                 </div>
