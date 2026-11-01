@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { MapPin } from 'lucide-react'
+import GetLocationButton from '@/components/GetLocationButton'
 import API from '@/services/api'
 import { toast } from 'sonner'
 
@@ -31,7 +31,6 @@ const ReportStatusDialog = ({ open, onOpenChange, report, targetStatus, onUpdate
     // A number input reports typed letters as '' — remember that it was not a number.
     const [tdsBadInput, setTdsBadInput] = useState(false)
     const [location, setLocation] = useState(null)
-    const [locationState, setLocationState] = useState('idle')
     const [saving, setSaving] = useState(false)
 
     useEffect(() => {
@@ -43,27 +42,8 @@ const ReportStatusDialog = ({ open, onOpenChange, report, targetStatus, onUpdate
         setTdsValue('')
         setTdsBadInput(false)
         setLocation(null)
-        setLocationState('idle')
         setChosenStatus(targetStatus)
     }, [open, report?.id, targetStatus])
-
-    // Location is a bonus: ask once, never wait for it and never require it.
-    useEffect(() => {
-        if (!open || status !== 'resolved' || locationState !== 'idle') return
-        if (!navigator.geolocation) {
-            setLocationState('unavailable')
-            return
-        }
-        setLocationState('asking')
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                setLocation({ lat: position.coords.latitude, lng: position.coords.longitude })
-                setLocationState('saved')
-            },
-            () => setLocationState('unavailable'),
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
-        )
-    }, [open, status, locationState])
 
     if (!report) return null
 
@@ -217,12 +197,13 @@ const ReportStatusDialog = ({ open, onOpenChange, report, targetStatus, onUpdate
                             />
                             <p className="text-xs text-gray-500">Recommended for water quality issues.</p>
                         </div>
-                        <p className="flex items-center gap-1 text-xs text-gray-500">
-                            <MapPin size={12} aria-hidden="true" />
-                            {locationState === 'saved' ? 'Your current location will be saved with this resolution.'
-                                : locationState === 'asking' ? 'Checking your location (optional)...'
-                                    : 'Location not available. The resolution will be saved without it.'}
-                        </p>
+                        <div className="space-y-1 pt-2">
+                            <Label>Location (optional)</Label>
+                            <GetLocationButton
+                                hasLocation={Boolean(location)}
+                                onChange={(coords) => setLocation(coords ? { lat: coords.latitude, lng: coords.longitude } : null)}
+                            />
+                        </div>
                     </div>
                 )}
 

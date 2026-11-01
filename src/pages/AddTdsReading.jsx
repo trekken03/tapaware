@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ArrowLeft, Droplets, Home, MapPin } from 'lucide-react'
+import { ArrowLeft, Droplets, Home } from 'lucide-react'
+import GetLocationButton from '@/components/GetLocationButton'
 import API from '@/services/api'
 import { toast } from 'sonner'
 import { useAuth } from '@/context/AuthContext'
@@ -34,7 +35,6 @@ const AddTdsReading = () => {
         measured_at: toLocalDateTimeString(new Date())
     })
     const [location, setLocation] = useState(null)
-    const [locationState, setLocationState] = useState('asking')
 
     useEffect(() => {
         if (householdIdParam) {
@@ -43,22 +43,6 @@ const AddTdsReading = () => {
             fetchHouseholds()
         }
     }, [householdIdParam])
-
-    // Location is optional: ask once, never block saving on it.
-    useEffect(() => {
-        if (!navigator.geolocation) {
-            setLocationState('unavailable')
-            return
-        }
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                setLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude })
-                setLocationState('saved')
-            },
-            () => setLocationState('unavailable'),
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
-        )
-    }, [])
 
     const fetchHouseholdInfo = async () => {
         try {
@@ -208,12 +192,14 @@ const AddTdsReading = () => {
                                     onChange={handleChange}
                                     required
                                 />
-                                <p className="flex items-center gap-1 text-xs text-gray-500">
-                                    <MapPin size={12} aria-hidden="true" />
-                                    {locationState === 'saved' ? 'Your current location will be saved with this reading.'
-                                        : locationState === 'asking' ? 'Checking your location (optional)...'
-                                            : 'Location not available. The reading will be saved without it.'}
-                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Location (optional)</Label>
+                                <GetLocationButton
+                                    hasLocation={Boolean(location)}
+                                    onChange={(coords) => setLocation(coords ? { latitude: coords.latitude, longitude: coords.longitude } : null)}
+                                />
                             </div>
 
                             <div className="space-y-2">
