@@ -439,7 +439,7 @@ exports.updateProfile = async (req, res) => {
 
     try {
         const [[currentUserRow]] = await db.query(
-            'SELECT email, household_id, role FROM users WHERE id = ?',
+            'SELECT name, email, household_id, role FROM users WHERE id = ?',
             [userId]
         );
 
@@ -449,6 +449,15 @@ exports.updateProfile = async (req, res) => {
                 email.trim().toLowerCase() !== String(currentUserRow.email).trim().toLowerCase())
         ) {
             return res.status(403).json({ message: 'Your email can only be changed by an administrator.' });
+        }
+
+        // Only admins change their own name here; residents and staff send a
+        // "Correct name" request instead. The role comes from the database.
+        if (
+            currentUserRow.role !== 'admin' &&
+            String(name ?? '').trim() !== String(currentUserRow.name ?? '').trim()
+        ) {
+            return res.status(403).json({ message: 'Your name can only be changed through a request to the admin. Open "Send a request to the admin" on your profile and choose "Correct name".' });
         }
 
         await db.query(

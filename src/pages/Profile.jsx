@@ -101,8 +101,9 @@ const Profile = () => {
         }
     }
 
-    const openAdminRequest = () => {
-        setAdminRequest(emptyAdminRequest)
+    // requestType preselects a type, e.g. 'correct_name' from the name hint.
+    const openAdminRequest = (requestType) => {
+        setAdminRequest({ ...emptyAdminRequest, request_type: typeof requestType === 'string' ? requestType : '' })
         setAdminRequestSent(false)
         setAdminRequestOpen(true)
     }
@@ -132,6 +133,9 @@ const Profile = () => {
     const adminRequestValid = adminRequest.request_type !== ''
         && (adminRequest.request_type === 'other' || adminRequest.requested_value.trim() !== '')
         && adminRequest.reason.trim().length >= 10
+
+    // Only admins edit their own name here (and save this form).
+    const isAdmin = user?.role === 'admin'
 
     const roleBadgeStyle = {
         admin: 'bg-purple-200 text-purple-800',
@@ -231,14 +235,38 @@ const Profile = () => {
                                             <div className="grid grid-cols-1 gap-4">
                                                 <div className="space-y-2">
                                                     <Label htmlFor="name">Full Name</Label>
-                                                    <Input
-                                                        id="name"
-                                                        name="name"
-                                                        value={form.name}
-                                                        onChange={handleChange}
-                                                        required
-                                                        className="h-11 rounded-md border-gray-300 bg-gray-50"
-                                                    />
+                                                    {isAdmin ? (
+                                                        <Input
+                                                            id="name"
+                                                            name="name"
+                                                            value={form.name}
+                                                            onChange={handleChange}
+                                                            required
+                                                            className="h-11 rounded-md border-gray-300 bg-gray-50"
+                                                        />
+                                                    ) : (
+                                                        <>
+                                                            {/* Residents and staff correct their name through a request (enforced by the server too). */}
+                                                            <Input
+                                                                id="name"
+                                                                name="name"
+                                                                value={form.name}
+                                                                readOnly
+                                                                aria-readonly="true"
+                                                                className="h-11 cursor-not-allowed rounded-md border-gray-300 bg-slate-100 text-slate-500"
+                                                            />
+                                                            <p className="text-xs text-gray-500">
+                                                                To correct your name,{' '}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => openAdminRequest('correct_name')}
+                                                                    className="inline-flex min-h-11 items-center underline hover:text-gray-600 hover:cursor-pointer"
+                                                                >
+                                                                    send a request to the admin
+                                                                </button>.
+                                                            </p>
+                                                        </>
+                                                    )}
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label htmlFor="email">Email</Label>
@@ -251,7 +279,9 @@ const Profile = () => {
                                                         aria-readonly="true"
                                                         className="h-11 cursor-not-allowed rounded-md border-gray-300 bg-slate-100 text-slate-500"
                                                     />
-                                                    <p className="text-xs text-gray-500">Your email can only be changed by an administrator.</p>
+                                                    {!isAdmin && (
+                                                        <p className="text-xs text-gray-500">Your email can only be changed by an administrator.</p>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -271,16 +301,18 @@ const Profile = () => {
 
 
 
-                                            <div className="pt-2">
-                                                <Button
-                                                    type="submit"
-                                                    className="h-11 w-full bg-[#102765] text-white hover:bg-[#1a3a8f]"
-                                                    disabled={loading}
-                                                >
-                                                    <Save size={16} className="mr-2" />
-                                                    {loading ? 'Saving...' : 'Save Changes'}
-                                                </Button>
-                                            </div>
+                                            {isAdmin && (
+                                                <div className="pt-2">
+                                                    <Button
+                                                        type="submit"
+                                                        className="h-11 w-full bg-[#102765] text-white hover:bg-[#1a3a8f]"
+                                                        disabled={loading}
+                                                    >
+                                                        <Save size={16} className="mr-2" />
+                                                        {loading ? 'Saving...' : 'Save Changes'}
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </form>
                                     </CardContent>
                                 </Card>
