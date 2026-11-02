@@ -3,6 +3,17 @@ const jwt = require('jsonwebtoken');
 const { getAttentionCounts } = require('../utils/attentionCounts');
 const { PUROKS, missingPurokRows } = require('../utils/puroks');
 
+// Id of a household's latest non-deleted TDS reading, as a correlated subquery on `h`
+// (households). Latest = highest COALESCE(measured_at, recorded_at), ties broken by
+// the highest id. `extraCondition` narrows the candidate readings (e.g. a date window).
+// No window functions, so it also runs on older MySQL versions.
+const LATEST_READING_ID_SQL = (extraCondition) => `SELECT t.id
+                FROM tds_readings t
+                WHERE t.household_id = h.id
+                  AND t.deleted_at IS NULL${extraCondition}
+                ORDER BY COALESCE(t.measured_at, t.recorded_at) DESC, t.id DESC
+                LIMIT 1`;
+
 exports.getSummary = async (req, res) => {
     // This route is public (the homepage uses it), so the admin-only total reads the
     // session cookie here instead of through verifyToken. No or bad token: field is left out.
@@ -28,8 +39,13 @@ exports.getSummary = async (req, res) => {
         const [[pendingReports]] = await db.query(
             `SELECT COUNT(*) as count FROM reports WHERE status='pending' AND deleted_at IS NULL`
         );
+        // Each non-deleted household counts once, with its latest non-deleted reading
+        // (same rule as getTdsByZone), so this agrees with the per-zone averages.
         const [[avgTds]] = await db.query(
-            `SELECT AVG(tds_value) as average FROM tds_readings WHERE deleted_at IS NULL`
+            `SELECT AVG(latest.tds_value) as average
+            FROM households h
+            JOIN tds_readings latest ON latest.id = (${LATEST_READING_ID_SQL('')})
+            WHERE h.deleted_at IS NULL`
         );
         let totalUsers = null;
         if (isAdmin) {
@@ -144,19 +160,27 @@ exports.getTdsByZone = async (req, res) => {
         // so it deliberately exposes no reading counts — only the average and the
         // date of the most recent reading. last_recorded is NULL for a zone with
         // no readings, which is how callers tell "empty" apart from "has data".
-        let query = `SELECT households.zone,
-            AVG(tds_readings.tds_value) as average_tds,
-            MAX(tds_readings.recorded_at) as last_recorded
-            FROM households
-            LEFT JOIN tds_readings ON households.id = tds_readings.household_id AND tds_readings.deleted_at IS NULL`;
-        const params = [];
-
-        if (from && to) {
-            query += ` AND tds_readings.recorded_at BETWEEN ? AND ?`;
-            params.push(from, `${to} 23:59:59`);
-        }
-
-        query += ` WHERE households.deleted_at IS NULL GROUP BY households.zone ORDER BY households.zone ASC`;
+        //
+        // average_tds: each household counts once, with its latest reading (within
+        // the date window when one is given). last_recorded: the most recent
+        // recorded_at of any reading in the zone (within the window), as before.
+        const hasWindow = Boolean(from && to);
+        const windowFor = (alias) => (hasWindow ? `\n                  AND ${alias}.recorded_at BETWEEN ? AND ?` : '');
+        const query = `SELECT h.zone,
+            AVG(latest.tds_value) AS average_tds,
+            MAX(zone_last.last_recorded) AS last_recorded
+            FROM households h
+            LEFT JOIN tds_readings latest ON latest.id = (${LATEST_READING_ID_SQL(windowFor('t'))})
+            LEFT JOIN (
+                SELECT r.household_id, MAX(r.recorded_at) AS last_recorded
+                FROM tds_readings r
+                WHERE r.deleted_at IS NULL${windowFor('r')}
+                GROUP BY r.household_id
+            ) zone_last ON zone_last.household_id = h.id
+            WHERE h.deleted_at IS NULL
+            GROUP BY h.zone
+            ORDER BY h.zone ASC`;
+        const params = hasWindow ? [from, `${to} 23:59:59`, from, `${to} 23:59:59`] : [];
         const [rows] = await db.query(query, params);
 
         // Every purok gets a row, even one with no households yet (NULL average and

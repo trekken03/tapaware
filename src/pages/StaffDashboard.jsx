@@ -40,7 +40,7 @@ const StaffDashboard = () => {
         { label: 'Total Households', value: summary?.total_households || 0, icon: Home, color: 'text-purple-700', titleColor: 'text-purple-700', border: 'border-purple-400', gradient: 'from-white to-purple-100', badge: 'bg-purple-700', caption: 'Households', path: '/households' },
         { label: 'Flagged Households', value: summary?.flagged_households || 0, icon: Flag, color: 'text-red-600', titleColor: 'text-red-600', border: 'border-red-400', gradient: 'from-white to-red-50', badge: 'bg-red-500', caption: 'Households' },
         { label: 'Pending Reports', value: summary?.pending_reports || 0, icon: ClockFading, color: 'text-amber-600', titleColor: 'text-amber-600', border: 'border-amber-300', gradient: 'from-white to-amber-100', badge: 'bg-amber-400', caption: 'Reports', path: '/reports?status=pending' },
-        { label: 'Average TDS (ppm)', value: summary?.average_tds || 0, icon: Droplets, color: 'text-green-600', titleColor: 'text-green-700', border: 'border-green-400', gradient: 'from-white to-green-100', badge: 'bg-green-600', caption: 'ppm', path: '/visualization' },
+        { label: 'Average TDS (latest reading per household)', value: summary?.average_tds || 0, icon: Droplets, color: 'text-green-600', titleColor: 'text-green-700', border: 'border-green-400', gradient: 'from-white to-green-100', badge: 'bg-green-600', caption: 'ppm', path: '/visualization' },
     ]
 
     const tdsColors = (tds) => {
@@ -104,7 +104,7 @@ const StaffDashboard = () => {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <TrendingUp size={20} className="text-blue-600" />
-                                Average TDS by Zone
+                                Average TDS by Zone (latest reading per household)
                             </CardTitle>
                         </CardHeader>
                         <CardContent>

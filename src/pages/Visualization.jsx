@@ -616,7 +616,7 @@ const Visualization = () => {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-base">
                                     <BarChart3 size={18} className="text-blue-600" />
-                                    Average TDS by Zone
+                                    Average TDS by Zone (latest reading per household)
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -640,7 +640,7 @@ const Visualization = () => {
                                                 label={{ value: 'TDS (ppm)', angle: -90, position: 'insideLeft', style: { fill: '#6b7280', fontSize: 12 } }}
                                             />
                                             <Tooltip
-                                                formatter={(value) => [value == null ? 'No readings yet' : `${Number(value).toFixed(2)} ppm`, 'Avg TDS']}
+                                                formatter={(value) => [value == null ? 'No readings yet' : `${Number(value).toFixed(2)} ppm`, 'Average TDS (latest reading per household)']}
                                                 labelFormatter={(label) => `Zone ${label}`}
                                             />
                                             <Bar dataKey="average_tds" radius={[2, 2, 0, 0]}>
